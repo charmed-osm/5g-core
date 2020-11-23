@@ -1,0 +1,10 @@
+# Copyright 2020 David Garcia
+# See LICENSE file for licensing details.
+name: amf
+description: |
+  TODO: fill out the charm's description
+summary: |
+  TODO: fill out the charm's summary
+series: [kubernetes]
+
+

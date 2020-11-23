@@ -1,0 +1,18 @@
+# Copyright 2020 David Garcia
+# See LICENSE file for licensing details.
+#
+# This is only an example, and you should edit to suit your needs.
+# If you don't need config, you can remove the file entirely.
+options:
+  port:
+    type: int
+    description: "Port"
+    default: 29518
+  lb_port:
+    type: int
+    description: "Port for the loadbalancer"
+    default: 38412
+  gin_mode:
+    type: string
+    description: "TODO: Explain what is this mode for, and the possible values"
+    default: "release"
