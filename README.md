@@ -1,27 +1,32 @@
 # 5G Core Operators
 
-TODO: Add short description
+Contains charm folder consisting of all 12 k8s charm applications
 
 
 ## Description
 
-TODO: fill out the description
+Consists of 12 applications
+* db
+* nrf
+* amf
+* ausf  
+* nssf
+* pcf
+* udm  
+* udr
+* webui
+* upf1
+* smf
+* natapp
 
 ## Usage
-
-TODO: explain how to use the charm
-
-### Scale Out Usage
-
-TODO: explain how to scale the charm
+Build
+sudo snap install charmcraft --beta
+cd <Application-operator>
+charmcraft build
+Deploy
+juju deploy ./juju-bundles/bundle.yaml
 
 ### Integration
 
-TODO: explain how to integrate it with RAN
-
-## TODOS:
-- Complete this README
-- Add bundle
-- Add Charms (for each charm, see the README of the skeleton charm, and meet the requirements specified there)
-- Add Dockerfiles (for each dockerfile, add a README.md with the description, the configs available, etc.)
-- Add functional tests
+Core integration with RAN we have to expose LoadBalancer service for AMF,DB and UPF Component
