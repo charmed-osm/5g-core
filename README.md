@@ -21,10 +21,15 @@ Consists of 12 applications
 
 ## Usage
 Build
+
 sudo snap install charmcraft --beta
+
 cd <Application-operator>
+  
 charmcraft build
+  
 Deploy
+
 juju deploy ./juju-bundles/bundle.yaml
 
 ### Integration
