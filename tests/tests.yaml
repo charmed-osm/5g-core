@@ -1,6 +1,5 @@
 gate_bundles:
   - bundle
-  - bundle-ha
 smoke_bundles:
   - bundle
 tests:

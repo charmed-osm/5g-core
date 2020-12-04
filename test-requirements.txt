@@ -1,1 +1,4 @@
-git+https://github.com/davigar15/zaza.git#egg=zaza
+zaza @ git+https://github.com/openstack-charmers/zaza.git@08bdb4e259d03791993dd36559c0e19e70f48418
+pymongo
+pysctp
+netifaces
