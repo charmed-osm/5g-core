@@ -24,7 +24,7 @@ Build
 
 sudo snap install charmcraft --beta
 
-cd <Application-operator>
+cd Application-operator
   
 charmcraft build
   
