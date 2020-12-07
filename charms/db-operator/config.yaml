@@ -1,0 +1,11 @@
+# Copyright 2020 Tata Elxsi canonical@tataelxsi.onmicrosoft.com
+# See LICENSE file for licensing details.
+#
+# This is only an example, and you should edit to suit your needs.
+# If you don't need config, you can remove the file entirely.
+options:
+    port:
+        type: int
+        description: 'Port'
+        default: 27017
+

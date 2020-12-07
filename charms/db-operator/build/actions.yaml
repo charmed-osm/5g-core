@@ -1,0 +1,11 @@
+# Copyright 2020 Tata Elxsi canonical@tataelxsi.onmicrosoft.com
+# See LICENSE file for licensing details.
+adduser:
+    description: "Addition of subscriber information "
+    params:
+        ueid:
+            description: "IMSI details"
+            type: string
+            default: ""
+
+

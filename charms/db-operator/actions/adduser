@@ -1,0 +1,24 @@
+#!/bin/bash
+
+UEID=`action-get ueid` 
+
+
+
+mongo db/free5gc --eval "db.policyData.ues.amData.insert({ \"subscCats\" : [ \"free5gc\" ], \"ueId\" : \"$UEID\" }) "
+
+mongo db/free5gc --eval "db.policyData.ues.smData.insert({\"smPolicySnssaiData\" : { \"01010203\" : { \"snssai\" : { \"sst\" : 1, \"sd\" : \"010203\" }, \"smPolicyDnnData\" : { \"internet\" : { \"dnn\" : \"internet\" } } }, \"01112233\" : { \"smPolicyDnnData\" : { \"internet\" : { \"dnn\" : \"internet\" } }, \"snssai\" : { \"sst\" : 1, \"sd\" : \"112233\" } } }, \"ueId\" : \"$UEID\" }  
+) "
+
+mongo db/free5gc --eval "db.subscriptionData.authenticationData.authenticationSubscription.insert({\"ueId\" : \"$UEID\", \"authenticationMethod\" : \"5G_AKA\", \"permanentKey\" : { \"permanentKeyValue\" : \"5122250214c33e723a5dd523fc145fc0\", \"encryptionKey\" : 0, \"encryptionAlgorithm\" : 0 }, \"sequenceNumber\" : \"16f3b3f70fc2\", \"authenticationManagementField\" : \"8000\", \"milenage\" : { \"op\" : { \"opValue\" : \"c9e8763286b5b9ffbdf56e1297d0887b\", \"encryptionKey\" : 0, \"encryptionAlgorithm\" : 0 } }, \"opc\" : { \"opcValue\" : \"981d464c7c52eb6e5036234984ad0bcf\", \"encryptionKey\" : 0, \"encryptionAlgorithm\" : 0 } } ) "
+
+mongo db/free5gc --eval "db.subscriptionData.provisionedData.amData.insert(
+  {\"gpsis\" : [ \"msisdn-0900000000\" ], \"subscribedUeAmbr\" : { \"downlink\" : \"1000 Kbps\", \"uplink\" : \"1000 Kbps\" }, \"nssai\" : { \"defaultSingleNssais\" : [ { \"sst\" : 1, \"sd\" : \"010203\" }, { \"sst\" : 1, \"sd\" : \"112233\" } ], \"singleNssais\" : [ { \"sst\" : 1, \"sd\" : \"010203\" }, { \"sst\" : 1, \"sd\" : \"112233\" } ] }, \"ueId\" : \"$UEID\", \"servingPlmnId\" : \"20893\" })"
+
+mongo db/free5gc --eval "db.subscriptionData.provisionedData.smData.insert({\"dnnConfigurations\" : { \"internet\" : { \"pduSessionTypes\" : { \"allowedSessionTypes\" : [ \"IPV4\" ], \"defaultSessionType\" : \"IPV4\" }, \"sscModes\" : { \"defaultSscMode\" : \"SSC_MODE_1\", \"allowedSscModes\" : [ \"SSC_MODE_1\", \"SSC_MODE_2\", \"SSC_MODE_3\" ] }, \"5gQosProfile\" : { \"arp\" : { \"priorityLevel\" : 8, \"preemptCap\" : \"\", \"preemptVuln\" : \"\" }, \"priorityLevel\" : 8, \"5qi\" : 0 }, \"sessionAmbr\" : { \"downlink\" : \"1000 Kbps\", \"uplink\" : \"1000 Kbps\" } } }, \"ueId\" : \"$UEID\", \"servingPlmnId\" : \"20893\", \"singleNssai\" : { \"sst\" : 1, \"sd\" : \"010203\" } })"
+
+
+mongo db/free5gc --eval "db.subscriptionData.provisionedData.smfSelectionSubscriptionData.insert({\"subscribedSnssaiInfos\" : { \"01010203\" : { \"dnnInfos\" : [ { \"dnn\" : \"internet\" } ] }, \"01112233\" : { \"dnnInfos\" : [ { \"dnn\" : \"internet\" } ] } }, \"ueId\" : \"$UEID\", \"servingPlmnId\" : \"20893\" })"
+
+
+
+

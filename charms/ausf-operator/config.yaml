@@ -1,0 +1,13 @@
+# Copyright 2020 Tata Elxsi canonical@tataelxsi.onmicrosoft.com
+# See LICENSE file for licensing details.
+options:
+    port:
+        type: int
+        description: 'Port'
+        default: 29509
+    gin_mode:
+        type: string
+        description: 'gin implements a HTTP web framework and possible values  are debug and release'
+        default: 'release'
+
+
