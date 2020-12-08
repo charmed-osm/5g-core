@@ -1,0 +1,20 @@
+# Copyright 2020 Tata Elxsi canonical@tataelxsi.onmicrosoft.com
+# See LICENSE file for licensing details.
+name: udm
+description: Charm for UDM
+summary: Charm for UDM
+tags:
+    - 5gcore
+series:
+    - kubernetes
+deployment:
+    type: stateful
+    service: cluster
+resources:
+  image:
+    type: oci-image
+    description: docker image for UDM
+
+requires:
+  nrf:
+     interface: nrf

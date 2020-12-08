@@ -15,6 +15,12 @@ juju deploy
 
 Check if the charm is deployed with juju status
 
+Create and activate a virtualenv with the development requirements:
+
+    virtualenv -p python3 venv
+    source venv/bin/activate
+    pip install -r requirements-dev.txt
+
 
 ## Testing
 

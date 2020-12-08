@@ -96,6 +96,17 @@ class TestCharm(unittest.TestCase):
             self.harness.charm.unit.status.message.startswith("Waiting for ")
         )
 
+    def test_publish_nrf_info(self) -> NoReturn:
+        """Test to see if nrf relation is updated."""
+        expected_result = {
+            "hostname": "nrf",
+        }
+        self.harness.charm.on.start.emit()
+        relation_id = self.harness.add_relation("nrf", "amf")
+        self.harness.add_relation_unit(relation_id, "amf/0")
+        relation_data = self.harness.get_relation_data(relation_id, "nrf")
+        self.assertDictEqual(expected_result, relation_data)
+
 
 if __name__ == "__main__":
     unittest.main()

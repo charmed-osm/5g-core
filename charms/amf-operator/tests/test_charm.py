@@ -31,6 +31,46 @@ class TestCharm(unittest.TestCase):
 
     def test_on_start_with_relations(self) -> NoReturn:
         """Test installation with any relation."""
+        self.harness.charm.on.start.emit()
+        expected_result = {
+            "version": 3,
+            "containers": [
+                {
+                    "name": "amf",
+                    "imageDetails": self.harness.charm.image.fetch(),
+                    "imagePullPolicy": "Always",
+                    "ports": [{
+                        "name": "amf",
+                        "containerPort": 29518,
+                        "protocol": "TCP",
+                    }],
+                    "envConfig": {
+                        "ALLOW_ANONYMOUS_LOGIN": "yes",
+                        "GIN_MODE": "release",
+                    },
+                    "command": ["./amf", "-amfcfg", "../config/amfcfg.conf", "&"],
+                }
+            ],
+            "kubernetesResources": {
+                "services": [
+                    {
+                        "name": "amf-lb",
+                        "labels": {"juju-app": "amf"},
+                        "spec": {
+                            "selector": {"juju-app": "amf"},
+                            "ports": [
+                                {
+                                    "protocol": "SCTP",
+                                    "port": 38412,
+                                    "targetPort": 38412,
+                                }
+                            ],
+                            "type": "LoadBalancer",
+                        },
+                    }
+                ],
+            },
+        }
         # Check if nrf is initialized
         self.assertIsNone(self.harness.charm.state.nrf_host)
 
@@ -38,43 +78,20 @@ class TestCharm(unittest.TestCase):
         nrf_relation_id = self.harness.add_relation("nrf", "nrf")
         self.harness.add_relation_unit(nrf_relation_id, "nrf/0")
         self.harness.update_relation_data(
-            nrf_relation_id, "nrf/0", {"hostname": "nrf"}
+            nrf_relation_id, "nrf", {"hostname": "nrf"}
         )
 
         # Checking if nrf data is stored
-        # self.assertEqual(self.harness.charm.state.nrf_host, "nrf")
+        self.assertEqual(self.harness.charm.state.nrf_host, "nrf")
 
         # Verifying status
-        # self.assertNotIsInstance(self.harness.charm.unit.status, BlockedStatus)
+        self.assertNotIsInstance(self.harness.charm.unit.status, BlockedStatus)
 
-        # pod_spec, kubernetesResources = self.harness.get_pod_spec()
-        # self.assertDictEqual(expected_result, pod_spec)
-
-    def test_on_nrf_unit_relation_changed(self) -> NoReturn:
-        """Test to see if kafka relation is updated."""
-        self.harness.charm.on.start.emit()
-
-        self.assertIsNone(self.harness.charm.state.nrf_host)
-
-        relation_id = self.harness.add_relation("nrf", "nrf")
-        self.harness.add_relation_unit(relation_id, "nrf/0")
-        self.harness.update_relation_data(
-            relation_id, "nrf/0", {"host": "nrf"}
-        )
-
-        # self.assertEqual(self.harness.charm.state.nrf_host, "nrf")
-
-        # Verifying status
-        self.assertIsInstance(self.harness.charm.unit.status, BlockedStatus)
-
-        # Verifying status message
-        self.assertGreater(len(self.harness.charm.unit.status.message), 0)
-        self.assertTrue(
-            self.harness.charm.unit.status.message.startswith("Waiting for ")
-        )
+        pod_spec, kubernetesResources = self.harness.get_pod_spec()
+        self.assertDictEqual(expected_result, pod_spec)
 
     def test_on_nrf_app_relation_changed(self) -> NoReturn:
-        """Test to see if kafka relation is updated."""
+        """Test to see if nrf relation is updated."""
         self.harness.charm.on.start.emit()
 
         self.assertIsNone(self.harness.charm.state.nrf_host)
@@ -82,17 +99,17 @@ class TestCharm(unittest.TestCase):
         relation_id = self.harness.add_relation("nrf", "nrf")
         self.harness.add_relation_unit(relation_id, "nrf/0")
         self.harness.update_relation_data(
-            relation_id, "nrf/0", {"host": "nrf"}
+            relation_id, "nrf", {"hostname": "nrf"}
         )
 
-        # self.assertEqual(self.harness.charm.state.nrf_host, "nrf")
+        self.assertEqual(self.harness.charm.state.nrf_host, "nrf")
 
         # Verifying status
-        self.assertIsInstance(self.harness.charm.unit.status, BlockedStatus)
+        self.assertNotIsInstance(self.harness.charm.unit.status, BlockedStatus)
 
         # Verifying status message
         self.assertGreater(len(self.harness.charm.unit.status.message), 0)
-        self.assertTrue(
+        self.assertFalse(
             self.harness.charm.unit.status.message.startswith("Waiting for ")
         )
 

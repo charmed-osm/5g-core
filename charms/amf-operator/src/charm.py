@@ -68,8 +68,8 @@ class AmfCharm(CharmBase):
         Args:
            event (EventBase): NRF relation event.
         """
-        # if not event.app in event.relation.data:
-        # return
+        if not (event.app in event.relation.data):
+            return
         # data_loc = event.unit if event.unit else event.app
 
         nrf_host = event.relation.data[event.app].get("hostname")

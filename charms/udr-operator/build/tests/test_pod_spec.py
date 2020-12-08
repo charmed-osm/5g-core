@@ -52,7 +52,7 @@ class TestPodSpec(unittest.TestCase):
         """Teting make pod spec"""
         image_info = {"upstream-source": "10.45.5.100:4200/canonical/udr:dev2.0"}
         config = {
-            "port": 29504,
+            "port": 2944,
             "db_uri": "mongodb://db/free5gc",
             "gin_mode": "release",
 

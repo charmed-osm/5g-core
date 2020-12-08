@@ -1,4 +1,4 @@
-# from pydantic import ValidationError
+from pydantic import ValidationError
 from typing import NoReturn
 import unittest
 import pod_spec
@@ -61,8 +61,8 @@ class TestPodSpec(unittest.TestCase):
             "upf_host": "upf_host"
         }
 
-        # with self.assertRaises(ValidationError):
-        pod_spec.make_pod_spec(image_info, config, relation_state, app_name)
+        with self.assertRaises(ValidationError):
+            pod_spec.make_pod_spec(image_info, config, relation_state, app_name)
 
 
 if __name__ == "__main__":

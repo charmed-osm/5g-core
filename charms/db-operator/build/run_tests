@@ -1,5 +1,5 @@
 #!/bin/sh -e
-# Copyright 2020 Tata Elxsi canonical@tataelxsi.onmicrosoft.com
+# Copyright 2020 telco
 # See LICENSE file for licensing details.
 
 if [ -z "$VIRTUAL_ENV" -a -d venv/ ]; then

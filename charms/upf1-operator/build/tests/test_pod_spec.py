@@ -1,7 +1,7 @@
 # Copyright 2020 Ubuntu
 # See LICENSE file for licensing details.
 
-# from pydantic import ValidationError
+from pydantic import ValidationError
 from typing import NoReturn
 import unittest
 import pod_spec
@@ -88,7 +88,7 @@ class TestPodSpec(unittest.TestCase):
                 "kind": "NetworkAttachmentDefinition",
                 "metadata": {"name": "n6-network"},
                 "spec": {
-                    "config": '{\n"cniVersion": "0.3.1",\n"name": "n6-network",\n"type": "macvlan",\n"master": "enp0s3",\n"mode": "bridge",\n"ipam": {\n"type": "host-local",\n"subnet": "192.168.0.0/16",\n"rangeStart": "192.168.1.100",\n"rangeEnd": "192.168.1.250",\n"gateway": "192.168.1.1"\n}\n}' # noqa
+                    "config": '{\n"cniVersion": "0.3.1",\n"name": "n6-network",\n"type": "macvlan",\n"master": "ens3",\n"mode": "bridge",\n"ipam": {\n"type": "host-local",\n"subnet": "192.168.0.0/16",\n"rangeStart": "192.168.1.100",\n"rangeEnd": "192.168.1.250",\n"gateway": "192.168.1.1"\n}\n}' # noqa
                 },
             }]
         }
@@ -126,8 +126,8 @@ class TestPodSpec(unittest.TestCase):
         }
         app_name = "upf1"
 
-        # with self.assertRaises(ValidationError):
-        pod_spec.make_pod_spec(image_info, config, app_name)
+        with self.assertRaises(ValidationError):
+            pod_spec.make_pod_spec(image_info, config, app_name)
 
 
 if __name__ == "__main__":

@@ -27,6 +27,17 @@ class TestCharm(unittest.TestCase):
         # Verifying status message
         self.assertGreater(len(self.harness.charm.unit.status.message), 0)
 
+    def test_publish_upf_info(self) -> NoReturn:
+        """Test to see if upf relation is updated."""
+        self.harness.charm.on.start.emit()
+        expected_result = {
+            "private_address": "upf",
+        }
+        relation_id = self.harness.add_relation("upf", "natapp")
+        self.harness.add_relation_unit(relation_id, "natapp/0")
+        relation_data = self.harness.get_relation_data(relation_id, "upf1")
+        self.assertDictEqual(expected_result, relation_data)
+
 
 if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    unittest.main()

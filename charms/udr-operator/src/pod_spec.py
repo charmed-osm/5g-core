@@ -21,7 +21,7 @@ class ConfigData(BaseModel):
         raise ValueError("Invalid port number")
 
     db_uri: constr(regex=r"^(mongodb://db/free5gc)$")  # noqa
-    gin_mode: constr(regex=r"^(release)$")  # noqa
+    gin_mode: constr(regex=r"^(release|debug)$")  # noqa
 
 
 def _make_pod_ports(config: ConfigData) -> List[Dict[str, Any]]:

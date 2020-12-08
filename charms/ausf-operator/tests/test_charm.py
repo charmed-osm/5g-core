@@ -93,3 +93,7 @@ class TestCharm(unittest.TestCase):
         self.assertFalse(
             self.harness.charm.unit.status.message.startswith("Waiting for ")
         )
+
+
+if __name__ == "__main__":
+    unittest.main()

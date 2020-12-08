@@ -180,17 +180,18 @@ class SmfCharm(CharmBase):
             self.unit.status = BlockedStatus("Error fetching image information")
             return
 
-        try:
-            pod_spec = make_pod_spec(
-                image_info,
-                self.model.config,
-                self.relation_state,
-                self.model.app.name,
-            )
-        except ValidationError as exc:
-            logger.exception("Config/Relation data validation error")
-            self.unit.status = BlockedStatus(str(exc))
-            return
+        if self.state.upf_host:
+            try:
+                pod_spec = make_pod_spec(
+                    image_info,
+                    self.model.config,
+                    self.relation_state,
+                    self.model.app.name,
+                )
+            except ValidationError as exc:
+                logger.exception("Config/Relation data validation error")
+                self.unit.status = BlockedStatus(str(exc))
+                return
 
         if self.state.pod_spec != pod_spec:
             self.model.pod.set_spec(pod_spec)

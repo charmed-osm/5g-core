@@ -64,12 +64,14 @@ class Upf1Charm(CharmBase):
         # if event.unit is None:
         # return
 
-        logging.info("UPF Provides IP to SMF")
+        logging.info("UPF Provides IP")
+        print("Entered")
         if self.unit.is_leader():
             private_ip = str(
                 self.model.get_binding(event.relation).network.bind_address
             )
             logging.info(private_ip)
+            print("Entered ip", private_ip)
             event.relation.data[self.model.app]["private_address"] = private_ip
 
     def configure_pod(self, event: EventBase) -> NoReturn:

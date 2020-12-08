@@ -1,4 +1,4 @@
-# from pydantic import ValidationError
+from pydantic import ValidationError
 from typing import NoReturn
 import unittest
 
@@ -72,14 +72,14 @@ class TestPodSpec(unittest.TestCase):
         """Teting make pod spec"""
         image_info = {"upstream-source": "10.45.5.100:4200/canonical/amf:dev2.0"}
         config = {
-            "port": 29518,
-            "lb_port": 38412,
+            "port": 9999,
+            "lb_port": 7777,
             "gin_mode": "release",
 
         }
         app_name = "amf"
-        # with self.assertRaises(ValidationError):
-        pod_spec.make_pod_spec(image_info, config, app_name)
+        with self.assertRaises(ValidationError):
+            pod_spec.make_pod_spec(image_info, config, app_name)
 
 
 if __name__ == "__main__":

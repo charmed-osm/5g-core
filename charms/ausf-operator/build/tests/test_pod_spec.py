@@ -27,7 +27,7 @@ class TestPodSpec(unittest.TestCase):
         self.assertListEqual(expected_result, pod_ports)
 
     def test_make_pod_envconfig(self) -> NoReturn:
-        """Teting make pod envconfig configuration."""
+        """Testing make pod envconfig configuration."""
 
         expected_result = {
             "ALLOW_ANONYMOUS_LOGIN": "yes",
@@ -38,17 +38,17 @@ class TestPodSpec(unittest.TestCase):
         self.assertDictEqual(expected_result, pod_envconfig)
 
     def test_make_pod_command(self) -> NoReturn:
-        """Teting make pod command."""
+        """Testing make pod command."""
 
         expected_result = ["./ausf", "-ausfcfg", "../config/ausfcfg.conf", "&"]
         pod_command = pod_spec._make_pod_command()
         self.assertEqual(expected_result, pod_command)
 
     def test_make_pod_spec(self) -> NoReturn:
-        """Teting make pod spec"""
+        """Testing make pod spec"""
         image_info = {"upstream-source": "10.45.5.100:4200/canonical/ausf:dev2.0"}
         config = {
-            "port": 29509,
+            "port": 8989,
             "gin_mode": "release",
         }
         app_name = "ausf"
