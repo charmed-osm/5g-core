@@ -1,5 +1,6 @@
 # Copyright 2020 Tata Elxsi canonical@tataelxsi.onmicrosoft.com
 # See LICENSE file for licensing details.
+---
 name: webui
 description: |
   TODO: fill out the charm's description
@@ -11,13 +12,9 @@ deployment:
     type: stateful
     service: cluster
 resources:
-  image:
-    type: oci-image
-    description: docker image for Webui
+    image:
+        type: oci-image
+        description: docker image for Webui
 requires:
-    db:
-       interface: db
-
-
-
-
+    mongodb:
+        interface: mongodb

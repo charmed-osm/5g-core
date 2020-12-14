@@ -1,4 +1,4 @@
-from pydantic import ValidationError
+""" test script for pod spec.py """
 from typing import NoReturn
 import unittest
 
@@ -20,26 +20,27 @@ class TestPodSpec(unittest.TestCase):
             }
         ]
         portdict = {
-            "port": 9999,
+            "natapp_port": 9999,
         }
+        # pylint:disable=W0212
         pod_ports = pod_spec._make_pod_ports(portdict)
 
         self.assertListEqual(expected_result, pod_ports)
 
     def test_make_pod_podannotations(self) -> NoReturn:
         """Testing make pod envconfig configuration."""
-
-        networks = '[\n{\n"name" : "n6-network",\n"interface": "eth1",\n"ips": ["192.168.1.216"]\n}]' # noqa
-        expected_result = {
-            "annotations": {"k8s.v1.cni.cncf.io/networks": networks}
-        }
+        # pylint:disable=line-too-long
+        networks = '[\n{\n"name" : "n6-network",\n"interface": "eth1",\n"ips": ["192.168.1.216"]\n}]'  # noqa
+        expected_result = {"annotations": {"k8s.v1.cni.cncf.io/networks": networks}}
+        # pylint:disable=W0212
         pod_annotation = pod_spec._make_pod_podannotations()
         self.assertDictEqual(expected_result, pod_annotation)
 
     def test_make_pod_command(self) -> NoReturn:
         """Testing make pod command."""
 
-        expected_result = ["./nat", "eth1", "eth0", "169.254.1.1"]
+        expected_result = ["./start.sh", "&"]
+        # pylint:disable=W0212
         pod_command = pod_spec._make_pod_command()
         self.assertEqual(expected_result, pod_command)
 
@@ -47,15 +48,16 @@ class TestPodSpec(unittest.TestCase):
         """Testing make pod envconfig configuration."""
 
         expected_result = {"securityContext": {"privileged": True}}
+        # pylint:disable=W0212
         pod_privilege = pod_spec._make_pod_privilege()
         self.assertDictEqual(expected_result, pod_privilege)
 
     def test_make_pod_spec(self) -> NoReturn:
         """Testing make pod spec"""
-        image_info = {"upstream-source": "10.45.5.100:4200/canonical/natapp:dev2.0"}
+        image_info = {"upstream-source": "localhost:32000/free5gc-natapp:1.0"}
         config = {
-            "port": -2,
+            "natapp_port": -2,
         }
         app_name = "natapp"
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValueError):
             pod_spec.make_pod_spec(image_info, config, app_name)

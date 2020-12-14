@@ -1,4 +1,4 @@
-from pydantic import ValidationError
+""" test script for pod spec.py """
 from typing import NoReturn
 import unittest
 import pod_spec
@@ -9,7 +9,7 @@ class TestPodSpec(unittest.TestCase):
 
     def test_make_pod_ports(self) -> NoReturn:
         """Testing make pod ports."""
-        port = 9999
+        port = 29502
 
         expected_result = [
             {
@@ -18,50 +18,50 @@ class TestPodSpec(unittest.TestCase):
                 "protocol": "TCP",
             }
         ]
-        portdict = {
-            "port": 9999,
-        }
-        pod_ports = pod_spec._make_pod_ports(portdict)
+        # pylint:disable=W0212
+        pod_ports = pod_spec._make_pod_ports()
 
         self.assertListEqual(expected_result, pod_ports)
+
+    def test_check_data(self) -> NoReturn:
+        """Testing check data."""
+        expected_result = True
+        config = {"gin_mode": "release"}
+        relation = {"upf_host": "127.0.0.1"}
+        # pylint:disable=W0212
+        check_data = pod_spec._check_data(config, relation)
+        self.assertEqual(expected_result, check_data)
 
     def test_make_pod_envconfig(self) -> NoReturn:
         """Testing make pod envconfig configuration."""
         expected_result = {
             "ALLOW_ANONYMOUS_LOGIN": "yes",
             "GIN_MODE": "release",
-            "IPADDR1": "upf_host"
+            "IPADDR1": "127.0.0.1",
         }
-        mode = {
-            "gin_mode": "release"
-        }
-        ipadd = {
-            "upf_host": "upf_host"
-        }
+        mode = {"gin_mode": "release"}
+        ipadd = {"upf_host": "127.0.0.1"}
+        # pylint:disable=W0212
         pod_envconfig = pod_spec._make_pod_envconfig(mode, ipadd)
         self.assertDictEqual(expected_result, pod_envconfig)
 
     def test_make_pod_command(self) -> NoReturn:
         """Testing make pod command."""
         expected_result = ["./ipscript.sh", "&"]
+        # pylint:disable=W0212
         pod_command = pod_spec._make_pod_command()
         self.assertEqual(expected_result, pod_command)
 
     def test_make_pod_spec(self) -> NoReturn:
         """Testing make pod spec"""
-        image_info = {"upstream-source": "10.45.5.100:4200/canonical/core-smf:v1.0"}
+        image_info = {"upstream-source": "localhost:32000/free5gc-smf:1.0"}
         config = {
-            "port": 9999,
-            "lb_port": 8888,
             "gin_mode": "release",
-
         }
         app_name = "smf"
-        relation_state = {
-            "upf_host": "upf_host"
-        }
+        relation_state = {"upf_host": "127.0.0.500"}
 
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValueError):
             pod_spec.make_pod_spec(image_info, config, relation_state, app_name)
 
 

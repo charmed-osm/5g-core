@@ -5,117 +5,113 @@ charm does not have any relations or config options to exercise.
 """
 
 import unittest
-import zaza
 import logging
 import socket
 import sctp
-import netifaces
 import zaza.model as model
 import pymongo
-from juju.model import Model
-import zaza.charm_lifecycle.utils as lifecycle_utils
 
 class BasicDeployment(unittest.TestCase):
-
+    """ class defines functional testing of all charms """
     def create_connection(self):
+        """ create mongo mongodb connection """
         try:
-            for unit in zaza.model.get_units('db'):
-                logging.info("Checking if the unit db is active: {}".format(unit.entity_id))
-                logging.info("checking for mongo db connection....")
-                db_ip = model.get_status().applications["db"]["units"][unit.entity_id]["address"]
-                myclient = pymongo.MongoClient("mongodb://"+db_ip+":27017/")
+            for unit in model.get_units('mongodb'):
+                logging.info("Checking if the unit mongodb is active: %s", unit.entity_id)
+                logging.info("checking for mongodb connection....")
+                mongodb_ip = model.get_status().applications["mongodb"]["units"][unit.entity_id]["address"]
+                myclient = pymongo.MongoClient("mongodb://"+mongodb_ip+":27017/")
                 logging.info("Mongodb connected successfully !!!")
-        except:
-            logging.info("Could not connect to Mongodb")
+        except pymongo.errors.ConnectionFailure:
+            logging.info("Could not connect to Mongomongodb")
         return myclient
-    
-    def mongo_read_data(self, db_name, coll_name, myclient):
-        core_db = myclient[db_name]
-        collection = core_db[coll_name]
+    def mongo_read_data(self, mongodb_name, coll_name, myclient): # pylint disable=no-self-use
+        """ Reading data from mongodb """
+        core_mongodb = myclient[mongodb_name]
+        collection = core_mongodb[coll_name]
         cursor = collection.find()
         return cursor
 
     def test1_mongo_listcollections(self):
         """ ***** list collections in mongodb *****"""
         collection = []
-        db_name = "free5gc"
+        mongodb_name = "free5gc"
         myclient = BasicDeployment.create_connection(self)
-        dblist = myclient.list_database_names()
-        if db_name in dblist:
+        mongodblist = myclient.list_database_names()
+        if mongodb_name in mongodblist:
             logging.info("free5gc Database Exists")
-            core_db = myclient[db_name]
-            for coll in core_db.list_collection_names():
+            core_mongodb = myclient[mongodb_name]
+            for coll in core_mongodb.list_collection_names():
                 collection.append(coll)
-            logging.info("collection list {}".format(collection))
+            logging.info("collection list %s", collection)
         else:
             logging.info("Database doesnot exists")
         myclient.close()
 
     def test2_mongo_insert(self):
-        """ ****** Insert record in mongodb ***** """ 
-        db_name = "free5gc"
+        """ ****** Insert record in mongomongodb ***** """
+        mongodb_name = "free5gc"
         coll_name = "policyData.ues.amData"
         ue_id = "imsi-2089300007487"
+        record = None
         myclient = BasicDeployment.create_connection(self)
-        core_db = myclient[db_name]
-        collection = core_db[coll_name]
-        ins_rec = { "subscCats" : [ db_name ], "ueId" : ue_id }
-        logging.info("Record to be inserted {}".format(ins_rec))
+        core_mongodb = myclient[mongodb_name]
+        collection = core_mongodb[coll_name]
+        ins_rec = { "subscCats" : [ mongodb_name ], "ueId" : ue_id }
+        logging.info("Record to be inserted %s", ins_rec)
         collection.insert_one(ins_rec)
         logging.info("Data inserted successfully !!")
-        cursor = BasicDeployment.mongo_read_data(self, db_name, coll_name, myclient)
+        cursor = BasicDeployment.mongo_read_data(self, mongodb_name, coll_name, myclient)
         for record in cursor:
-            logging.info("Reading the inserted document from mongodb {}".format(record))
+            logging.info("Reading the inserted document from mongodb %s", record)
         logging.info("To check inserted record and retrieved document are same ...")
-        self.assertEqual(ins_rec, record) 
+        self.assertEqual(ins_rec, record)
         myclient.close()
-    
     def test4_mongo_delete(self):
-        """ ***** Delete record in mongodb ***** """
-        db_name = "free5gc"
+        """ ***** Delete record in mongomongodb ***** """
+        mongodb_name = "free5gc"
         coll_name = "policyData.ues.amData"
         ue_id = "imsi-2089300007488"
         myclient = BasicDeployment.create_connection(self)
-        core_db = myclient[db_name]
-        collection = core_db[coll_name]
+        core_mongodb = myclient[mongodb_name]
+        collection = core_mongodb[coll_name]
         logging.info("Deleting record based on UE-Id")
         del_rec = { "ueId" : ue_id }
-        logging.info("Record to be deleted {}".format(del_rec))
+        logging.info("Record to be deleted %s", del_rec)
         result = collection.delete_one(del_rec)
-        logging.info("Data deleted {}".format(result.deleted_count))
+        logging.info("Data deleted %d ",result.deleted_count)
         logging.info("Data deleted successfully !!")
-        cursor = BasicDeployment.mongo_read_data(self, db_name, coll_name, myclient)
-        if core_db.collection.count_documents({ 'ueId': ue_id }, limit = 1) == 0:
-            logging.info("Reading the deleted document ue_id: {}".format(ue_id))
+        BasicDeployment.mongo_read_data(self, mongodb_name, coll_name, myclient)
+        if core_mongodb.collection.count_documents({ 'ueId': ue_id }, limit = 1) == 0:
+            logging.info("Reading the deleted document ue_id: %s",ue_id)
             self.assertEqual(1,result.deleted_count)
         else:
             logging.info("Document present")
         myclient.close()
 
     def test3_mongo_update(self):
-        """ ***** Update record in mongodb ***** """
-        db_name = "free5gc"
+        """ ***** Update record in mongomongodb ***** """
+        mongodb_name = "free5gc"
         coll_name = "policyData.ues.amData"
         ue_id = "imsi-2089300007487"
         myclient = BasicDeployment.create_connection(self)
-        core_db = myclient[db_name]
-        collection = core_db[coll_name]
+        core_mongodb = myclient[mongodb_name]
+        collection = core_mongodb[coll_name]
         myquery = { "ueId" : ue_id }
         update_rec = { "$set": { "ueId": "imsi-2089300007488" } }
         result = collection.update_one(myquery, update_rec)
         logging.info("Data updated successfully !!")
-        cursor = BasicDeployment.mongo_read_data(self, db_name, coll_name, myclient)
+        cursor = BasicDeployment.mongo_read_data(self, mongodb_name, coll_name, myclient)
         for record in cursor:
-            logging.info("updated document {}".format(record))
+            logging.info("updated document %s",record)
             self.assertEqual(1, result.modified_count)
-            
         myclient.close()
 
     def test5_sctp_connection_amf(self):
         """ ***** checking sctp transport connection in amf ***** """
         amf_sctp_port = 38412
         sock = sctp.sctpsocket_tcp(socket.AF_INET)
-        for unit in zaza.model.get_units('amf'):
+        for unit in model.get_units('amf'):
             amf_ip = model.get_status().applications["amf"]["units"][unit.entity_id]["address"]
             result = sock.connect_ex((amf_ip, amf_sctp_port))
             if result == 0:
@@ -123,12 +119,11 @@ class BasicDeployment(unittest.TestCase):
             else:
                 logging.info("SCTP Transport is not available")
             self.assertEqual(result,0)
-    
     def test6_upfgtp_connection(self):
         """ ***** checking gtp connection in upf ***** """
         upf_gtp_port = 2152
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        for unit in zaza.model.get_units('upf1'):
+        for unit in model.get_units('upf1'):
             upf1_ip = model.get_status().applications["upf1"]["units"][unit.entity_id]["address"]
             result = sock.connect_ex((upf1_ip, upf_gtp_port))
             if result == 0:
@@ -136,4 +131,3 @@ class BasicDeployment(unittest.TestCase):
             else:
                 logging.info("GTP Transport is not available")
             self.assertEqual(result,0)
-

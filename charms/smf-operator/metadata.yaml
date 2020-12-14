@@ -1,5 +1,6 @@
 # Copyright 2020 Tata Elxsi <canonical@tataelxsi.onmicrosoft.com>
 # See LICENSE file for licensing details.
+---
 name: smf
 description: Charm for SMF
 summary: Charm for SMF
@@ -11,9 +12,9 @@ deployment:
     type: stateful
     service: cluster
 resources:
-  image:
-    type: oci-image
-    description: docker image for SMF
+    image:
+        type: oci-image
+        description: docker image for SMF
 
 requires:
     upf:

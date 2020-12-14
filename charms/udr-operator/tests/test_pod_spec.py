@@ -1,4 +1,4 @@
-from pydantic import ValidationError
+""" test script for pod spec.py """
 from typing import NoReturn
 import unittest
 
@@ -10,7 +10,7 @@ class TestPodSpec(unittest.TestCase):
 
     def test_make_pod_ports(self) -> NoReturn:
         """Testing make pod ports."""
-        port = 9999
+        port = 29504
 
         expected_result = [
             {
@@ -19,44 +19,49 @@ class TestPodSpec(unittest.TestCase):
                 "protocol": "TCP",
             }
         ]
-        portdict = {
-            "port": 9999,
-        }
-        pod_ports = pod_spec._make_pod_ports(portdict)
+        # pylint:disable=W0212
+        pod_ports = pod_spec._make_pod_ports()
 
         self.assertListEqual(expected_result, pod_ports)
 
+    def test_check_data(self) -> NoReturn:
+        """Testing check data."""
+        expected_result = True
+        config = {"gin_mode": "release"}
+        relation = {"mongodb_uri": "mongodb://mongodb/free5gc"}
+        # pylint:disable=W0212
+        check_data = pod_spec._check_data(config, relation)
+        self.assertEqual(expected_result, check_data)
+
     def test_make_pod_envconfig(self) -> NoReturn:
-        """Teting make pod envconfig configuration."""
+        """Testing make pod envconfig configuration."""
 
         expected_result = {
             "ALLOW_ANONYMOUS_LOGIN": "yes",
             "GIN_MODE": "release",
-            "DB_URI": "mongodb://db/free5gc"
+            "MONGODB_URI": "mongodb://mongodb/free5gc",
         }
-        mode = {
-            "db_uri": "mongodb://db/free5gc",
-            "gin_mode": "release"
-        }
-        pod_envconfig = pod_spec._make_pod_envconfig(mode)
+        mongodb_uri = {"mongodb_uri": "mongodb://mongodb/free5gc"}
+        mode = {"gin_mode": "release"}
+        # pylint:disable=W0212
+        pod_envconfig = pod_spec._make_pod_envconfig(mode, mongodb_uri)
         self.assertDictEqual(expected_result, pod_envconfig)
 
     def test_make_pod_command(self) -> NoReturn:
-        """Teting make pod command."""
+        """Testing make pod command."""
 
         expected_result = ["./udr", "-udrcfg", "../config/udrcfg.conf", "&"]
+        # pylint:disable=W0212
         pod_command = pod_spec._make_pod_command()
         self.assertEqual(expected_result, pod_command)
 
     def test_make_pod_spec(self) -> NoReturn:
-        """Teting make pod spec"""
-        image_info = {"upstream-source": "10.45.5.100:4200/canonical/udr:dev2.0"}
+        """Testing make pod spec"""
+        image_info = {"upstream-source": "localhost:32000/free5gc-udr:1.0"}
         config = {
-            "port": 2944,
-            "db_uri": "mongodb://db/free5gc",
-            "gin_mode": "release",
-
+            "gin_mode": "notrelease",
         }
-        app_name = "udr"
-        with self.assertRaises(ValidationError):
-            pod_spec.make_pod_spec(image_info, config, app_name)
+        app_name = ("udr",)
+        relation_state = {"mongodb_uri": "nomongodb://mongodb/free5gc"}
+        with self.assertRaises(ValueError):
+            pod_spec.make_pod_spec(image_info, config, relation_state, app_name)

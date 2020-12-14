@@ -1,32 +1,34 @@
 #!/usr/bin/env python3
 # Copyright 2020 Tata Elxsi
 # See LICENSE file for licensing details.
+""" Pod spec for NatApp charm """
 
 import logging
-from pydantic import BaseModel, PositiveInt
 from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
 
 
-class ConfigData(BaseModel):
-    """Configuration data model."""
-
-    port: PositiveInt
-
-
-def _make_pod_ports(config: ConfigData) -> List[Dict[str, Any]]:
+def _make_pod_ports(config: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Generate pod ports details.
     Args:
         port (int): port to expose.
     Returns:
         List[Dict[str, Any]]: pod port details.
     """
-    return [{"name": "natapp", "containerPort": config["port"], "protocol": "UDP"}]
+    if config["natapp_port"] > 0:
+        return [
+            {
+                "name": "natapp",
+                "containerPort": config["natapp_port"],
+                "protocol": "UDP",
+            }
+        ]
+    raise ValueError("Invalid port number")
 
 
 def _make_pod_command() -> List[str]:
-    return ["./nat", "eth1", "eth0", "169.254.1.1"]
+    return ["./start.sh", "&"]
 
 
 def _make_pod_podannotations() -> Dict[str, Any]:
@@ -67,8 +69,6 @@ def make_pod_spec(
     """
     if not image_info:
         return None
-
-    ConfigData(**(config))
 
     ports = _make_pod_ports(config)
     command = _make_pod_command()

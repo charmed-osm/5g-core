@@ -1,40 +1,40 @@
 #!/usr/bin/env python3
 # Copyright 2020 Tata Elxsi canonical@tataelxsi.onmicrosoft.com
 # See LICENSE file for licensing details.
+""" Pod spec for UDR charm """
 
 import logging
-from pydantic import BaseModel, constr, validator
 from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
 
 
-class ConfigData(BaseModel):
-    """Configuration data model."""
-
-    port: int = 29504
-
-    @validator("port")
-    def validate_port(cls, value: int) -> Any:
-        if value == 29504:  # <- Here is condition checking your format.
-            return value
-        raise ValueError("Invalid port number")
-
-    db_uri: constr(regex=r"^(mongodb://db/free5gc)$")  # noqa
-    gin_mode: constr(regex=r"^(release|debug)$")  # noqa
+UDR_PORT = 29504
 
 
-def _make_pod_ports(config: ConfigData) -> List[Dict[str, Any]]:
+def _make_pod_ports() -> List[Dict[str, Any]]:
     """Generate pod ports details.
     Args:
         port (int): port to expose.
     Returns:
         List[Dict[str, Any]]: pod port details.
     """
-    return [{"name": "udr", "containerPort": config["port"], "protocol": "TCP"}]
+    return [{"name": "udr", "containerPort": UDR_PORT, "protocol": "TCP"}]
 
 
-def _make_pod_envconfig(config: ConfigData) -> Dict[str, Any]:
+def _check_data(config: Dict[str, Any], relation_state: Dict[str, Any]) -> bool:
+    if relation_state["mongodb_uri"] != "mongodb://mongodb/free5gc":
+        if config["gin_mode"] != "release" and config["gin_mode"] != "debug":
+            raise ValueError("Invalid gin_mode and invalid mongodb_uri")
+        raise ValueError("Invalid mongodb_uri")
+    if config["gin_mode"] != "release" and config["gin_mode"] != "debug":
+        raise ValueError("Invalid gin_mode")
+    return True
+
+
+def _make_pod_envconfig(
+    config: Dict[str, Any], relation_state: Dict[str, Any]
+) -> Dict[str, Any]:
     """Generate pod environment configuration.
     Args:
         config (Dict[str, Any]): configuration information.
@@ -42,12 +42,13 @@ def _make_pod_envconfig(config: ConfigData) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: pod environment configuration.
     """
-    envconfig = {
-        # General configuration
-        "ALLOW_ANONYMOUS_LOGIN": "yes",
-        "GIN_MODE": config["gin_mode"],
-        "DB_URI": config["db_uri"],
-    }
+    if _check_data(config, relation_state):
+        envconfig = {
+            # General configuration
+            "ALLOW_ANONYMOUS_LOGIN": "yes",
+            "GIN_MODE": config["gin_mode"],
+            "MONGODB_URI": relation_state["mongodb_uri"],
+        }
 
     return envconfig
 
@@ -59,6 +60,7 @@ def _make_pod_command() -> List[str]:
 def make_pod_spec(
     image_info: Dict[str, str],
     config: Dict[str, Any],
+    relation_state: Dict[str, Any],
     app_name: str,
 ) -> Dict[str, Any]:
     """Generate the pod spec information.
@@ -75,10 +77,8 @@ def make_pod_spec(
     if not image_info:
         return None
 
-    ConfigData(**(config))
-
-    ports = _make_pod_ports(config)
-    env_config = _make_pod_envconfig(config)
+    ports = _make_pod_ports()
+    env_config = _make_pod_envconfig(config, relation_state)
     command = _make_pod_command()
     return {
         "version": 3,

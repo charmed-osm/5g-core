@@ -3,17 +3,10 @@
 #
 # This is only an example, and you should edit to suit your needs.
 # If you don't need config, you can remove the file entirely.
+---
 options:
-    port:
-        type: int
-        description: 'Port'
-        default: 29504
     gin_mode:
         type: string
-        description: 'gin implements a HTTP web framework and possible values  are debug and release'
+        description: 'gin implements a HTTP web framework
+                      and possible values are debug and release'
         default: 'release'
-    db_uri:
-        type: string
-        description: 'DB URI env'
-        default: 'mongodb://db/free5gc'
-

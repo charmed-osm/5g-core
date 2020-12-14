@@ -1,5 +1,6 @@
 # Copyright 2020 Tata Elxsi canonical@tataelxsi.onmicrosoft.com
 # See LICENSE file for licensing details.
+---
 name: udr
 description: Charm for UDR
 summary: Charm for UDR
@@ -11,13 +12,11 @@ deployment:
     type: stateful
     service: cluster
 resources:
-  image:
-    type: oci-image
-    description: docker image for UDR
+    image:
+        type: oci-image
+        description: docker image for UDR
 requires:
-  db:
-     interface: db
-  nrf:
-     interface: nrf
-
-
+    mongodb:
+        interface: mongodb
+    nrf:
+        interface: nrf

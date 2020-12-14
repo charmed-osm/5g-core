@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
-# Copyright 2020 telco
+# Copyright 2020 Tata Elxsi canonical@tataelxsi.onmicrosoft.com
 # See LICENSE file for licensing details.
+""" Defining NatApp charm events """
 
 import logging
-
+from typing import Any, Dict, NoReturn
 from ops.charm import CharmBase, CharmEvents
 from ops.main import main
 from ops.framework import StoredState, EventBase, EventSource
 from ops.model import ActiveStatus, BlockedStatus, MaintenanceStatus
 
 from oci_image import OCIImageResource, OCIImageResourceError
-
-from pydantic import ValidationError
-from typing import Any, Dict, NoReturn
 
 from pod_spec import make_pod_spec
 
@@ -21,15 +19,17 @@ logger = logging.getLogger(__name__)
 
 class ConfigurePodEvent(EventBase):
     """Configure Pod event"""
-    pass
 
 
 class NatappEvents(CharmEvents):
-    """AUSF Events"""
+    """Natapp Events"""
+
     configure_pod = EventSource(ConfigurePodEvent)
 
 
 class NatappCharm(CharmBase):
+    """ Natapp charm events definition """
+
     state = StoredState()
     on = NatappEvents()
 
@@ -50,10 +50,14 @@ class NatappCharm(CharmBase):
         self.framework.observe(self.on.configure_pod, self.configure_pod)
 
         # Registering required relation changed events
-        self.framework.observe(self.on.upf_relation_changed, self._on_upf_relation_changed)
+        self.framework.observe(
+            self.on.upf_relation_changed, self._on_upf_relation_changed
+        )
 
         # Registering required relation departed events
-        self.framework.observe(self.on.upf_relation_departed, self._on_upf_relation_departed)
+        self.framework.observe(
+            self.on.upf_relation_departed, self._on_upf_relation_departed
+        )
 
         # -- initialize states --
         self.state.set_default(upf_host=None)
@@ -61,10 +65,10 @@ class NatappCharm(CharmBase):
     def _on_upf_relation_changed(self, event: EventBase) -> NoReturn:
         """Reads information about the upf relation.
 
-          Args:
-             event (EventBase): upf relation event.
+        Args:
+           event (EventBase): upf relation event.
         """
-        if not (event.app in event.relation.data):
+        if event.app not in event.relation.data:
             return
 
         upf_host = event.relation.data[event.app].get("private_address")
@@ -77,9 +81,10 @@ class NatappCharm(CharmBase):
     def _on_upf_relation_departed(self, event: EventBase) -> NoReturn:
         """Clears data from UPF relation.
 
-         Args:
-             event (EventBase): UPF relation event.
+        Args:
+            event (EventBase): UPF relation event.
         """
+        logging.info(event)
         self.state.upf_host = None
         self.on.configure_pod.emit()
 
@@ -100,9 +105,7 @@ class NatappCharm(CharmBase):
         Returns:
             Dict[str, Any]: relation state information.
         """
-        relation_state = {
-            "upf_host": self.state.upf_host
-        }
+        relation_state = {"upf_host": self.state.upf_host}
 
         return relation_state
 
@@ -112,6 +115,7 @@ class NatappCharm(CharmBase):
             event (EventBase): Hook or Relation event that started the
                                function.
         """
+        logging.info(event)
         missing = self._missing_relations()
         if missing:
             status = "Waiting for {0} relation{1}"
@@ -139,8 +143,8 @@ class NatappCharm(CharmBase):
                 self.model.config,
                 self.model.app.name,
             )
-        except ValidationError as exc:
-            logger.exception("Config/Relation data validation error")
+        except ValueError as exc:
+            logger.exception("Config data validation error")
             self.unit.status = BlockedStatus(str(exc))
             return
 

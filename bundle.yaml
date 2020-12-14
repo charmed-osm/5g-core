@@ -1,91 +1,92 @@
+---
 description: 5g Core Bundle
 bundle: kubernetes
 applications:
-  db:
-    charm: '../charms/db-operator/db.charm'
+  mongodb:
+    charm: './charms/mongodb-operator/mongodb.charm'
     scale: 1
     resources:
-      image: 'mongo:latest'
+      image: 'localhost:32000/free5gc-mongo:1.0'
   nrf:
-    charm: '../charms/nrf-operator/nrf.charm'
+    charm: './charms/nrf-operator/nrf.charm'
     scale: 1
     resources:
-      image: '10.45.5.100:4200/canonical/nrf:dev2.0'
+      image: 'localhost:32000/free5gc-nrf:1.0'
   amf:
-    charm: '../charms/amf-operator/amf.charm'
+    charm: './charms/amf-operator/amf.charm'
     scale: 1
     resources:
-      image: '10.45.5.100:4200/canonical/amf:dev2.0'    
+      image: 'localhost:32000/free5gc-amf:1.0'
   ausf:
-    charm: '../charms/ausf-operator/ausf.charm'
+    charm: './charms/ausf-operator/ausf.charm'
     scale: 1
     resources:
-      image: '10.45.5.100:4200/canonical/ausf:dev2.0'
+      image: 'localhost:32000/free5gc-ausf:1.0'
   nssf:
-    charm: '../charms/nssf-operator/nssf.charm'
+    charm: './charms/nssf-operator/nssf.charm'
     scale: 1
     resources:
-      image: '10.45.5.100:4200/canonical/nssf:dev2.0'
+      image: 'localhost:32000/free5gc-nssf:1.0'
   udm:
-    charm: '../charms/udm-operator/udm.charm'
+    charm: './charms/udm-operator/udm.charm'
     scale: 1
     resources:
-      image: '10.45.5.100:4200/canonical/udm:dev2.0'
+      image: 'localhost:32000/free5gc-udm:1.0'
   udr:
-    charm: '../charms/udr-operator/udr.charm'
+    charm: './charms/udr-operator/udr.charm'
     scale: 1
     resources:
-      image: '10.45.5.100:4200/canonical/udr:dev2.0'
-  webui:
-    charm: '../charms/webui-operator/webui.charm'
-    scale: 1
-    resources:
-      image: '10.45.5.100:4200/canonical/webui:dev2.0'
+      image: 'localhost:32000/free5gc-udr:1.0'
   pcf:
-    charm: '../charms/pcf-operator/pcf.charm'
+    charm: './charms/pcf-operator/pcf.charm'
     scale: 1
     resources:
-      image: '10.45.5.100:4200/canonical/pcf:dev2.0'        
+      image: 'localhost:32000/free5gc-pcf:1.0'
   upf1:
-    charm: '../charms/upf1-operator/upf1.charm'
+    charm: './charms/upf1-operator/upf1.charm'
     scale: 1
     resources:
-      image: '10.45.5.100:4200/canonical/upf1_idn:dev3.0'
-
+      image: 'localhost:32000/free5gc-upf-1:1.0'
+  webui:
+    charm: './charms/webui-operator/webui.charm'
+    scale: 1
+    resources:
+      image: 'localhost:32000/free5gc-webui:1.0'
   smf:
-    charm: '../charms/smf-operator/smf.charm'
+    charm: './charms/smf-operator/smf.charm'
     scale: 1
     resources:
-      image: '10.45.5.100:4200/canonical/smf_idn:dev3.0'
-
+      image: 'localhost:32000/free5gc-smf:1.0'
   natapp:
-    charm: '../charms/natapp-operator/natapp.charm'
+    charm: './charms/natapp-operator/natapp.charm'
     scale: 1
     resources:
-      image: '10.45.5.100:4200/canonical/quagga_custom:dev4.0'
-         
+      image: 'localhost:32000/free5gc-natapp:1.0'
+
 relations:
-       - - nrf:db
-         - db:db
-       - - amf:nrf
-         - nrf:nrf
-       - - ausf:nrf
-         - nrf:nrf
-       - - nssf:nrf
-         - nrf:nrf
-       - - smf:upf
-         - upf1:upf
-       - - smf:nrf
-         - nrf:nrf
-       - - udm:nrf
-         - nrf:nrf
-       - - udr:db
-         - db:db
-       - - udr:nrf
-         - nrf:nrf
-       - - webui:db
-         - db:db
-
-
-
-
+  - - nrf:mongodb
+    - mongodb:mongodb
+  - - amf:nrf
+    - nrf:nrf
+  - - ausf:nrf
+    - nrf:nrf
+  - - nssf:nrf
+    - nrf:nrf
+  - - smf:upf
+    - upf1:upf
+  - - smf:nrf
+    - nrf:nrf
+  - - udm:nrf
+    - nrf:nrf
+  - - udr:mongodb
+    - mongodb:mongodb
+  - - udr:nrf
+    - nrf:nrf
+  - - webui:mongodb
+    - mongodb:mongodb
+  - - natapp:upf
+    - upf1:upf
+  - - pcf:amf
+    - amf:amf
+  - - pcf:nrf
+    - nrf:nrf

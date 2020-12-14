@@ -1,5 +1,6 @@
 # Copyright 2020 Tata Elxsi canonical@tataelxsi.onmicrosoft.com
 # See LICENSE file for licensing details.
+""" NSSF test script for charm.py """
 
 import unittest
 
@@ -11,6 +12,8 @@ from charm import NssfCharm
 
 
 class TestCharm(unittest.TestCase):
+    """ Test script for checking relations """
+
     def setUp(self) -> NoReturn:
         """Test setup"""
         self.harness = Harness(NssfCharm)
@@ -71,7 +74,7 @@ class TestCharm(unittest.TestCase):
         # Verifying status
         self.assertNotIsInstance(self.harness.charm.unit.status, BlockedStatus)
 
-        pod_spec, kubernetesResources = self.harness.get_pod_spec()
+        pod_spec, _ = self.harness.get_pod_spec()
         self.assertDictEqual(expected_result, pod_spec)
 
     def test_on_nrf_app_relation_changed(self) -> NoReturn:

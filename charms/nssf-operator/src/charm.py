@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 # Copyright 2020 Tata Elxsi canonical@tataelxsi.onmicrosoft.com
 # See LICENSE file for licensing details.
+""" Defining nssf charm events """
 
 import logging
-
+from typing import Any, Dict, NoReturn
 from ops.charm import CharmBase, CharmEvents
 from ops.main import main
 from ops.framework import StoredState, EventBase, EventSource
 from ops.model import ActiveStatus, BlockedStatus, MaintenanceStatus
 
 from oci_image import OCIImageResource, OCIImageResourceError
-
-from pydantic import ValidationError
-from typing import Any, Dict, NoReturn
 
 from pod_spec import make_pod_spec
 
@@ -23,8 +21,6 @@ logger = logging.getLogger(__name__)
 class ConfigurePodEvent(EventBase):
     """Configure Pod event"""
 
-    pass
-
 
 class NssfEvents(CharmEvents):
     """NSSF Events"""
@@ -33,6 +29,8 @@ class NssfEvents(CharmEvents):
 
 
 class NssfCharm(CharmBase):
+    """ NSSF charm events class definition """
+
     state = StoredState()
     on = NssfEvents()
 
@@ -71,7 +69,7 @@ class NssfCharm(CharmBase):
         Args:
            event (EventBase): NRF relation event.
         """
-        if not (event.app in event.relation.data):
+        if event.app not in event.relation.data:
             return
         # data_loc = event.unit if event.unit else event.app
 
@@ -88,6 +86,7 @@ class NssfCharm(CharmBase):
         Args:
             event (EventBase): NRF relation event.
         """
+        logging.info(event)
         self.state.nrf_host = None
         self.on.configure_pod.emit()
 
@@ -118,6 +117,7 @@ class NssfCharm(CharmBase):
             event (EventBase): Hook or Relation event that started the
                                function.
         """
+        logging.info(event)
         missing = self._missing_relations()
         if missing:
             self.unit.status = BlockedStatus(
@@ -146,8 +146,8 @@ class NssfCharm(CharmBase):
                 self.model.config,
                 self.model.app.name,
             )
-        except ValidationError as exc:
-            logger.exception("Config/Relation data validation error")
+        except ValueError as exc:
+            logger.exception("Config data validation error")
             self.unit.status = BlockedStatus(str(exc))
             return
 

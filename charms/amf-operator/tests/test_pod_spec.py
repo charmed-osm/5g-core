@@ -1,4 +1,4 @@
-from pydantic import ValidationError
+""" test script for pod spec.py """
 from typing import NoReturn
 import unittest
 
@@ -10,7 +10,7 @@ class TestPodSpec(unittest.TestCase):
 
     def test_make_pod_ports(self) -> NoReturn:
         """Testing make pod ports."""
-        port = 9999
+        port = 29518
 
         expected_result = [
             {
@@ -19,10 +19,8 @@ class TestPodSpec(unittest.TestCase):
                 "protocol": "TCP",
             }
         ]
-        portdict = {
-            "port": 9999,
-        }
-        pod_ports = pod_spec._make_pod_ports(portdict)
+        # pylint:disable=W0212
+        pod_ports = pod_spec._make_pod_ports()
 
         self.assertListEqual(expected_result, pod_ports)
 
@@ -33,9 +31,8 @@ class TestPodSpec(unittest.TestCase):
             "ALLOW_ANONYMOUS_LOGIN": "yes",
             "GIN_MODE": "release",
         }
-        mode = {
-            "gin_mode": "release"
-        }
+        mode = {"gin_mode": "release"}
+        # pylint:disable=W0212
         pod_envconfig = pod_spec._make_pod_envconfig(mode)
         self.assertDictEqual(expected_result, pod_envconfig)
 
@@ -43,42 +40,42 @@ class TestPodSpec(unittest.TestCase):
         """Teting make pod command."""
 
         expected_result = ["./amf", "-amfcfg", "../config/amfcfg.conf", "&"]
+        # pylint:disable=W0212
         pod_command = pod_spec._make_pod_command()
         self.assertEqual(expected_result, pod_command)
 
     def test_make_pod_services(self) -> NoReturn:
         """Teting make pod services."""
-        lb_port = "9999"
-        expected_result = [{
-            "name": "amf-lb",
-            "labels": {"juju-app": "amf"},
-            "spec": {
-                "selector": {"juju-app": "amf"},
-                "ports": [
-                    {
-                        "protocol": "SCTP",
-                        "port": lb_port,
-                        "targetPort": lb_port,
-                    }
-                ],
-                "type": "LoadBalancer",
-            },
-        }]
-        lbportdict = {"lb_port": "9999"}
-        pod_services = pod_spec._make_pod_services(lbportdict, "amf")
+        sctp_port = 38412
+        expected_result = [
+            {
+                "name": "amf-lb",
+                "labels": {"juju-app": "amf"},
+                "spec": {
+                    "selector": {"juju-app": "amf"},
+                    "ports": [
+                        {
+                            "protocol": "SCTP",
+                            "port": sctp_port,
+                            "targetPort": sctp_port,
+                        }
+                    ],
+                    "type": "LoadBalancer",
+                },
+            }
+        ]
+        # pylint:disable=W0212
+        pod_services = pod_spec._make_pod_services("amf")
         self.assertEqual(expected_result, pod_services)
 
     def test_make_pod_spec(self) -> NoReturn:
         """Teting make pod spec"""
-        image_info = {"upstream-source": "10.45.5.100:4200/canonical/amf:dev2.0"}
+        image_info = {"upstream-source": "localhost:32000/free5gc-amf:1.0"}
         config = {
-            "port": 9999,
-            "lb_port": 7777,
-            "gin_mode": "release",
-
+            "gin_mode": "12345",
         }
         app_name = "amf"
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValueError):
             pod_spec.make_pod_spec(image_info, config, app_name)
 
 

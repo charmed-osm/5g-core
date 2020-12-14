@@ -1,49 +1,35 @@
 #!/usr/bin/env python3
 # Copyright 2020 Tata Elxsi
 # See LICENSE file for licensing details.
+""" Pod spec for UPF charm """
 
 import logging
-from pydantic import BaseModel, validator
 from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
 
-
-class ConfigData(BaseModel):
-    """Configuration data model."""
-
-    port: int = 2152
-
-    @validator("port")
-    def validate_gtp_port(cls, value: int) -> Any:
-        if value == 2152:
-            return value
-        raise ValueError("Invalid port number")
-
-    port_tcp: int = 80
-
-    @validator("port_tcp")
-    def validate_tcp_port(cls, value: int) -> Any:
-        if value == 80:
-            return value
-        raise ValueError("Invalid port number")
+TCP_PORT = 80
 
 
-def _make_pod_ports(config: ConfigData) -> List[Dict[str, Any]]:
+def _make_pod_ports(config: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Generate pod ports details.
     Args:
         port (int): port to expose.
     Returns:
         List[Dict[str, Any]]: pod port details.
     """
-    return [{"name": "upf1", "containerPort": config["port"], "protocol": "UDP"}]
+    if config["gtp_port"] == 2152:
+        return [
+            {"name": "upf1", "containerPort": config["gtp_port"], "protocol": "UDP"}
+        ]
+    raise ValueError("Invlaid gtp port number")
 
 
 def _make_pod_command() -> List[str]:
     return ["./free5gc-upfd", "-f", "../config/upfcfg.yaml", "&"]
 
 
-def _make_pod_services(config: ConfigData, app_name: str):
+def _make_pod_services(app_name: str):
     """Generate pod service details.
     Args:
         port (int): port to expose.
@@ -59,8 +45,8 @@ def _make_pod_services(config: ConfigData, app_name: str):
                 "ports": [
                     {
                         "protocol": "TCP",
-                        "port": config["port_tcp"],
-                        "targetPort": config["port_tcp"],
+                        "port": TCP_PORT,
+                        "targetPort": TCP_PORT,
                     }
                 ],
                 "type": "ClusterIP",
@@ -69,7 +55,7 @@ def _make_pod_services(config: ConfigData, app_name: str):
     ]
 
 
-def _make_pod_customResourceDefinitions():
+def _make_pod_custom_resource_definitions():
     return [
         {
             "name": "network-attachment-definitions.k8s.cni.cncf.io",
@@ -87,26 +73,27 @@ def _make_pod_customResourceDefinitions():
     ]
 
 
-def _make_pod_customResources():
+def _make_pod_custom_resources():
     """Generate Network attachment definitions.
     Args:
         config (Dict[str, Any]): configuration information.
     Returns:
         Dict[str, Any]: pod network attachment definitions.
     """
-    customResources = {
+    custom_resources = {
         "network-attachment-definitions.k8s.cni.cncf.io": [
             {
                 "apiVersion": "k8s.cni.cncf.io/v1",
                 "kind": "NetworkAttachmentDefinition",
                 "metadata": {"name": "n6-network"},
                 "spec": {
+                    # pylint:disable=line-too-long
                     "config": '{\n"cniVersion": "0.3.1",\n"name": "n6-network",\n"type": "macvlan",\n"master": "ens3",\n"mode": "bridge",\n"ipam": {\n"type": "host-local",\n"subnet": "192.168.0.0/16",\n"rangeStart": "192.168.1.100",\n"rangeEnd": "192.168.1.250",\n"gateway": "192.168.1.1"\n}\n}'  # noqa
                 },
             }
         ]
     }
-    return customResources
+    return custom_resources
 
 
 def _make_pod_podannotations() -> Dict[str, Any]:
@@ -134,7 +121,7 @@ def _make_pod_privilege() -> Dict[str, Any]:
 
 def make_pod_spec(
     image_info: Dict[str, str],
-    config: Dict[str, Any],
+    config: Dict[str, str],
     app_name: str,
 ) -> Dict[str, Any]:
     """Generate the pod spec information.
@@ -151,14 +138,12 @@ def make_pod_spec(
     if not image_info:
         return None
 
-    ConfigData(**(config))
-
     ports = _make_pod_ports(config)
     command = _make_pod_command()
-    services = _make_pod_services(config, app_name)
+    services = _make_pod_services(app_name)
     kubernetes = _make_pod_privilege()
-    customResourceDefinitions = _make_pod_customResourceDefinitions()
-    customResources = _make_pod_customResources()
+    custom_resource_definitions = _make_pod_custom_resource_definitions()
+    custom_resources = _make_pod_custom_resources()
     podannotations = _make_pod_podannotations()
     return {
         "version": 3,
@@ -174,8 +159,8 @@ def make_pod_spec(
         ],
         "kubernetesResources": {
             "services": services,
-            "customResourceDefinitions": customResourceDefinitions,
-            "customResources": customResources,
+            "customResourceDefinitions": custom_resource_definitions,
+            "customResources": custom_resources,
             "pod": podannotations,
         },
     }

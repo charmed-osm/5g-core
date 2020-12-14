@@ -1,7 +1,9 @@
 # Copyright 2020 canonical@tataelxsi.onmicrosoft.com
 # See LICENSE file for licensing details.
+""" NRF test script for charm.py """
 
 import unittest
+
 # from unittest.mock import Mock
 from typing import NoReturn
 from ops.model import BlockedStatus
@@ -10,6 +12,8 @@ from charm import NrfCharm
 
 
 class TestCharm(unittest.TestCase):
+    """ Test script for checking relations """
+
     def setUp(self) -> NoReturn:
         """Test setup"""
         self.harness = Harness(NrfCharm)
@@ -39,14 +43,16 @@ class TestCharm(unittest.TestCase):
                     "name": "nrf",
                     "imageDetails": self.harness.charm.image.fetch(),
                     "imagePullPolicy": "Always",
-                    "ports": [{
-                        "name": "nrf",
-                        "containerPort": 29510,
-                        "protocol": "TCP",
-                    }],
+                    "ports": [
+                        {
+                            "name": "nrf",
+                            "containerPort": 29510,
+                            "protocol": "TCP",
+                        }
+                    ],
                     "envConfig": {
                         "ALLOW_ANONYMOUS_LOGIN": "yes",
-                        "DB_URI": "mongodb://db/free5gc",
+                        "MONGODB_URI": "mongodb://mongodb/free5gc",
                         "GIN_MODE": "release",
                     },
                     "command": ["./nrf", "-nrfcfg", "../config/nrfcfg.conf", "&"],
@@ -55,17 +61,19 @@ class TestCharm(unittest.TestCase):
         }
         self.harness.charm.on.start.emit()
         # Check if nrf is initialized
-        self.assertIsNone(self.harness.charm.state.db_host)
+        self.assertIsNone(self.harness.charm.state.mongodb_host)
 
         # Initializing the nrf relation
-        nrf_relation_id = self.harness.add_relation("db", "db")
-        self.harness.add_relation_unit(nrf_relation_id, "db/0")
+        nrf_relation_id = self.harness.add_relation("mongodb", "mongodb")
+        self.harness.add_relation_unit(nrf_relation_id, "mongodb/0")
         self.harness.update_relation_data(
-            nrf_relation_id, "db", {"hostname": "db"}
+            # pylint:disable=line-too-long
+            nrf_relation_id, "mongodb", {"hostname": "mongodb", "mongodb_uri": "mongodb://mongodb/free5gc"} # noqa
         )
 
         # Checking if nrf data is stored
-        self.assertEqual(self.harness.charm.state.db_host, "db")
+        self.assertEqual(self.harness.charm.state.mongodb_host, "mongodb")
+        self.assertEqual(self.harness.charm.state.mongodb_uri, "mongodb://mongodb/free5gc")
 
         # Verifying status
         self.assertNotIsInstance(self.harness.charm.unit.status, BlockedStatus)
@@ -74,18 +82,20 @@ class TestCharm(unittest.TestCase):
         self.assertDictEqual(expected_result, pod_spec)
 
     def test_on_db_app_relation_changed(self) -> NoReturn:
-        """Test to see if kafka relation is updated."""
+        """Test to see if mongodb relation is updated."""
         self.harness.charm.on.start.emit()
 
-        self.assertIsNone(self.harness.charm.state.db_host)
+        self.assertIsNone(self.harness.charm.state.mongodb_host)
 
-        relation_id = self.harness.add_relation("db", "db")
-        self.harness.add_relation_unit(relation_id, "db/0")
+        relation_id = self.harness.add_relation("mongodb", "mongodb")
+        self.harness.add_relation_unit(relation_id, "mongodb/0")
         self.harness.update_relation_data(
-            relation_id, "db", {"hostname": "db"}
+            # pylint:disable=line-too-long
+            relation_id, "mongodb", {"hostname": "mongodb", "mongodb_uri": "mongodb://mongodb/free5gc"} # noqa
         )
 
-        self.assertEqual(self.harness.charm.state.db_host, "db")
+        self.assertEqual(self.harness.charm.state.mongodb_host, "mongodb")
+        self.assertEqual(self.harness.charm.state.mongodb_uri, "mongodb://mongodb/free5gc")
 
         # Verifying status
         self.assertNotIsInstance(self.harness.charm.unit.status, BlockedStatus)
@@ -101,9 +111,10 @@ class TestCharm(unittest.TestCase):
         expected_result = {
             "hostname": "nrf",
         }
-        self.harness.charm.on.start.emit()
+
         relation_id = self.harness.add_relation("nrf", "amf")
         self.harness.add_relation_unit(relation_id, "amf/0")
+        self.harness.charm.on.publish_nrf_info.emit()
         relation_data = self.harness.get_relation_data(relation_id, "nrf")
         self.assertDictEqual(expected_result, relation_data)
 

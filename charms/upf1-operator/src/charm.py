@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 # Copyright 2020 Tata Elxsi <canonical@tataelxsi.onmicrosoft.com>
 # See LICENSE file for licensing details.
+""" Defining upf charm events """
 
 import logging
-
+from typing import NoReturn
 from ops.charm import CharmBase, CharmEvents
 from ops.main import main
 from ops.framework import StoredState, EventBase, EventSource
 from ops.model import ActiveStatus, BlockedStatus, MaintenanceStatus
 
 from oci_image import OCIImageResource, OCIImageResourceError
-
-from pydantic import ValidationError
-from typing import NoReturn
 
 from pod_spec import make_pod_spec
 
@@ -23,8 +21,6 @@ logger = logging.getLogger(__name__)
 class ConfigurePodEvent(EventBase):
     """Configure Pod event"""
 
-    pass
-
 
 class Upf1Events(CharmEvents):
     """UPF1 Events"""
@@ -33,6 +29,8 @@ class Upf1Events(CharmEvents):
 
 
 class Upf1Charm(CharmBase):
+    """ UPF charm events class definition """
+
     state = StoredState()
     on = Upf1Events()
 
@@ -80,6 +78,7 @@ class Upf1Charm(CharmBase):
             event (EventBase): Hook or Relation event that started the
                                function.
         """
+        logging.info(event)
         if not self.unit.is_leader():
             self.unit.status = ActiveStatus("ready")
             return
@@ -93,15 +92,14 @@ class Upf1Charm(CharmBase):
         except OCIImageResourceError:
             self.unit.status = BlockedStatus("Error fetching image information")
             return
-
         try:
             pod_spec = make_pod_spec(
                 image_info,
                 self.model.config,
                 self.model.app.name,
             )
-        except ValidationError as exc:
-            logger.exception("Config/Relation data validation error")
+        except ValueError as exc:
+            logger.exception("Config data validation error")
             self.unit.status = BlockedStatus(str(exc))
             return
 

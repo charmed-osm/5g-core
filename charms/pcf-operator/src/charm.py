@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 # Copyright 2020 Tata Elxsi canonical@tataelxsi.onmicrosoft.com
 # See LICENSE file for licensing details.
+""" Defining pcf charm events """
 
 import logging
-
+from typing import NoReturn, Any, Dict
 from ops.charm import CharmBase, CharmEvents
 from ops.main import main
 from ops.framework import StoredState, EventBase, EventSource
 from ops.model import ActiveStatus, BlockedStatus, MaintenanceStatus
 
 from oci_image import OCIImageResource, OCIImageResourceError
-
-from pydantic import ValidationError
-from typing import NoReturn
 
 from pod_spec import make_pod_spec
 
@@ -21,11 +19,11 @@ logger = logging.getLogger(__name__)
 
 class ConfigurePodEvent(EventBase):
     """Configure Pod event"""
-    pass
 
 
 class PcfEvents(CharmEvents):
     """PCF Events"""
+
     configure_pod = EventSource(ConfigurePodEvent)
 
 
@@ -33,6 +31,8 @@ logger = logging.getLogger(__name__)
 
 
 class PcfCharm(CharmBase):
+    """ PCF charm events class definition """
+
     state = StoredState()
     on = PcfEvents()
 
@@ -51,13 +51,106 @@ class PcfCharm(CharmBase):
         self.framework.observe(self.on.configure_pod, self.configure_pod)
 
         # Registering required relation changed events
-        # self.framework.observe(self.on.amf_relation_changed, self._on_amf_relation_changed)
+        self.framework.observe(
+            self.on.amf_relation_changed, self._on_amf_relation_changed
+        )
 
         # Registering required relation departed events
-        # self.framework.observe(self.on.amf_relation_departed, self._on_amf_relation_departed)
+        self.framework.observe(
+            self.on.amf_relation_departed, self._on_amf_relation_departed
+        )
+
+        # Registering required relation changed events
+        self.framework.observe(
+            self.on.nrf_relation_changed, self._on_nrf_relation_changed
+        )
+
+        # Registering required relation departed events
+        self.framework.observe(
+            self.on.nrf_relation_departed, self._on_nrf_relation_departed
+        )
 
         # -- initialize states --
-        # self.state.set_default(amf_host=None)
+        self.state.set_default(amf_host=None)
+        self.state.set_default(nrf_host=None)
+
+    def _on_amf_relation_changed(self, event: EventBase) -> NoReturn:
+        """Reads information about the AMF relation.
+
+        Args:
+           event (EventBase): AMF relation event.
+        """
+        if event.app not in event.relation.data:
+            return
+        # data_loc = event.unit if event.unit else event.app
+
+        amf_host = event.relation.data[event.app].get("hostname")
+        logging.info("PCF Requires From AMF")
+        logging.info(amf_host)
+        if amf_host and self.state.amf_host != amf_host:
+            self.state.amf_host = amf_host
+            self.on.configure_pod.emit()
+
+    def _on_amf_relation_departed(self, event: EventBase) -> NoReturn:
+        """Clears data from AMF relation.
+
+        Args:
+            event (EventBase): AMF relation event.
+        """
+        logging.info(event)
+        self.state.amf_host = None
+        self.on.configure_pod.emit()
+
+    def _on_nrf_relation_changed(self, event: EventBase) -> NoReturn:
+        """Reads information about the NRF relation.
+
+        Args:
+           event (EventBase): NRF relation event.
+        """
+        if event.app not in event.relation.data:
+            return
+        # data_loc = event.unit if event.unit else event.app
+
+        nrf_host = event.relation.data[event.app].get("hostname")
+        logging.info("PCF Requires From NRF")
+        logging.info(nrf_host)
+        if nrf_host and self.state.nrf_host != nrf_host:
+            self.state.nrf_host = nrf_host
+            self.on.configure_pod.emit()
+
+    def _on_nrf_relation_departed(self, event: EventBase) -> NoReturn:
+        """Clears data from NRF relation.
+
+        Args:
+            event (EventBase): NRF relation event.
+        """
+        logging.info(event)
+        self.state.nrf_host = None
+        self.on.configure_pod.emit()
+
+    def _missing_relations(self) -> str:
+        """Checks if there missing relations.
+
+        Returns:
+            str: string with missing relations
+        """
+        data_status = {"nrf": self.state.nrf_host, "amf": self.state.amf_host}
+        missing_relations = [k for k, v in data_status.items() if not v]
+        return ", ".join(missing_relations)
+
+    @property
+    def relation_state(self) -> Dict[str, Any]:
+        """Collects relation state configuration for pod spec assembly.
+
+        Returns:
+            Dict[str, Any]: relation state information.
+        """
+        relation_state = {
+            "nrf_host": self.state.nrf_host,
+            "amf_host": self.state.amf_host,
+        }
+
+        return relation_state
 
     def configure_pod(self, event: EventBase) -> NoReturn:
         """Assemble the pod spec and apply it, if possible.
@@ -65,6 +158,14 @@ class PcfCharm(CharmBase):
             event (EventBase): Hook or Relation event that started the
                                function.
         """
+        logging.info(event)
+        missing = self._missing_relations()
+        if missing:
+            status = "Waiting for {0} relation{1}"
+            self.unit.status = BlockedStatus(
+                status.format(missing, "s" if "," in missing else "")
+            )
+            return
         if not self.unit.is_leader():
             self.unit.status = ActiveStatus("ready")
             return
@@ -85,8 +186,8 @@ class PcfCharm(CharmBase):
                 self.model.config,
                 self.model.app.name,
             )
-        except ValidationError as exc:
-            logger.exception("Config/Relation data validation error")
+        except ValueError as exc:
+            logger.exception("Config data validation error")
             self.unit.status = BlockedStatus(str(exc))
             return
 

@@ -1,5 +1,6 @@
 # Copyright 2020 Tata Elxsi canonical@tataelxsi.onmicrosoft.com
 # See LICENSE file for licensing details.
+---
 name: nssf
 description: Charm for NSSF
 summary: Charm for NSSF
@@ -11,10 +12,10 @@ deployment:
     type: stateful
     service: cluster
 resources:
-  image:
-    type: oci-image
-    description: docker image for NSSF
+    image:
+        type: oci-image
+        description: docker image for NSSF
 
 requires:
-  nrf:
-     interface: nrf
+    nrf:
+        interface: nrf

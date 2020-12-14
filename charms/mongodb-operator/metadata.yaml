@@ -1,0 +1,22 @@
+# Copyright 2020 Tata Elxsi canonical@tataelxsi.onmicrosoft.com
+# See LICENSE file for licensing details.
+---
+name: mongodb
+description: Charm for MongoDb
+summary: Charm for MongoDb
+tags:
+    - 5gcore
+series:
+    - kubernetes
+deployment:
+    type: stateful
+    service: loadbalancer
+
+resources:
+    image:
+        type: oci-image
+        description: docker image for MongoDB
+
+provides:
+    mongodb:
+        interface: mongodb

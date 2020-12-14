@@ -1,40 +1,37 @@
 #!/usr/bin/env python3
 # Copyright 2020 Tata Elxsi
 # See LICENSE file for licensing details.
+""" Pod spec for SMF charm """
 
 import logging
-from pydantic import BaseModel, validator, constr
 from typing import Any, Dict, List
+from IPy import IP
 
 logger = logging.getLogger(__name__)
 
 
-class ConfigData(BaseModel):
-    """Configuration data model."""
-
-    port: int = 29502
-
-    @validator("port")
-    def validate_port(cls, value: int) -> Any:
-        if value == 29502:
-            return value
-        raise ValueError("Invalid port number")
-
-    gin_mode: constr(regex=r"^(release|debug)$")  # noqa
+SMF_PORT = 29502
 
 
-def _make_pod_ports(config: ConfigData) -> List[Dict[str, Any]]:
+def _make_pod_ports() -> List[Dict[str, Any]]:
     """Generate pod ports details.
     Args:
         port (int): port to expose.
     Returns:
         List[Dict[str, Any]]: pod port details.
     """
-    return [{"name": "smf", "containerPort": config["port"], "protocol": "TCP"}]
+    return [{"name": "smf", "containerPort": SMF_PORT, "protocol": "TCP"}]
+
+
+def _check_data(config: Dict[str, Any], relation_state: Dict[str, Any]) -> bool:
+    logging.info(relation_state)
+    if config["gin_mode"] != "release" and config["gin_mode"] != "debug":
+        raise ValueError("Invalid gin_mode")
+    return True
 
 
 def _make_pod_envconfig(
-    config: ConfigData, relation_state: Dict[str, Any]
+    config: Dict[str, Any], relation_state: Dict[str, Any]
 ) -> Dict[str, Any]:
     """Generate pod environment configuration.
     Args:
@@ -43,13 +40,14 @@ def _make_pod_envconfig(
     Returns:
         Dict[str, Any]: pod environment configuration.
     """
-    envconfig = {
-        # General configuration
-        "ALLOW_ANONYMOUS_LOGIN": "yes",
-        "GIN_MODE": config["gin_mode"],
-        "IPADDR1": relation_state["upf_host"],
-    }
-
+    if _check_data(config, relation_state):
+        if IP(relation_state["upf_host"]):
+            envconfig = {
+                # General configuration
+                "ALLOW_ANONYMOUS_LOGIN": "yes",
+                "GIN_MODE": config["gin_mode"],
+                "IPADDR1": relation_state["upf_host"],
+            }
     return envconfig
 
 
@@ -77,9 +75,7 @@ def make_pod_spec(
     if not image_info:
         return None
 
-    ConfigData(**(config))
-
-    ports = _make_pod_ports(config)
+    ports = _make_pod_ports()
     env_config = _make_pod_envconfig(config, relation_state)
     command = _make_pod_command()
     return {

@@ -1,47 +1,27 @@
 #!/usr/bin/env python3
 # Copyright 2020 Tata Elxsi canonical@tataelxsi.onmicrosoft.com
 # See LICENSE file for licensing details.
-
+""" Pod spec for AMF charm """
 import logging
-from pydantic import BaseModel, constr, validator
 from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
 
-
-class ConfigData(BaseModel):
-    """Configuration data model."""
-
-    port: int = 29518
-
-    @validator("port")
-    def validate_port(cls, value: int) -> Any:
-        if value == 29518:
-            return value
-        raise ValueError("Invalid port number")
-
-    lb_port: int = 38412
-
-    @validator("lb_port")
-    def validate_lb_port(cls, value: int) -> Any:
-        if value == 38412:
-            return value
-        raise ValueError("Invalid port number")
-
-    gin_mode: constr(regex=r"^(release|debug)$")  # noqa
+AMF_PORT = 29518
+SCTP_PORT = 38412
 
 
-def _make_pod_ports(config: ConfigData) -> List[Dict[str, Any]]:
+def _make_pod_ports() -> List[Dict[str, Any]]:
     """Generate pod ports details.
     Args:
         port (int): port to expose.
     Returns:
         List[Dict[str, Any]]: pod port details.
     """
-    return [{"name": "amf", "containerPort": config["port"], "protocol": "TCP"}]
+    return [{"name": "amf", "containerPort": AMF_PORT, "protocol": "TCP"}]
 
 
-def _make_pod_envconfig(config: ConfigData) -> Dict[str, Any]:
+def _make_pod_envconfig(config: Dict[str, Any]) -> Dict[str, Any]:
     """Generate pod environment configuration.
     Args:
         config (Dict[str, Any]): configuration information.
@@ -49,11 +29,14 @@ def _make_pod_envconfig(config: ConfigData) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: pod environment configuration.
     """
-    envconfig = {
-        # General configuration
-        "ALLOW_ANONYMOUS_LOGIN": "yes",
-        "GIN_MODE": config["gin_mode"],
-    }
+    if config["gin_mode"] == "release" or config["gin_mode"] == "debug":
+        envconfig = {
+            # General configuration
+            "ALLOW_ANONYMOUS_LOGIN": "yes",
+            "GIN_MODE": config["gin_mode"],
+        }
+    else:
+        raise ValueError("Invalid gin_mode")
 
     return envconfig
 
@@ -62,7 +45,7 @@ def _make_pod_command() -> List[str]:
     return ["./amf", "-amfcfg", "../config/amfcfg.conf", "&"]
 
 
-def _make_pod_services(config: ConfigData, app_name: str):
+def _make_pod_services(app_name: str):
     return [
         {
             "name": "amf-lb",
@@ -72,8 +55,8 @@ def _make_pod_services(config: ConfigData, app_name: str):
                 "ports": [
                     {
                         "protocol": "SCTP",
-                        "port": config["lb_port"],
-                        "targetPort": config["lb_port"],
+                        "port": SCTP_PORT,
+                        "targetPort": SCTP_PORT,
                     }
                 ],
                 "type": "LoadBalancer",
@@ -101,12 +84,10 @@ def make_pod_spec(
     if not image_info:
         return None
 
-    ConfigData(**(config))
-
-    ports = _make_pod_ports(config)
+    ports = _make_pod_ports()
     env_config = _make_pod_envconfig(config)
     command = _make_pod_command()
-    services = _make_pod_services(config, app_name)
+    services = _make_pod_services(app_name)
 
     return {
         "version": 3,

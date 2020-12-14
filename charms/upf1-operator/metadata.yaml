@@ -1,5 +1,6 @@
 # Copyright 2020 Tata Elxsi <canonical@tataelxsi.onmicrosoft.com>
 # See LICENSE file for licensing details.
+---
 name: upf1
 description: Charm for UPF1
 summary: Charm for UPF1
@@ -11,12 +12,10 @@ deployment:
     type: stateful
     service: loadbalancer
 resources:
-  image:
-    type: oci-image
-    description: docker image for UPF1
+    image:
+        type: oci-image
+        description: docker image for UPF1
 
 provides:
     upf:
         interface: upf
-
-

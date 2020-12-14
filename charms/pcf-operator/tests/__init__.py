@@ -1,3 +1,4 @@
+"""Pod spec unit tests."""
 import sys
 from unittest.mock import MagicMock
 

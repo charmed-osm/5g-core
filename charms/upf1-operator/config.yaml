@@ -3,14 +3,10 @@
 #
 # This is only an example, and you should edit to suit your needs.
 # If you don't need config, you can remove the file entirely.
+---
 options:
-  port:
-    type: int
-    default: 2152
-    description: Port
-  port_tcp:
-    type: int
-    default: 80
-    description: Port
-
-
+    gtp_port:
+        type: int
+        description: 'gtp_port is used for
+                       communication between smf and upf'
+        default: 2152

@@ -1,5 +1,6 @@
 # Copyright 2020 Tata Elxsi <canonical@tataelxsi.onmicrosoft.com>
 # See LICENSE file for licensing details.
+---
 name: natapp
 description: Charm for Nat Application
 summary: Charm for Nat Application
@@ -11,12 +12,10 @@ deployment:
     type: stateful
     service: cluster
 resources:
-  image:
-    type: oci-image
-    description: docker image for NATAPP
+    image:
+        type: oci-image
+        description: docker image for NATAPP
 
 requires:
     upf:
         interface: upf
-
-

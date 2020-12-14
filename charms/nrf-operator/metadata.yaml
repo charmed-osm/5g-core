@@ -1,27 +1,26 @@
 # Copyright 2020 Tata elxsi canonical@tataelxsi.onmicrosoft.com
 # See LICENSE file for licensing details.
+---
 name: nrf
-description:  Charm for NRF
-summary:  Charm for NRF
+description: Charm for NRF
+summary: Charm for NRF
 tags:
     - 5gcore
 series:
-   - kubernetes
+    - kubernetes
 deployment:
     type: stateful
     service: cluster
 
 resources:
-  image:
-    type: oci-image
-    description: docker image for NRF
+    image:
+        type: oci-image
+        description: docker image for NRF
 
 requires:
-    db:
-        interface: db
+    mongodb:
+        interface: mongodb
 
 provides:
     nrf:
         interface: nrf
-
-

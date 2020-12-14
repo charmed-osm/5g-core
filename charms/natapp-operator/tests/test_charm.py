@@ -1,5 +1,6 @@
 # Copyright 2020 Ubuntu
 # See LICENSE file for licensing details.
+""" NatApp test script for charm.py """
 
 import unittest
 from typing import NoReturn
@@ -8,10 +9,12 @@ from ops.testing import Harness
 from ops.model import BlockedStatus
 
 from charm import NatappCharm
+
 # from ops.model import BlockedStatus
 
 
 class TestCharm(unittest.TestCase):
+    """ Test script for checking relations """
 
     def setUp(self) -> NoReturn:
         """Test setup"""
@@ -28,15 +31,16 @@ class TestCharm(unittest.TestCase):
 
         # Verifying status message
         self.assertGreater(len(self.harness.charm.unit.status.message), 0)
-        self.assertTrue(self.harness.charm.unit.status.message.startswith("Waiting for"))
+        self.assertTrue(
+            self.harness.charm.unit.status.message.startswith("Waiting for")
+        )
 
     def test_on_start_with_relations(self) -> NoReturn:
         """Test installation with any relation."""
         self.harness.charm.on.start.emit()
-        networks = '[\n{\n"name" : "n6-network",\n"interface": "eth1",\n"ips": ["192.168.1.216"]\n}]' # noqa
-        annot = {
-            "annotations": {"k8s.v1.cni.cncf.io/networks": networks}
-        }
+        # pylint:disable=line-too-long
+        networks = '[\n{\n"name" : "n6-network",\n"interface": "eth1",\n"ips": ["192.168.1.216"]\n}]'  # noqa
+        annot = {"annotations": {"k8s.v1.cni.cncf.io/networks": networks}}
         expected_result = {
             "version": 3,
             "containers": [
@@ -44,18 +48,18 @@ class TestCharm(unittest.TestCase):
                     "name": "natapp",
                     "imageDetails": self.harness.charm.image.fetch(),
                     "imagePullPolicy": "Always",
-                    "ports": [{
-                        "name": "natapp",
-                        "containerPort": 2601,
-                        "protocol": "UDP",
-                    }],
-                    "command": ["./nat", "eth1", "eth0", "169.254.1.1"],
-                    "kubernetes": {"securityContext": {"privileged": True}}
+                    "ports": [
+                        {
+                            "name": "natapp",
+                            "containerPort": 2601,
+                            "protocol": "UDP",
+                        }
+                    ],
+                    "command": ["./start.sh", "&"],
+                    "kubernetes": {"securityContext": {"privileged": True}},
                 }
             ],
-            "kubernetesResources": {
-                "pod": annot
-            },
+            "kubernetesResources": {"pod": annot},
         }
         # Check if nrf is initialized
         self.assertIsNone(self.harness.charm.state.upf_host)
@@ -99,5 +103,5 @@ class TestCharm(unittest.TestCase):
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

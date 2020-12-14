@@ -6,7 +6,7 @@ Kubernetes charm to deploy UDR core component
 
 ## Usage
 
-UDR requires port ,gin mode and db uri to be configured
+UDR requires port ,gin mode  to be configured
 
 
 ## Developing

@@ -1,15 +1,19 @@
 # Copyright 2020 Tata Elxsi canonical@tataelxsi.onmicrosoft.com
 # See LICENSE file for licensing details.
+""" UPF test script for charm.py """
 
 import unittest
+
 # from unittest.mock import Mock
 from typing import NoReturn
+
 # from ops.model import BlockedStatus
 from ops.testing import Harness
 from charm import Upf1Charm
 
 
 class TestCharm(unittest.TestCase):
+    """ Test script for checking relations """
 
     def setUp(self) -> NoReturn:
         """Test setup"""

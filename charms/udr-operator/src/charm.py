@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 # Copyright 2020 Tata Elxsi canonical@tataelxsi.onmicrosoft.com
 # See LICENSE file for licensing details.
+""" Defining udr charm events """
 
 import logging
-
+from typing import Any, Dict, NoReturn
 from ops.charm import CharmBase, CharmEvents
 from ops.main import main
 from ops.framework import StoredState, EventBase, EventSource
 from ops.model import ActiveStatus, BlockedStatus, MaintenanceStatus
 
 from oci_image import OCIImageResource, OCIImageResourceError
-
-from pydantic import ValidationError
-from typing import Any, Dict, NoReturn
 
 from pod_spec import make_pod_spec
 
@@ -22,15 +20,16 @@ logger = logging.getLogger(__name__)
 
 class ConfigurePodEvent(EventBase):
     """Configure Pod event"""
-    pass
 
 
 class UdrEvents(CharmEvents):
     """UDR Events"""
+
     configure_pod = EventSource(ConfigurePodEvent)
 
 
 class UdrCharm(CharmBase):
+    """ UDR charm events class definition """
     state = StoredState()
     on = UdrEvents()
 
@@ -51,54 +50,73 @@ class UdrCharm(CharmBase):
         self.framework.observe(self.on.configure_pod, self.configure_pod)
 
         # Registering required relation changed events
-        self.framework.observe(self.on.db_relation_changed, self._on_db_relation_changed)
+        self.framework.observe(
+            self.on.mongodb_relation_changed, self._on_mongodb_relation_changed
+        )
 
         # Registering required relation departed events
-        self.framework.observe(self.on.db_relation_departed, self._on_db_relation_departed)
+        self.framework.observe(
+            self.on.mongodb_relation_departed, self._on_mongodb_relation_departed
+        )
 
         # Registering required relation changed events
-        self.framework.observe(self.on.nrf_relation_changed, self._on_nrf_relation_changed)
+        self.framework.observe(
+            self.on.nrf_relation_changed, self._on_nrf_relation_changed
+        )
 
         # Registering required relation departed events
-        self.framework.observe(self.on.nrf_relation_departed, self._on_nrf_relation_departed)
+        self.framework.observe(
+            self.on.nrf_relation_departed, self._on_nrf_relation_departed
+        )
 
         # -- initialize states --
-        self.state.set_default(db_host=None)
+        self.state.set_default(mongodb_host=None)
         self.state.set_default(nrf_host=None)
+        self.state.set_default(mongodb_uri=None)
 
-    def _on_db_relation_changed(self, event: EventBase) -> NoReturn:
-        """Reads information about the DB relation.
+    def _on_mongodb_relation_changed(self, event: EventBase) -> NoReturn:
+        """Reads information about the MongoDB relation.
 
-          Args:
-             event (EventBase): DB relation event.
+        Args:
+           event (EventBase): MongoDB relation event.
         """
-        if not (event.app in event.relation.data):
+        if event.app not in event.relation.data:
             return
         # data_loc = event.unit if event.unit else event.app
 
-        db_host = event.relation.data[event.app].get("hostname")
-        logging.info("UDM Requires DB")
-        logging.info(db_host)
-        if db_host and self.state.db_host != db_host:
-            self.state.db_host = db_host
+        mongodb_host = event.relation.data[event.app].get("hostname")
+        mongodb_uri = event.relation.data[event.app].get("mongodb_uri")
+        logging.info("UDM Requires MongoDB")
+        logging.info(mongodb_host)
+        logging.info(mongodb_uri)
+        if (
+            mongodb_host  # noqa
+            and mongodb_uri  # noqa
+            # pylint:disable=line-too-long
+            and (self.state.mongodb_host != mongodb_host or self.state.mongodb_uri != mongodb_uri)  # noqa
+        ):
+            self.state.mongodb_host = mongodb_host
+            self.state.mongodb_uri = mongodb_uri
             self.on.configure_pod.emit()
 
-    def _on_db_relation_departed(self, event: EventBase) -> NoReturn:
-        """Clears data from DB relation.
+    def _on_mongodb_relation_departed(self, event: EventBase) -> NoReturn:
+        """Clears data from MongoDB relation.
 
-         Args:
-             event (EventBase): DB relation event.
+        Args:
+            event (EventBase): MongoDB relation event.
         """
-        self.state.db_host = None
+        logging.info(event)
+        self.state.mongodb_host = None
+        self.state.mongodb_uri = None
         self.on.configure_pod.emit()
 
     def _on_nrf_relation_changed(self, event: EventBase) -> NoReturn:
         """Reads information about the NRF relation.
 
-          Args:
-             event (EventBase): NRF relation event.
+        Args:
+           event (EventBase): NRF relation event.
         """
-        if not (event.app in event.relation.data):
+        if event.app not in event.relation.data:
             return
         # data_loc = event.unit if event.unit else event.app
 
@@ -112,19 +130,20 @@ class UdrCharm(CharmBase):
     def _on_nrf_relation_departed(self, event: EventBase) -> NoReturn:
         """Clears data from NRF relation.
 
-         Args:
-             event (EventBase): NRF relation event.
+        Args:
+            event (EventBase): NRF relation event.
         """
+        logging.info(event)
         self.state.nrf_host = None
         self.on.configure_pod.emit()
 
     def _missing_relations(self) -> str:
         """Checks if there missing relations.
 
-          Returns:
-              str: string with missing relations
+        Returns:
+            str: string with missing relations
         """
-        data_status = {"nrf": self.state.nrf_host, "db": self.state.db_host}
+        data_status = {"nrf": self.state.nrf_host, "mongodb": self.state.mongodb_uri}
         missing_relations = [k for k, v in data_status.items() if not v]
         return ", ".join(missing_relations)
 
@@ -135,7 +154,11 @@ class UdrCharm(CharmBase):
         Returns:
             Dict[str, Any]: relation state information.
         """
-        relation_state = {"nrf_host": self.state.nrf_host, "db": self.state.db_host}
+        relation_state = {
+            "nrf_host": self.state.nrf_host,
+            "mongodb_host": self.state.mongodb_host,
+            "mongodb_uri": self.state.mongodb_uri,
+        }  # noqa
 
         return relation_state
 
@@ -145,10 +168,13 @@ class UdrCharm(CharmBase):
             event (EventBase): Hook or Relation event that started the
                                function.
         """
+        logging.info(event)
         missing = self._missing_relations()
         if missing:
             status = "Waiting for {0} relation{1}"
-            self.unit.status = BlockedStatus(status.format(missing, "s" if "," in missing else ""))
+            self.unit.status = BlockedStatus(
+                status.format(missing, "s" if "," in missing else "")
+            )
             return
         if not self.unit.is_leader():
             self.unit.status = ActiveStatus("ready")
@@ -168,9 +194,10 @@ class UdrCharm(CharmBase):
             pod_spec = make_pod_spec(
                 image_info,
                 self.model.config,
+                self.relation_state,
                 self.model.app.name,
             )
-        except ValidationError as exc:
+        except ValueError as exc:
             logger.exception("Config/Relation data validation error")
             self.unit.status = BlockedStatus(str(exc))
             return

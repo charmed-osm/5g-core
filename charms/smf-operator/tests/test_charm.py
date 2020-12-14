@@ -1,7 +1,9 @@
 # Copyright 2020 Tata Elxsi canonical@tataelxsi.onmicrosoft.com
 # See LICENSE file for licensing details.
+""" SMF test script for charm.py """
 
 import unittest
+
 # from unittest.mock import Mock
 from typing import NoReturn
 from ops.model import BlockedStatus
@@ -10,6 +12,8 @@ from charm import SmfCharm
 
 
 class TestCharm(unittest.TestCase):
+    """ Test script for checking pod spec and relations """
+
     def setUp(self) -> NoReturn:
         """Test setup"""
         self.harness = Harness(SmfCharm)
@@ -68,9 +72,7 @@ class TestCharm(unittest.TestCase):
 
         relation_id = self.harness.add_relation("upf", "upf")
         self.harness.add_relation_unit(relation_id, "upf/0")
-        self.harness.update_relation_data(
-            relation_id, "upf/0", {"host": "upf"}
-        )
+        self.harness.update_relation_data(relation_id, "upf/0", {"host": "upf"})
 
         # Verifying status
         self.assertIsInstance(self.harness.charm.unit.status, BlockedStatus)
@@ -89,9 +91,7 @@ class TestCharm(unittest.TestCase):
 
         relation_id = self.harness.add_relation("upf", "upf")
         self.harness.add_relation_unit(relation_id, "upf/0")
-        self.harness.update_relation_data(
-            relation_id, "upf", {"host": "upf"}
-        )
+        self.harness.update_relation_data(relation_id, "upf", {"host": "upf"})
 
         # Verifying status
         self.assertIsInstance(self.harness.charm.unit.status, BlockedStatus)
@@ -110,9 +110,7 @@ class TestCharm(unittest.TestCase):
 
         relation_id = self.harness.add_relation("nrf", "nrf")
         self.harness.add_relation_unit(relation_id, "nrf/0")
-        self.harness.update_relation_data(
-            relation_id, "nrf/0", {"host": "nrf"}
-        )
+        self.harness.update_relation_data(relation_id, "nrf/0", {"host": "nrf"})
 
         # Verifying status
         self.assertIsInstance(self.harness.charm.unit.status, BlockedStatus)
@@ -131,9 +129,7 @@ class TestCharm(unittest.TestCase):
 
         relation_id = self.harness.add_relation("nrf", "nrf")
         self.harness.add_relation_unit(relation_id, "nrf/0")
-        self.harness.update_relation_data(
-            relation_id, "nrf", {"host": "nrf"}
-        )
+        self.harness.update_relation_data(relation_id, "nrf", {"host": "nrf"})
 
         # Verifying status
         self.assertIsInstance(self.harness.charm.unit.status, BlockedStatus)

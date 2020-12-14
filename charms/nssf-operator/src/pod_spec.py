@@ -1,39 +1,28 @@
 #!/usr/bin/env python3
 # Copyright 2020 Tata Elxsi canonical@tataelxsi.onmicrosoft.com
 # See LICENSE file for licensing details.
+""" Pod spec for NSSF charm """
 
 import logging
-from pydantic import BaseModel, constr, validator
 from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
 
 
-class ConfigData(BaseModel):
-    """Configuration data model."""
-
-    port: int = 29531
-
-    @validator("port")
-    def validate_port(cls, value: int) -> Any:
-        if value == 29531:
-            return value
-        raise ValueError("Invalid port number")
-
-    gin_mode: constr(regex=r"^(release)$")  # noqa
+NSSF_PORT = 29531
 
 
-def _make_pod_ports(config: ConfigData) -> List[Dict[str, Any]]:
+def _make_pod_ports() -> List[Dict[str, Any]]:
     """Generate pod ports details.
     Args:
         port (int): port to expose.
     Returns:
         List[Dict[str, Any]]: pod port details.
     """
-    return [{"name": "nssf", "containerPort": config["port"], "protocol": "TCP"}]
+    return [{"name": "nssf", "containerPort": NSSF_PORT, "protocol": "TCP"}]
 
 
-def _make_pod_envconfig(config: ConfigData) -> Dict[str, Any]:
+def _make_pod_envconfig(config: Dict[str, Any]) -> Dict[str, Any]:
     """Generate pod environment configuration.
     Args:
         config (Dict[str, Any]): configuration information.
@@ -41,11 +30,14 @@ def _make_pod_envconfig(config: ConfigData) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: pod environment configuration.
     """
-    envconfig = {
-        # General configuration
-        "ALLOW_ANONYMOUS_LOGIN": "yes",
-        "GIN_MODE": config["gin_mode"],
-    }
+    if config["gin_mode"] == "release" or config["gin_mode"] == "debug":
+        envconfig = {
+            # General configuration
+            "ALLOW_ANONYMOUS_LOGIN": "yes",
+            "GIN_MODE": config["gin_mode"],
+        }
+    else:
+        raise ValueError("Invalid gin_mode")
 
     return envconfig
 
@@ -73,9 +65,7 @@ def make_pod_spec(
     if not image_info:
         return None
 
-    ConfigData(**(config))
-
-    ports = _make_pod_ports(config)
+    ports = _make_pod_ports()
     env_config = _make_pod_envconfig(config)
     command = _make_pod_command()
     return {

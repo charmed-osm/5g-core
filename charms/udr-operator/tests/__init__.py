@@ -1,3 +1,4 @@
+""" init script for unit test """
 import sys
 from unittest.mock import MagicMock
 
