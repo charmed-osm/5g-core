@@ -1,0 +1,112 @@
+# Copyright 2020 Tata Elxsi
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# For those usages not covered by the Apache License, Version 2.0 please
+# contact: canonical@tataelxsi.onmicrosoft.com
+#
+# To get in touch with the maintainers, please contact:
+# canonical@tataelxsi.onmicrosoft.com
+##
+---
+description: 5g Core Bundle
+bundle: kubernetes
+applications:
+  mongodb:
+    charm: '../charms/mongodb-operator/build'
+    scale: 1
+    resources:
+      image: 'localhost:32000/free5gc-mongo:1.0'
+  nrf:
+    charm: '../charms/nrf-operator/build'
+    scale: 1
+    resources:
+      image: 'localhost:32000/free5gc-nrf:1.0'
+  amf:
+    charm: '../charms/amf-operator/build'
+    scale: 1
+    resources:
+      image: 'localhost:32000/free5gc-amf:1.0'
+  ausf:
+    charm: '../charms/ausf-operator/build'
+    scale: 1
+    resources:
+      image: 'localhost:32000/free5gc-ausf:1.0'
+  nssf:
+    charm: '../charms/nssf-operator/build'
+    scale: 1
+    resources:
+      image: 'localhost:32000/free5gc-nssf:1.0'
+  udm:
+    charm: '../charms/udm-operator/build'
+    scale: 1
+    resources:
+      image: 'localhost:32000/free5gc-udm:1.0'
+  udr:
+    charm: '../charms/udr-operator/build'
+    scale: 1
+    resources:
+      image: 'localhost:32000/free5gc-udr:1.0'
+  pcf:
+    charm: '../charms/pcf-operator/build'
+    scale: 1
+    resources:
+      image: 'localhost:32000/free5gc-pcf:1.0'
+  upf1:
+    charm: '../charms/upf1-operator/build'
+    scale: 1
+    resources:
+      image: 'localhost:32000/free5gc-upf-1:1.0'
+  webui:
+    charm: '../charms/webui-operator/build'
+    scale: 1
+    resources:
+      image: 'localhost:32000/free5gc-webui:1.0'
+  smf:
+    charm: '../charms/smf-operator/build'
+    scale: 1
+    resources:
+      image: 'localhost:32000/free5gc-smf:1.0'
+  natapp:
+    charm: '../charms/natapp-operator/build'
+    scale: 1
+    resources:
+      image: 'localhost:32000/free5gc-natapp:1.0'
+
+relations:
+  - - nrf:mongodb
+    - mongodb:mongodb
+  - - amf:nrf
+    - nrf:nrf
+  - - ausf:nrf
+    - nrf:nrf
+  - - nssf:nrf
+    - nrf:nrf
+  - - smf:upf
+    - upf1:upf
+  - - smf:nrf
+    - nrf:nrf
+  - - udm:nrf
+    - nrf:nrf
+  - - udr:mongodb
+    - mongodb:mongodb
+  - - udr:nrf
+    - nrf:nrf
+  - - webui:mongodb
+    - mongodb:mongodb
+  - - natapp:upf
+    - upf1:upf
+  - - pcf:amf
+    - amf:amf
+  - - pcf:nrf
+    - nrf:nrf

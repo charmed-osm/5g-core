@@ -1,5 +1,24 @@
-# Copyright 2020 Ubuntu
-# See LICENSE file for licensing details.
+#!/usr/bin/env python3
+# Copyright 2020 Tata Elxsi
+#
+# Licensed under the Apache License, Version 2.0 (the License); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an AS IS BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# For those usages not covered by the Apache License, Version 2.0 please
+# contact: canonical@tataelxsi.onmicrosoft.com
+#
+# To get in touch with the maintainers, please contact:
+# canonical@tataelxsi.onmicrosoft.com
+##
 """ test script for pod spec.py """
 
 from typing import NoReturn
@@ -89,8 +108,20 @@ class TestPodSpec(unittest.TestCase):
                     "kind": "NetworkAttachmentDefinition",
                     "metadata": {"name": "n6-network"},
                     "spec": {
-                        # pylint:disable=line-too-long
-                        "config": '{\n"cniVersion": "0.3.1",\n"name": "n6-network",\n"type": "macvlan",\n"master": "ens3",\n"mode": "bridge",\n"ipam": {\n"type": "host-local",\n"subnet": "192.168.0.0/16",\n"rangeStart": "192.168.1.100",\n"rangeEnd": "192.168.1.250",\n"gateway": "192.168.1.1"\n}\n}'  # noqa
+                        "config": {
+                            "cniVersion": "0.3.1",
+                            "name": "n6-network",
+                            "type": "macvlan",
+                            "master": "ens3",
+                            "mode": "bridge",
+                            "ipam": {
+                                "type": "host-local",
+                                "subnet": "192.168.0.0/16",
+                                "rangeStart": "192.168.1.100",
+                                "rangeEnd": "192.168.1.250",
+                                "gateway": "192.168.1.1",
+                            },
+                        }  # noqa
                     },
                 }
             ]
@@ -101,8 +132,7 @@ class TestPodSpec(unittest.TestCase):
 
     def test_make_pod_podannotations(self) -> NoReturn:
         """Testing make pod privilege"""
-        # pylint:disable=line-too-long
-        networks = '[\n{\n"name" : "n6-network",\n"interface": "eth1",\n"ips": ["192.168.1.215"]\n}]'  # noqa
+        networks = '[{"name" : "n6-network","interface": "eth1","ips": ["192.168.1.215"]}]'  # noqa
         expected_result = {
             "annotations": {"k8s.v1.cni.cncf.io/networks": networks},
             "securityContext": {"runAsUser": 0000, "runAsGroup": 0000},
@@ -122,7 +152,7 @@ class TestPodSpec(unittest.TestCase):
 
     def test_make_pod_spec(self) -> NoReturn:
         """Testing make pod spec"""
-        image_info = {"upstream-source": "localhost:32000/free5gc-upf-1:1.0"}
+        image_info = {"upstream-source": "localhost:32000/free5gc-upf1:1.0"}
         config = {
             "gtp_port": 9999,
         }

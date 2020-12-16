@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  free5gc-upf-1:
+    container_name: upf1
+    build:
+      context: ./upf
+      args:
+        DEBUG_TOOLS: "false"
+
+  free5gc-mongodb:
+    container_name: mongodb
+    build:
+      context: ./mongodb
+
+  free5gc-nrf:
+    container_name: nrf
+    build:
+      context: ./nrf
+      args:
+        DEBUG_TOOLS: "false"
+
+  free5gc-amf:
+    container_name: amf
+    build:
+      context: ./amf
+      args:
+        DEBUG_TOOLS: "false"
+
+  free5gc-ausf:
+    container_name: ausf
+    build:
+      context: ./ausf
+      args:
+        DEBUG_TOOLS: "false"
+
+  free5gc-nssf:
+    container_name: nssf
+    build:
+      context: ./nssf
+      args:
+        DEBUG_TOOLS: "false"
+
+  free5gc-pcf:
+    container_name: pcf
+    build:
+      context: ./pcf
+      args:
+        DEBUG_TOOLS: "false"
+
+  free5gc-smf:
+    container_name: smf
+    build:
+      context: ./smf
+      args:
+        DEBUG_TOOLS: "false"
+
+  free5gc-udm:
+    container_name: udm
+    build:
+      context: ./udm
+      args:
+        DEBUG_TOOLS: "false"
+
+  free5gc-udr:
+    container_name: udr
+    build:
+      context: ./udr
+      args:
+        DEBUG_TOOLS: "false"
+
+  free5gc-webui:
+    container_name: webui
+    build:
+      context: ./webui
+      args:
+        DEBUG_TOOLS: "false"
+
+  free5gc-natapp:
+    container_name: natapp
+    build:
+      context: ./natapp
+
+volumes:
+  dbdata:
