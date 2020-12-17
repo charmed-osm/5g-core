@@ -54,7 +54,7 @@ def _make_pod_podannotations() -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: pod Annotations.
     """
-    networks = '[{"name" : "n6-network","interface": "eth1","ips": ["192.168.1.216"]}]'
+    networks = '[\n{\n"name" : "n6-network",\n"interface": "eth1",\n"ips": ["192.168.1.216"]\n}]'
     annot = {"annotations": {"k8s.v1.cni.cncf.io/networks": networks}}
 
     return annot

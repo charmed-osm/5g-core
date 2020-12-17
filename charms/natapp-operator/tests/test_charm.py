@@ -57,7 +57,8 @@ class TestCharm(unittest.TestCase):
     def test_on_start_with_relations(self) -> NoReturn:
         """Test installation with any relation."""
         self.harness.charm.on.start.emit()
-        networks = '[{"name" : "n6-network","interface": "eth1","ips": ["192.168.1.216"]}]'  # noqa
+        # pylint:disable=line-too-long
+        networks = '[\n{\n"name" : "n6-network",\n"interface": "eth1",\n"ips": ["192.168.1.216"]\n}]'  # noqa
         annot = {"annotations": {"k8s.v1.cni.cncf.io/networks": networks}}
         expected_result = {
             "version": 3,

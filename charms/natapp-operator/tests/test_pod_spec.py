@@ -50,7 +50,8 @@ class TestPodSpec(unittest.TestCase):
 
     def test_make_pod_podannotations(self) -> NoReturn:
         """Testing make pod envconfig configuration."""
-        networks = '[{"name" : "n6-network","interface": "eth1","ips": ["192.168.1.216"]}]'  # noqa
+        # pylint:disable=line-too-long
+        networks = '[\n{\n"name" : "n6-network",\n"interface": "eth1",\n"ips": ["192.168.1.216"]\n}]'  # noqa
         expected_result = {"annotations": {"k8s.v1.cni.cncf.io/networks": networks}}
         # pylint:disable=W0212
         pod_annotation = pod_spec._make_pod_podannotations()

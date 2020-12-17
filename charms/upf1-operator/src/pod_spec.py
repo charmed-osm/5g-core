@@ -105,21 +105,10 @@ def _make_pod_custom_resources():
                 "kind": "NetworkAttachmentDefinition",
                 "metadata": {"name": "n6-network"},
                 "spec": {
-                    "config": {
-                        "cniVersion": "0.3.1",
-                        "name": "n6-network",
-                        "type": "macvlan",
-                        "master": "ens3",
-                        "mode": "bridge",
-                        "ipam": {
-                            "type": "host-local",
-                            "subnet": "192.168.0.0/16",
-                            "rangeStart": "192.168.1.100",
-                            "rangeEnd": "192.168.1.250",
-                            "gateway": "192.168.1.1",
-                        },
-                    }  # noqa
+                    # pylint:disable=line-too-long
+                    "config": '{\n"cniVersion": "0.3.1",\n"name": "n6-network",\n"type": "macvlan",\n"master": "ens3",\n"mode": "bridge",\n"ipam": {\n"type": "host-local",\n"subnet": "192.168.0.0/16",\n"rangeStart": "192.168.1.100",\n"rangeEnd": "192.168.1.250",\n"gateway": "192.168.1.1"\n}\n}'  # noqa
                 },
+
             }
         ]
     }
@@ -131,7 +120,7 @@ def _make_pod_podannotations() -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: pod Annotations.
     """
-    networks = '[{"name" : "n6-network","interface": "eth1","ips": ["192.168.1.215"]}]'
+    networks = '[\n{\n"name" : "n6-network",\n"interface": "eth1",\n"ips": ["192.168.1.215"]\n}]'
     annot = {
         "annotations": {"k8s.v1.cni.cncf.io/networks": networks},
         "securityContext": {"runAsUser": 0000, "runAsGroup": 0000},

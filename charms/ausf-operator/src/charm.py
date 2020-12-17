@@ -165,7 +165,8 @@ class AusfCharm(CharmBase):
         if self.state.pod_spec != pod_spec:
             self.model.pod.set_spec(pod_spec)
             self.state.pod_spec = pod_spec
-            self.unit.status = ActiveStatus("ready")
+
+        self.unit.status = ActiveStatus("ready")
 
 
 if __name__ == "__main__":
