@@ -19,22 +19,19 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 
-osm package-create vnf core
-osm package-create ns core
-
+cd charms/
 charms="amf-operator mongodb-operator nrf-operator pcf-operator udm-operator upf1-operator
 ausf-operator natapp-operator nssf-operator smf-operator udr-operator webui-operator"
 
+if [ -z `which charmcraft` ]; then
+    sudo snap install charmcraft --beta
+fi
 
 for charm_directory in $charms; do
-    mkdir -p "core_vnf/charms/$charm_directory" && \
-    cp -rf ../charms/$charm_directory/build "core_vnf/charms/$charm_directory"
+    echo "Building charm $charm_directory..."
+    cd $charm_directory
+    charmcraft build
+    cd ..
 done
 
-mkdir -p "core_vnf/juju-bundles" && cp bundle.yaml "core_vnf/juju-bundles"
-
-cp core_vnfd.yaml "core_vnf/"
-cp core_nsd.yaml "core_ns/"
-
-tar -cvzf core_vnf.tar.gz core_vnf/
-tar -cvzf core_ns.tar.gz core_ns/
+cd ..

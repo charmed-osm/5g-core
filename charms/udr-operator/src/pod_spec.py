@@ -40,16 +40,6 @@ def _make_pod_ports() -> List[Dict[str, Any]]:
     return [{"name": "udr", "containerPort": UDR_PORT, "protocol": "TCP"}]
 
 
-def _check_data(config: Dict[str, Any], relation_state: Dict[str, Any]) -> bool:
-    if relation_state["mongodb_uri"] != "mongodb://mongodb/free5gc":
-        if config["gin_mode"] != "release" and config["gin_mode"] != "debug":
-            raise ValueError("Invalid gin_mode and invalid mongodb_uri")
-        raise ValueError("Invalid mongodb_uri")
-    if config["gin_mode"] != "release" and config["gin_mode"] != "debug":
-        raise ValueError("Invalid gin_mode")
-    return True
-
-
 def _make_pod_envconfig(
     config: Dict[str, Any], relation_state: Dict[str, Any]
 ) -> Dict[str, Any]:
@@ -60,19 +50,24 @@ def _make_pod_envconfig(
     Returns:
         Dict[str, Any]: pod environment configuration.
     """
-    if _check_data(config, relation_state):
-        envconfig = {
-            # General configuration
-            "ALLOW_ANONYMOUS_LOGIN": "yes",
-            "GIN_MODE": config["gin_mode"],
-            "MONGODB_URI": relation_state["mongodb_uri"],
-        }
-
-    return envconfig
+    return {
+        # General configuration
+        "ALLOW_ANONYMOUS_LOGIN": "yes",
+        "GIN_MODE": config["gin_mode"],
+        "MONGODB_URI": relation_state["mongodb_uri"],
+    }
 
 
 def _make_pod_command() -> List[str]:
     return ["./udr", "-udrcfg", "../config/udrcfg.conf", "&"]
+
+
+def _validate_config(config: Dict[str, Any]):
+    pass  # TODO
+
+
+def _validate_relation_state(config: Dict[str, Any]):
+    pass  # TODO
 
 
 def make_pod_spec(
@@ -95,6 +90,12 @@ def make_pod_spec(
     if not image_info:
         return None
 
+    _validate_config(
+        config
+    )  # Create this function, and check all parameters needed there. Raise ValueError inside that function if something is not correct.
+    _validate_relation_state(
+        relation_state
+    )  # Create this function, and check all parameters needed there. Raise ValueError inside that function if something is not correct.
     ports = _make_pod_ports()
     env_config = _make_pod_envconfig(config, relation_state)
     command = _make_pod_command()

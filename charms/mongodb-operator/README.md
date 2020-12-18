@@ -29,14 +29,13 @@ Possible action in this is adduser to mongomongodb
 
 ## Usage
 
+> This does not explain how to use it. Add similar steps to the ones in the main readme.
+ - How to deploy it from the store
+ - How to deploy it locally.
+
 Mongodb port needed to be configured
 
 ## Developing
-
-Deploy the charm
-juju deploy
-
-Check if the charm is deployed with juju status
 
 To test mongodb insert action,run the following command
 COMMAND : sudo juju run-action mongodb/<UNIT-ID> adduser ueid=<imsi-no>

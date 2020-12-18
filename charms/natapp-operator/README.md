@@ -18,6 +18,7 @@
  To get in touch with the maintainers, please contact:
  canonical@tataelxsi.onmicrosoft.com
 -->
+
 # natapp
 
 ## Description
@@ -26,15 +27,14 @@ Kubernetes charm to deploy Natapp
 
 ## Usage
 
-Natapp requires  port 
+> This does not explain how to use it. Add similar steps to the ones in the main readme.
 
+- How to deploy it from the store
+- How to deploy it locally.
+
+Natapp requires port
 
 ## Developing
-
-Deploy the charm
-juju deploy
-
-Check if the charm is deployed with juju status
 
 Check if the charm is deployed with juju status
 To test 'iptables' action,run the following command

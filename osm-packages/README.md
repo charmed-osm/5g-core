@@ -20,22 +20,17 @@ Copyright 2020 Tata Elxsi
  canonical@tataelxsi.onmicrosoft.com
 -->
 
+> As all the charms and the bundle will be in the charm store, you do not need all this.
+> Add two folders ready to be uploaded to osm:
+ - nsd
+ - vnfd <-- in the juju-bundle, point to the charm store
 
-## To build the charms and osm packages
-* Build the charms enter into 5g-core/osm-packages/
+> ^ the package.sh can be put as clear, simple, and complete instructions here in the readme. Remove the package.sh then.
 
-  run ./build.sh
+> In the readme, add the commands needed to upload the packages: osm nfpkg-create, and nspkg-create.
 
-    The charms will be build, build and .charm can be located in respective operators inside charms directory.
-Eg: build and amf.charm in 5g-core/charms/amf-operator,similarly in all charms it can be found.
+> Also add the steps to onboard it to OSM.
 
-* To create osm package and add necessary contents to it
+> Add an integration part in the end, saying how would you integrate it in OSM with ran and IMS.
 
-   run ./package.sh
-  
-    Will generate osm packages placing all necessary contents and 
-    finally a tar of vnf and ns
-    * core_ns.tar.gz
-    * core_vnf.tar.gz
-
-   Onboard the resulting package to OSM
+> Cross-model relations are not supported yet in OSM, so add the manual instructions to set up the cross-model relations

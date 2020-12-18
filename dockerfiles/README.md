@@ -61,6 +61,8 @@ To build all components Images
 
 sudo docker-compose build
 
+> This does not deploy anything. Please complete the instructions
+
 ## Exposed Ports
 
 ----------------------------------------------------------

@@ -27,3 +27,4 @@ exclude:
   build
   dist
   *.egg_info
+ignore=W503

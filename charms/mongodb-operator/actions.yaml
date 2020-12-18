@@ -22,7 +22,7 @@
 add-user:
     description: "Addition of subscriber information "
     params:
-        ue-id:
+        ue-id:  # I THINK YOU NEED TO PUT THIS AS A REQUIRED PARAMETER
             description: "IMSI details"
             type: string
             default: ""

@@ -36,21 +36,10 @@ from pod_spec import make_pod_spec
 logger = logging.getLogger(__name__)
 
 
-class ConfigurePodEvent(EventBase):
-    """Configure Pod event"""
-
-
-class UdmEvents(CharmEvents):
-    """UDM Events"""
-
-    configure_pod = EventSource(ConfigurePodEvent)
-
-
 class UdmCharm(CharmBase):
     """ UDM charm events class definition """
 
     state = StoredState()
-    on = UdmEvents()
 
     def __init__(self, *args):
         super().__init__(*args)
@@ -59,23 +48,16 @@ class UdmCharm(CharmBase):
         self.image = OCIImageResource(self, "image")
 
         # Registering regular events
-        self.framework.observe(self.on.start, self.configure_pod)
         self.framework.observe(self.on.config_changed, self.configure_pod)
-        self.framework.observe(self.on.upgrade_charm, self.configure_pod)
-        self.framework.observe(self.on.leader_elected, self.configure_pod)
-        self.framework.observe(self.on.update_status, self.configure_pod)
-
-        # Registering custom internal events
-        self.framework.observe(self.on.configure_pod, self.configure_pod)
 
         # Registering required relation changed events
         self.framework.observe(
             self.on.nrf_relation_changed, self._on_nrf_relation_changed
         )
 
-        # Registering required relation departed events
+        # Registering required relation broken events
         self.framework.observe(
-            self.on.nrf_relation_departed, self._on_nrf_relation_departed
+            self.on.nrf_relation_broken, self._on_nrf_relation_broken
         )
 
         # -- initialize states --
@@ -89,24 +71,21 @@ class UdmCharm(CharmBase):
         """
         if event.app not in event.relation.data:
             return
-        # data_loc = event.unit if event.unit else event.app
 
         nrf_host = event.relation.data[event.app].get("hostname")
-        logging.info("UDM Requires From NRF")
-        logging.info(nrf_host)
         if nrf_host and self.state.nrf_host != nrf_host:
             self.state.nrf_host = nrf_host
-            self.on.configure_pod.emit()
+            self.configure_pod()
 
-    def _on_nrf_relation_departed(self, event: EventBase) -> NoReturn:
+    def _on_nrf_relation_broken(self, event: EventBase) -> NoReturn:
         """Clears data from NRF relation.
 
         Args:
             event (EventBase): NRF relation event.
         """
-        logging.info(event)
+
         self.state.nrf_host = None
-        self.on.configure_pod.emit()
+        self.configure_pod()
 
     def _missing_relations(self) -> str:
         """Checks if there missing relations.
@@ -129,13 +108,13 @@ class UdmCharm(CharmBase):
 
         return relation_state
 
-    def configure_pod(self, event: EventBase) -> NoReturn:
+    def configure_pod(self, _=None) -> NoReturn:
         """Assemble the pod spec and apply it, if possible.
         Args:
             event (EventBase): Hook or Relation event that started the
                                function.
         """
-        logging.info(event)
+
         missing = self._missing_relations()
         if missing:
             self.unit.status = BlockedStatus(
@@ -148,11 +127,8 @@ class UdmCharm(CharmBase):
             self.unit.status = ActiveStatus("ready")
             return
 
-        self.unit.status = MaintenanceStatus("Assembling pod spec")
-
         # Fetch image information
         try:
-            self.unit.status = MaintenanceStatus("Fetching image information")
             image_info = self.image.fetch()
         except OCIImageResourceError:
             self.unit.status = BlockedStatus("Error fetching image information")

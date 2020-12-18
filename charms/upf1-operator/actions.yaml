@@ -19,5 +19,6 @@
 # canonical@tataelxsi.onmicrosoft.com
 ##
 ---
+# SEE COMMENT IN ACTIONS/ADD-ROUTE
 add-route:
     description: "route addition and IP rules addition"

@@ -47,20 +47,19 @@ def _make_pod_envconfig(config: Dict[str, Any]) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: pod environment configuration.
     """
-    if config["gin_mode"] == "release" or config["gin_mode"] == "debug":
-        envconfig = {
-            # General configuration
-            "ALLOW_ANONYMOUS_LOGIN": "yes",
-            "GIN_MODE": config["gin_mode"],
-        }
-    else:
-        raise ValueError("Invalid gin_mode")
-
-    return envconfig
+    return {
+        # General configuration
+        "ALLOW_ANONYMOUS_LOGIN": "yes",
+        "GIN_MODE": config["gin_mode"],
+    }
 
 
 def _make_pod_command() -> List[str]:
     return ["./ausf", "-ausfcfg", "../config/ausfcfg.conf", "&"]
+
+
+def _validate_config(config: Dict[str, Any]):
+    pass  # TODO
 
 
 def make_pod_spec(
@@ -82,6 +81,9 @@ def make_pod_spec(
     if not image_info:
         return None
 
+    _validate_config(
+        config
+    )  # Create this function, and check all parameters needed there. Raise ValueError inside that function if something is not correct.
     ports = _make_pod_ports()
     env_config = _make_pod_envconfig(config)
     command = _make_pod_command()

@@ -26,7 +26,7 @@ class BasicDeployment(unittest.TestCase):
                 mongodb_ip = model.get_status().applications["mongodb"]["units"][
                     unit.entity_id
                 ]["address"]
-                myclient = pymongo.MongoClient("mongodb://" + mongodb_ip + ":27017/")
+                myclient = pymongo.MongoClient(f"mongodb://{mongodb_ip}:27017/")
                 logging.info("Mongodb connected successfully !!!")
         except pymongo.errors.ConnectionFailure:
             logging.info("Could not connect to Mongomongodb")
@@ -67,15 +67,12 @@ class BasicDeployment(unittest.TestCase):
         core_mongodb = myclient[mongodb_name]
         collection = core_mongodb[coll_name]
         ins_rec = {"subscCats": [mongodb_name], "ueId": ue_id}
-        logging.info("Record to be inserted %s", ins_rec)
         collection.insert_one(ins_rec)
-        logging.info("Data inserted successfully !!")
         cursor = BasicDeployment.mongo_read_data(
             self, mongodb_name, coll_name, myclient
         )
         for record in cursor:
             logging.info("Reading the inserted document from mongodb %s", record)
-        logging.info("To check inserted record and retrieved document are same ...")
         self.assertEqual(ins_rec, record)
         myclient.close()
 
@@ -87,12 +84,8 @@ class BasicDeployment(unittest.TestCase):
         myclient = BasicDeployment.create_connection(self)
         core_mongodb = myclient[mongodb_name]
         collection = core_mongodb[coll_name]
-        logging.info("Deleting record based on UE-Id")
         del_rec = {"ueId": ue_id}
-        logging.info("Record to be deleted %s", del_rec)
         result = collection.delete_one(del_rec)
-        logging.info("Data deleted %d ", result.deleted_count)
-        logging.info("Data deleted successfully !!")
         BasicDeployment.mongo_read_data(self, mongodb_name, coll_name, myclient)
         if core_mongodb.collection.count_documents({"ueId": ue_id}, limit=1) == 0:
             logging.info("Reading the deleted document ue_id: %s", ue_id)
@@ -112,7 +105,6 @@ class BasicDeployment(unittest.TestCase):
         myquery = {"ueId": ue_id}
         update_rec = {"$set": {"ueId": "imsi-2089300007488"}}
         result = collection.update_one(myquery, update_rec)
-        logging.info("Data updated successfully !!")
         cursor = BasicDeployment.mongo_read_data(
             self, mongodb_name, coll_name, myclient
         )

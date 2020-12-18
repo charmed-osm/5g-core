@@ -36,21 +36,10 @@ from pod_spec import make_pod_spec
 logger = logging.getLogger(__name__)
 
 
-class ConfigurePodEvent(EventBase):
-    """Configure Pod event"""
-
-
-class UdrEvents(CharmEvents):
-    """UDR Events"""
-
-    configure_pod = EventSource(ConfigurePodEvent)
-
-
 class UdrCharm(CharmBase):
     """ UDR charm events class definition """
 
     state = StoredState()
-    on = UdrEvents()
 
     def __init__(self, *args):
         super().__init__(*args)
@@ -59,23 +48,16 @@ class UdrCharm(CharmBase):
         self.image = OCIImageResource(self, "image")
 
         # Registering regular events
-        self.framework.observe(self.on.start, self.configure_pod)
         self.framework.observe(self.on.config_changed, self.configure_pod)
-        self.framework.observe(self.on.upgrade_charm, self.configure_pod)
-        self.framework.observe(self.on.leader_elected, self.configure_pod)
-        self.framework.observe(self.on.update_status, self.configure_pod)
-
-        # Registering custom internal events
-        self.framework.observe(self.on.configure_pod, self.configure_pod)
 
         # Registering required relation changed events
         self.framework.observe(
             self.on.mongodb_relation_changed, self._on_mongodb_relation_changed
         )
 
-        # Registering required relation departed events
+        # Registering required relation broken events
         self.framework.observe(
-            self.on.mongodb_relation_departed, self._on_mongodb_relation_departed
+            self.on.mongodb_relation_broken, self._on_mongodb_relation_broken
         )
 
         # Registering required relation changed events
@@ -83,9 +65,9 @@ class UdrCharm(CharmBase):
             self.on.nrf_relation_changed, self._on_nrf_relation_changed
         )
 
-        # Registering required relation departed events
+        # Registering required relation broken events
         self.framework.observe(
-            self.on.nrf_relation_departed, self._on_nrf_relation_departed
+            self.on.nrf_relation_broken, self._on_nrf_relation_broken
         )
 
         # -- initialize states --
@@ -101,13 +83,9 @@ class UdrCharm(CharmBase):
         """
         if event.app not in event.relation.data:
             return
-        # data_loc = event.unit if event.unit else event.app
 
         mongodb_host = event.relation.data[event.app].get("hostname")
         mongodb_uri = event.relation.data[event.app].get("mongodb_uri")
-        logging.info("UDM Requires MongoDB")
-        logging.info(mongodb_host)
-        logging.info(mongodb_uri)
         if (
             mongodb_host  # noqa
             and mongodb_uri  # noqa
@@ -118,18 +96,18 @@ class UdrCharm(CharmBase):
         ):
             self.state.mongodb_host = mongodb_host
             self.state.mongodb_uri = mongodb_uri
-            self.on.configure_pod.emit()
+            self.configure_pod()
 
-    def _on_mongodb_relation_departed(self, event: EventBase) -> NoReturn:
+    def _on_mongodb_relation_broken(self, event: EventBase) -> NoReturn:
         """Clears data from MongoDB relation.
 
         Args:
             event (EventBase): MongoDB relation event.
         """
-        logging.info(event)
+
         self.state.mongodb_host = None
         self.state.mongodb_uri = None
-        self.on.configure_pod.emit()
+        self.configure_pod()
 
     def _on_nrf_relation_changed(self, event: EventBase) -> NoReturn:
         """Reads information about the NRF relation.
@@ -139,24 +117,21 @@ class UdrCharm(CharmBase):
         """
         if event.app not in event.relation.data:
             return
-        # data_loc = event.unit if event.unit else event.app
 
         nrf_host = event.relation.data[event.app].get("hostname")
-        logging.info("UDM Requires From NRF")
-        logging.info(nrf_host)
         if nrf_host and self.state.nrf_host != nrf_host:
             self.state.nrf_host = nrf_host
-            self.on.configure_pod.emit()
+            self.configure_pod()
 
-    def _on_nrf_relation_departed(self, event: EventBase) -> NoReturn:
+    def _on_nrf_relation_broken(self, event: EventBase) -> NoReturn:
         """Clears data from NRF relation.
 
         Args:
             event (EventBase): NRF relation event.
         """
-        logging.info(event)
+
         self.state.nrf_host = None
-        self.on.configure_pod.emit()
+        self.configure_pod()
 
     def _missing_relations(self) -> str:
         """Checks if there missing relations.
@@ -183,13 +158,13 @@ class UdrCharm(CharmBase):
 
         return relation_state
 
-    def configure_pod(self, event: EventBase) -> NoReturn:
+    def configure_pod(self, _=None) -> NoReturn:
         """Assemble the pod spec and apply it, if possible.
         Args:
             event (EventBase): Hook or Relation event that started the
                                function.
         """
-        logging.info(event)
+
         missing = self._missing_relations()
         if missing:
             status = "Waiting for {0} relation{1}"
@@ -201,11 +176,8 @@ class UdrCharm(CharmBase):
             self.unit.status = ActiveStatus("ready")
             return
 
-        self.unit.status = MaintenanceStatus("Assembling pod spec")
-
         # Fetch image information
         try:
-            self.unit.status = MaintenanceStatus("Fetching image information")
             image_info = self.image.fetch()
         except OCIImageResourceError:
             self.unit.status = BlockedStatus("Error fetching image information")

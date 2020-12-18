@@ -23,65 +23,65 @@ description: 5g Core Bundle
 bundle: kubernetes
 applications:
   mongodb:
-    charm: '../charms/mongodb-operator/build'
+    charm: './charms/mongodb-operator/mongodb.charm'
     scale: 1
     resources:
-      image: 'localhost:32000/free5gc-mongo:1.0'
+      image: 'cs:~tata-charmers/free5gc-mongo:1.0'
   nrf:
-    charm: '../charms/nrf-operator/build'
+    charm: './charms/nrf-operator/nrf.charm'
     scale: 1
     resources:
-      image: 'localhost:32000/free5gc-nrf:1.0'
+      image: 'cs:~tata-charmers/free5gc-nrf:1.0'
   amf:
-    charm: '../charms/amf-operator/build'
+    charm: './charms/amf-operator/amf.charm'
     scale: 1
     resources:
-      image: 'localhost:32000/free5gc-amf:1.0'
+      image: 'cs:~tata-charmers/free5gc-amf:1.0'
   ausf:
-    charm: '../charms/ausf-operator/build'
+    charm: './charms/ausf-operator/ausf.charm'
     scale: 1
     resources:
-      image: 'localhost:32000/free5gc-ausf:1.0'
+      image: 'cs:~tata-charmers/free5gc-ausf:1.0'
   nssf:
-    charm: '../charms/nssf-operator/build'
+    charm: './charms/nssf-operator/nssf.charm'
     scale: 1
     resources:
-      image: 'localhost:32000/free5gc-nssf:1.0'
+      image: 'cs:~tata-charmers/free5gc-nssf:1.0'
   udm:
-    charm: '../charms/udm-operator/build'
+    charm: './charms/udm-operator/udm.charm'
     scale: 1
     resources:
-      image: 'localhost:32000/free5gc-udm:1.0'
+      image: 'cs:~tata-charmers/free5gc-udm:1.0'
   udr:
-    charm: '../charms/udr-operator/build'
+    charm: './charms/udr-operator/udr.charm'
     scale: 1
     resources:
-      image: 'localhost:32000/free5gc-udr:1.0'
+      image: 'cs:~tata-charmers/free5gc-udr:1.0'
   pcf:
-    charm: '../charms/pcf-operator/build'
+    charm: './charms/pcf-operator/pcf.charm'
     scale: 1
     resources:
-      image: 'localhost:32000/free5gc-pcf:1.0'
+      image: 'cs:~tata-charmers/free5gc-pcf:1.0'
   upf1:
-    charm: '../charms/upf1-operator/build'
+    charm: './charms/upf1-operator/upf1.charm'
     scale: 1
     resources:
-      image: 'localhost:32000/free5gc-upf-1:1.0'
+      image: 'cs:~tata-charmers/free5gc-upf-1:1.0'
   webui:
-    charm: '../charms/webui-operator/build'
+    charm: './charms/webui-operator/webui.charm'
     scale: 1
     resources:
-      image: 'localhost:32000/free5gc-webui:1.0'
+      image: 'cs:~tata-charmers/free5gc-webui:1.0'
   smf:
-    charm: '../charms/smf-operator/build'
+    charm: './charms/smf-operator/smf.charm'
     scale: 1
     resources:
-      image: 'localhost:32000/free5gc-smf:1.0'
+      image: 'cs:~tata-charmers/free5gc-smf:1.0'
   natapp:
-    charm: '../charms/natapp-operator/build'
+    charm: './charms/natapp-operator/natapp.charm'
     scale: 1
     resources:
-      image: 'localhost:32000/free5gc-natapp:1.0'
+      image: 'cs:~tata-charmers/free5gc-natapp:1.0'
 
 relations:
   - - nrf:mongodb

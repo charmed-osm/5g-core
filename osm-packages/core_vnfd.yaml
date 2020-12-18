@@ -33,7 +33,7 @@ vnfd-catalog:
            # At least one VDU need to be specified
         kdu:
         -   name: core-kdu
-            juju-bundle: bundle.yaml
+            juju-bundle: cs:~tata-charmers/core
             kdu-configuration:
                 initial-config-primitive:
                 -   name: add-route

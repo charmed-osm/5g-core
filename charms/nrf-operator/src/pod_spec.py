@@ -38,16 +38,6 @@ def _make_pod_ports() -> List[Dict[str, Any]]:
     return [{"name": "nrf", "containerPort": NRF_PORT, "protocol": "TCP"}]
 
 
-def _check_data(config: Dict[str, Any], relation_state: Dict[str, Any]) -> bool:
-    if relation_state["mongodb_uri"] != "mongodb://mongodb/free5gc":
-        if config["gin_mode"] != "release" and config["gin_mode"] != "debug":
-            raise ValueError("Invalid gin_mode and invalid db_uri")
-        raise ValueError("Invalid mongodb_uri")
-    if config["gin_mode"] != "release" and config["gin_mode"] != "debug":
-        raise ValueError("Invalid gin_mode")
-    return True
-
-
 def _make_pod_envconfig(
     config: Dict[str, Any], relation_state: Dict[str, Any]
 ) -> Dict[str, Any]:
@@ -58,20 +48,28 @@ def _make_pod_envconfig(
     Returns:
         Dict[str, Any]: pod environment configuration.
     """
-    envconfig = {}
-    if _check_data(config, relation_state):
-        envconfig = {
-            # General configuration
-            "ALLOW_ANONYMOUS_LOGIN": "yes",
-            "GIN_MODE": config["gin_mode"],
-            "MONGODB_URI": relation_state["mongodb_uri"],
-        }
-
-    return envconfig
+    return {
+        # General configuration
+        "ALLOW_ANONYMOUS_LOGIN": "yes",
+        "GIN_MODE": config["gin_mode"],
+        "MONGODB_URI": relation_state["mongodb_uri"],
+    }
 
 
 def _make_pod_command() -> List[str]:
     return ["./nrf", "-nrfcfg", "../config/nrfcfg.conf", "&"]
+
+
+def _validate_config(config: Dict[str, Any]):
+    valid_gin_modes = ["release", "debug"]
+    if config.get("gin_mode") not in valid_gin_modes:
+        raise ValueError("Invalid gin_mode")
+
+
+def _validate_relation_state(relation_state: Dict[str, Any]):
+    uri = relation_state.get("mongodb_uri")
+    if not uri or not isinstance(uri, str) or not uri.startswith("mongodb://"):
+        raise ValueError("Invalid mongodb_uri")
 
 
 def make_pod_spec(
@@ -91,11 +89,15 @@ def make_pod_spec(
     Returns:
         Dict[str, Any]: Pod spec dictionary for the charm.
     """
-    if not image_info:
-        return None
+
+    _validate_config(
+        config
+    )  # Create this function, and check all parameters needed there. Raise ValueError inside that function if something is not correct.
+    _validate_relation_state(
+        relation_state
+    )  # Create this function, and check all parameters needed there. Raise ValueError inside that function if something is not correct.
+
     env_config = _make_pod_envconfig(config, relation_state)
-    if not env_config:
-        raise ValueError("Env config Value Error")
     ports = _make_pod_ports()
     command = _make_pod_command()
 

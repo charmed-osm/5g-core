@@ -35,21 +35,10 @@ from pod_spec import make_pod_spec
 logger = logging.getLogger(__name__)
 
 
-class ConfigurePodEvent(EventBase):
-    """Configure Pod event"""
-
-
-class NatappEvents(CharmEvents):
-    """Natapp Events"""
-
-    configure_pod = EventSource(ConfigurePodEvent)
-
-
 class NatappCharm(CharmBase):
     """ Natapp charm events definition """
 
     state = StoredState()
-    on = NatappEvents()
 
     def __init__(self, *args):
         super().__init__(*args)
@@ -58,23 +47,16 @@ class NatappCharm(CharmBase):
         self.image = OCIImageResource(self, "image")
 
         # Registering regular events
-        self.framework.observe(self.on.start, self.configure_pod)
         self.framework.observe(self.on.config_changed, self.configure_pod)
-        self.framework.observe(self.on.upgrade_charm, self.configure_pod)
-        self.framework.observe(self.on.leader_elected, self.configure_pod)
-        self.framework.observe(self.on.update_status, self.configure_pod)
-
-        # Registering custom internal events
-        self.framework.observe(self.on.configure_pod, self.configure_pod)
 
         # Registering required relation changed events
         self.framework.observe(
             self.on.upf_relation_changed, self._on_upf_relation_changed
         )
 
-        # Registering required relation departed events
+        # Registering required relation broken events
         self.framework.observe(
-            self.on.upf_relation_departed, self._on_upf_relation_departed
+            self.on.upf_relation_broken, self._on_upf_relation_broken
         )
 
         # -- initialize states --
@@ -90,21 +72,19 @@ class NatappCharm(CharmBase):
             return
 
         upf_host = event.relation.data[event.app].get("private_address")
-        logging.info("NATAPP Requires From UPF")
-        logging.info(upf_host)
         if upf_host and self.state.upf_host != upf_host:
             self.state.upf_host = upf_host
-            self.on.configure_pod.emit()
+            self.configure_pod()
 
-    def _on_upf_relation_departed(self, event: EventBase) -> NoReturn:
+    def _on_upf_relation_broken(self, event: EventBase) -> NoReturn:
         """Clears data from UPF relation.
 
         Args:
             event (EventBase): UPF relation event.
         """
-        logging.info(event)
+
         self.state.upf_host = None
-        self.on.configure_pod.emit()
+        self.configure_pod()
 
     def _missing_relations(self) -> str:
         """Checks if there missing relations.
@@ -127,13 +107,13 @@ class NatappCharm(CharmBase):
 
         return relation_state
 
-    def configure_pod(self, event: EventBase) -> NoReturn:
+    def configure_pod(self, _=None) -> NoReturn:
         """Assemble the pod spec and apply it, if possible.
         Args:
             event (EventBase): Hook or Relation event that started the
                                function.
         """
-        logging.info(event)
+
         missing = self._missing_relations()
         if missing:
             status = "Waiting for {0} relation{1}"
@@ -145,11 +125,8 @@ class NatappCharm(CharmBase):
             self.unit.status = ActiveStatus("ready")
             return
 
-        self.unit.status = MaintenanceStatus("Assembling pod spec")
-
         # Fetch image information
         try:
-            self.unit.status = MaintenanceStatus("Fetching image information")
             image_info = self.image.fetch()
         except OCIImageResourceError:
             self.unit.status = BlockedStatus("Error fetching image information")

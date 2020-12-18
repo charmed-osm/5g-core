@@ -73,6 +73,14 @@ def _make_pod_command() -> List[str]:
     return ["./ipscript.sh", "&"]
 
 
+def _validate_config(config: Dict[str, Any]):
+    pass  # TODO
+
+
+def _validate_relation_state(config: Dict[str, Any]):
+    pass  # TODO
+
+
 def make_pod_spec(
     image_info: Dict[str, str],
     config: Dict[str, Any],
@@ -93,6 +101,12 @@ def make_pod_spec(
     if not image_info:
         return None
 
+    _validate_config(
+        config
+    )  # Create this function, and check all parameters needed there. Raise ValueError inside that function if something is not correct.
+    _validate_relation_state(
+        config
+    )  # Create this function, and check all parameters needed there. Raise ValueError inside that function if something is not correct.
     ports = _make_pod_ports()
     env_config = _make_pod_envconfig(config, relation_state)
     command = _make_pod_command()

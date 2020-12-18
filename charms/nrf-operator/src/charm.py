@@ -38,26 +38,10 @@ from pod_spec import make_pod_spec
 logger = logging.getLogger(__name__)
 
 
-class ConfigurePodEvent(EventBase):
-    """Configure Pod event"""
-
-
-class PublishNrfEvent(EventBase):
-    """Publish NRF event"""
-
-
-class NrfEvents(CharmEvents):
-    """Nrf Events"""
-
-    configure_pod = EventSource(ConfigurePodEvent)
-    publish_nrf_info = EventSource(PublishNrfEvent)
-
-
 class NrfCharm(CharmBase):
     """ NRF charm events class definition """
 
     state = StoredState()
-    on = NrfEvents()
 
     def __init__(self, *args):
         super().__init__(*args)
@@ -67,47 +51,33 @@ class NrfCharm(CharmBase):
         self.image = OCIImageResource(self, "image")
 
         # Registering regular events
-        self.framework.observe(self.on.start, self.configure_pod)
         self.framework.observe(self.on.config_changed, self.configure_pod)
-        self.framework.observe(self.on.upgrade_charm, self.configure_pod)
-
-        # Registering custom internal events
-        self.framework.observe(self.on.configure_pod, self.configure_pod)
-        self.framework.observe(self.on.publish_nrf_info, self.publish_nrf_info)
 
         # Registering required relation changed events
         self.framework.observe(
-            self.on.mongodb_relation_changed, self._on_mongodb_relation_changed
+            self.on.mongodb_relation_changed,
+            self._on_mongodb_relation_changed,
         )
 
-        # Registering required relation departed events
+        # Registering required relation broken events
         self.framework.observe(
-            self.on.mongodb_relation_departed, self._on_mongodb_relation_departed
+            self.on.mongodb_relation_broken,
+            self._on_mongodb_relation_broken,
         )
+
+        # Registering provides relation events
+        self.framework.observe(self.on.nrf_relation_joined, self.publish_nrf_info)
 
         # -- initialize states --
-        self.state.set_default(mongodb_host=None)
-        self.state.set_default(mongodb_uri=None)
+        self.state.set_default(mongodb_host=None, mongodb_uri=None)
 
     def publish_nrf_info(self, event: EventBase) -> NoReturn:
-        """Publishes NRF information
-        relation.7
+        """Publishes NRF information relation.
         Args:
         event (EventBase): NRF relation event .
         """
-        # if event.unit is None:
-        # return
-        # if self.unit.status != ActiveStatus("ready"):
-        # return
-        logging.info(event)
-        if not self.unit.is_leader():
-            return
-        relation_id = self.model.relations.__getitem__("nrf")
-        for i in relation_id:
-            relation = self.model.get_relation("nrf", i.id)
-            logging.info("NRF Provides")
-            logging.info(self.model.app.name)
-            relation.data[self.model.app]["hostname"] = self.model.app.name
+        if self.unit.is_leader():
+            event.relation.data[self.model.app]["hostname"] = self.model.app.name
 
     def _on_mongodb_relation_changed(self, event: EventBase) -> NoReturn:
         """Reads information about the MongoDB relation.
@@ -116,33 +86,30 @@ class NrfCharm(CharmBase):
         """
         if event.app not in event.relation.data:
             return
-        # data_loc = event.unit if event.unit else event.app
         mongodb_host = event.relation.data[event.app].get("hostname")
         mongodb_uri = event.relation.data[event.app].get("mongodb_uri")
-        logging.info("NRF Requires from MongoDB")
-        logging.info(mongodb_host)
-        logging.info(mongodb_uri)
+
         if (
-            mongodb_host  # noqa
-            and mongodb_uri  # noqa
+            mongodb_host
+            and mongodb_uri
             and (
                 self.state.mongodb_host != mongodb_host
                 or self.state.mongodb_uri != mongodb_uri
-            )  # noqa
+            )
         ):
             self.state.mongodb_host = mongodb_host
             self.state.mongodb_uri = mongodb_uri
-            self.on.configure_pod.emit()
+            self.configure_pod()
 
-    def _on_mongodb_relation_departed(self, event: EventBase) -> NoReturn:
+    def _on_mongodb_relation_broken(self, event: EventBase) -> NoReturn:
         """Clears data from MongoDB relation.
         Args:
             event (EventBase): MongoDB relation event.
         """
-        logging.info(event)
+
         self.state.mongodb_host = None
         self.state.mongodb_uri = None
-        self.on.configure_pod.emit()
+        self.configure_pod()
 
     def _missing_relations(self) -> str:
         """Checks if there missing relations.
@@ -168,13 +135,8 @@ class NrfCharm(CharmBase):
 
         return relation_state
 
-    def configure_pod(self, event: EventBase) -> NoReturn:
-        """Assemble the pod spec and apply it, if possible.
-        Args:
-            event (EventBase): Hook or Relation event that started the
-                               function.
-        """
-        logging.info(event)
+    def configure_pod(self, _=None) -> NoReturn:
+        """Assemble the pod spec and apply it, if possible."""
         missing = self._missing_relations()
         if missing:
             status = "Waiting for {0} relation{1}"
@@ -186,29 +148,30 @@ class NrfCharm(CharmBase):
             self.unit.status = ActiveStatus("ready")
             return
 
-        self.unit.status = MaintenanceStatus("Assembling pod spec")
-
         # Fetch image information
         try:
-            self.unit.status = MaintenanceStatus("Fetching image information")
             image_info = self.image.fetch()
         except OCIImageResourceError:
             self.unit.status = BlockedStatus("Error fetching image information")
             return
 
-        pod_spec = make_pod_spec(
-            image_info,
-            self.model.config,
-            self.relation_state,
-            self.model.app.name,
-        )
+        try:
+            pod_spec = make_pod_spec(
+                image_info,
+                self.model.config,
+                self.relation_state,
+                self.model.app.name,
+            )
+        except ValueError as e:
+            logger.exception("Config/Relation data validation error")
+            self.unit.status = BlockedStatus(str(e))
+            return
 
         if self.state.pod_spec != pod_spec:
             self.model.pod.set_spec(pod_spec)
             self.state.pod_spec = pod_spec
 
         self.unit.status = ActiveStatus("ready")
-        self.on.publish_nrf_info.emit()
 
 
 if __name__ == "__main__":

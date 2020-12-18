@@ -36,21 +36,10 @@ from pod_spec import make_pod_spec
 logger = logging.getLogger(__name__)
 
 
-class ConfigurePodEvent(EventBase):
-    """Configure Pod event"""
-
-
-class Upf1Events(CharmEvents):
-    """UPF1 Events"""
-
-    configure_pod = EventSource(ConfigurePodEvent)
-
-
 class Upf1Charm(CharmBase):
     """ UPF charm events class definition """
 
     state = StoredState()
-    on = Upf1Events()
 
     def __init__(self, *args):
         super().__init__(*args)
@@ -59,14 +48,7 @@ class Upf1Charm(CharmBase):
         self.image = OCIImageResource(self, "image")
 
         # Registering regular events
-        self.framework.observe(self.on.start, self.configure_pod)
         self.framework.observe(self.on.config_changed, self.configure_pod)
-        self.framework.observe(self.on.upgrade_charm, self.configure_pod)
-        self.framework.observe(self.on.leader_elected, self.configure_pod)
-        self.framework.observe(self.on.update_status, self.configure_pod)
-
-        # Registering custom internal events
-        self.framework.observe(self.on.configure_pod, self.configure_pod)
 
         # Registering provided relation events
         self.framework.observe(self.on.upf_relation_changed, self._publish_upf_info)
@@ -77,35 +59,25 @@ class Upf1Charm(CharmBase):
         Args:
              event (EventBase): upf relation event to update SMF.
         """
-        # if event.unit is None:
-        # return
-
-        logging.info("UPF Provides IP")
-        print("Entered")
         if self.unit.is_leader():
             private_ip = str(
-                self.model.get_binding(event.relation).network.bind_address
+                self.model.get_binding(event.relation).network.bind_address # <-- See comments in the email
             )
-            logging.info(private_ip)
-            print("Entered ip", private_ip)
             event.relation.data[self.model.app]["private_address"] = private_ip
 
-    def configure_pod(self, event: EventBase) -> NoReturn:
+    def configure_pod(self, _=None) -> NoReturn:
         """Assemble the pod spec and apply it, if possible.
         Args:
             event (EventBase): Hook or Relation event that started the
                                function.
         """
-        logging.info(event)
+
         if not self.unit.is_leader():
             self.unit.status = ActiveStatus("ready")
             return
 
-        self.unit.status = MaintenanceStatus("Assembling pod spec")
-
         # Fetch image information
         try:
-            self.unit.status = MaintenanceStatus("Fetching image information")
             image_info = self.image.fetch()
         except OCIImageResourceError:
             self.unit.status = BlockedStatus("Error fetching image information")

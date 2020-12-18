@@ -49,6 +49,10 @@ def _make_pod_command() -> List[str]:
     return ["mongod", "--bind_ip", "mongodb-endpoints", "--port", "27017"]
 
 
+def _validate_config(config: Dict[str, Any]):
+    pass  # TODO
+
+
 def make_pod_spec(
     image_info: Dict[str, str],
     config: Dict[str, str],
@@ -68,6 +72,9 @@ def make_pod_spec(
     if not image_info:
         return None
 
+    _validate_config(
+        config
+    )  # Create this function, and check all parameters needed there. Raise ValueError inside that function if something is not correct.
     ports = _make_pod_ports(config)
     command = _make_pod_command()
 

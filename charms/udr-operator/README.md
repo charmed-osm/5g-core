@@ -27,14 +27,14 @@ Kubernetes charm to deploy UDR core component
 
 ## Usage
 
+> This does not explain how to use it. Add similar steps to the ones in the main readme.
+ - How to deploy it from the store
+ - How to deploy it locally.
+
 UDR requires port ,gin mode  to be configured
 
 
 ## Developing
-Deploy the charm
-juju deploy
-
-Check if the charm is deployed with juju status
 
 Create and activate a virtualenv with the development requirements:
 

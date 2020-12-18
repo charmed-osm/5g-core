@@ -35,21 +35,10 @@ from pod_spec import make_pod_spec
 logger = logging.getLogger(__name__)
 
 
-class ConfigurePodEvent(EventBase):
-    """Configure Pod event"""
-
-
-class MongodbEvents(CharmEvents):
-    """MongoDB Events"""
-
-    configure_pod = EventSource(ConfigurePodEvent)
-
-
 class MongodbCharm(CharmBase):
     """ MongoDB charm events class definition """
 
     state = StoredState()
-    on = MongodbEvents()
 
     def __init__(self, *args):
         super().__init__(*args)
@@ -59,14 +48,7 @@ class MongodbCharm(CharmBase):
         self.image = OCIImageResource(self, "image")
 
         # Registering regular events
-        self.framework.observe(self.on.start, self.configure_pod)
         self.framework.observe(self.on.config_changed, self.configure_pod)
-        self.framework.observe(self.on.upgrade_charm, self.configure_pod)
-        self.framework.observe(self.on.leader_elected, self.configure_pod)
-        self.framework.observe(self.on.update_status, self.configure_pod)
-
-        # Registering custom internal events
-        self.framework.observe(self.on.configure_pod, self.configure_pod)
 
         # Registering required relation joined events
         self.framework.observe(
@@ -79,33 +61,28 @@ class MongodbCharm(CharmBase):
         Args:
              event (EventBase): MongoDB relation event to update NRF.
         """
-        logging.info("MongoDB Provides to NRF")
-        logging.info(self.model.app.name)
 
         if self.unit.is_leader():
             rel_data = {
-                "hostname": self.model.app.name,
-                "mongodb_uri": "mongodb://mongodb/free5gc",
+                "hostname": self.model.app.name,  # Is this used? remove if not
+                "mongodb_uri": f"mongodb://{self.model.app.name}/free5gc",
             }
             for k, param in rel_data.items():
                 event.relation.data[self.model.app][k] = param
 
-    def configure_pod(self, event: EventBase) -> NoReturn:
+    def configure_pod(self, _=None) -> NoReturn:
         """Assemble the pod spec and apply it, if possible.
         Args:
             event (EventBase): Hook or Relation event that started the
                                function.
         """
-        logging.info(event)
+
         if not self.unit.is_leader():
             self.unit.status = ActiveStatus("ready")
             return
 
-        self.unit.status = MaintenanceStatus("Assembling pod spec")
-
         # Fetch image information
         try:
-            self.unit.status = MaintenanceStatus("Fetching image information")
             image_info = self.image.fetch()
         except OCIImageResourceError:
             self.unit.status = BlockedStatus("Error fetching image information")  # noqa

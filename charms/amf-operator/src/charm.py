@@ -35,26 +35,10 @@ from pod_spec import make_pod_spec
 logger = logging.getLogger(__name__)
 
 
-class ConfigurePodEvent(EventBase):
-    """Configure Pod event"""
-
-
-class PublishAmfEvent(EventBase):
-    """Configure Pod event"""
-
-
-class AmfEvents(CharmEvents):
-    """AMF Events"""
-
-    configure_pod = EventSource(ConfigurePodEvent)
-    publish_amf_info = EventSource(PublishAmfEvent)
-
-
 class AmfCharm(CharmBase):
     """ AMF charm events class definition """
 
     state = StoredState()
-    on = AmfEvents()
 
     def __init__(self, *args) -> NoReturn:
         super().__init__(*args)
@@ -64,22 +48,19 @@ class AmfCharm(CharmBase):
         self.image = OCIImageResource(self, "image")
 
         # Registering regular events
-        self.framework.observe(self.on.start, self.configure_pod)
         self.framework.observe(self.on.config_changed, self.configure_pod)
-        self.framework.observe(self.on.upgrade_charm, self.configure_pod)
 
-        # Registering custom internal events
-        self.framework.observe(self.on.configure_pod, self.configure_pod)
-        self.framework.observe(self.on.publish_amf_info, self.publish_amf_info)
+        # Registering provides relation events
+        self.framework.observe(self.on.amf_relation_joined, self.publish_amf_info)
 
         # Registering required relation changed events
         self.framework.observe(
             self.on.nrf_relation_changed, self._on_nrf_relation_changed
         )
 
-        # Registering required relation departed events
+        # Registering required relation broken events
         self.framework.observe(
-            self.on.nrf_relation_departed, self._on_nrf_relation_departed
+            self.on.nrf_relation_broken, self._on_nrf_relation_broken
         )
 
         # -- initialize states --
@@ -91,15 +72,9 @@ class AmfCharm(CharmBase):
         Args:
              event (EventBase): AMF relation event .
         """
-        logging.info(event)
-        if not self.unit.is_leader():
-            return
-        relation_id = self.model.relations.__getitem__("amf")
-        for i in relation_id:
-            relation = self.model.get_relation("amf", i.id)
-            logging.info("AMF Provides")
-            logging.info(self.model.app.name)
-            relation.data[self.model.app]["hostname"] = self.model.app.name
+
+        if self.unit.is_leader():
+            event.relation.data[self.model.app]["hostname"] = self.model.app.name
 
     def _on_nrf_relation_changed(self, event: EventBase) -> NoReturn:
         """Reads information about the NRF relation.
@@ -108,24 +83,21 @@ class AmfCharm(CharmBase):
         """
         if event.app not in event.relation.data:
             return
-        # data_loc = event.unit if event.unit else event.app
 
         nrf_host = event.relation.data[event.app].get("hostname")
-        logging.info("AMF Requires From NRF")
-        logging.info(nrf_host)
         if nrf_host and self.state.nrf_host != nrf_host:
             self.state.nrf_host = nrf_host
-            self.on.configure_pod.emit()
+            self.configure_pod()
 
-    def _on_nrf_relation_departed(self, event: EventBase) -> NoReturn:
+    def _on_nrf_relation_broken(self, event: EventBase) -> NoReturn:
         """Clears data from NRF relation.
 
         Args:
             event (EventBase): NRF relation event.
         """
-        logging.info(event)
+
         self.state.nrf_host = None
-        self.on.configure_pod.emit()
+        self.configure_pod()
 
     def _missing_relations(self) -> str:
         """Checks if there missing relations.
@@ -148,13 +120,13 @@ class AmfCharm(CharmBase):
 
         return relation_state
 
-    def configure_pod(self, event: EventBase) -> NoReturn:
+    def configure_pod(self, _=None) -> NoReturn:
         """Assemble the pod spec and apply it, if possible.
         Args:
             event (EventBase): Hook or Relation event that started the
                                function.
         """
-        logging.info(event)
+
         missing = self._missing_relations()
         if missing:
             status = "Waiting for {0} relation{1}"
@@ -166,11 +138,8 @@ class AmfCharm(CharmBase):
             self.unit.status = ActiveStatus("ready")
             return
 
-        self.unit.status = MaintenanceStatus("Assembling pod spec")
-
         # Fetch image information
         try:
-            self.unit.status = MaintenanceStatus("Fetching image information")
             image_info = self.image.fetch()
         except OCIImageResourceError:
             self.unit.status = BlockedStatus("Error fetching image information")
@@ -187,7 +156,6 @@ class AmfCharm(CharmBase):
             self.state.pod_spec = pod_spec
 
         self.unit.status = ActiveStatus("ready")
-        self.on.publish_amf_info.emit()
 
 
 if __name__ == "__main__":
