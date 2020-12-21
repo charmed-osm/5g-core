@@ -1,0 +1,88 @@
+# Copyright 2020 Tata Elxsi
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# For those usages not covered by the Apache License, Version 2.0 please
+# contact: canonical@tataelxsi.onmicrosoft.com
+#
+# To get in touch with the maintainers, please contact:
+# canonical@tataelxsi.onmicrosoft.com
+##
+---
+description: 5g Core Bundle
+bundle: kubernetes
+applications:
+  mongodb:
+    charm: 'cs:~tataelxsi-charmers/mongodb'
+    scale: 1
+  nrf:
+    charm: 'cs:~tataelxsi-charmers/nrf'
+    scale: 1
+  amf:
+    charm: 'cs:~tataelxsi-charmers/amf'
+    scale: 1
+  ausf:
+    charm: 'cs:~tataelxsi-charmers/ausf'
+    scale: 1
+  nssf:
+    charm: 'cs:~tataelxsi-charmers/nssf'
+    scale: 1
+  udm:
+    charm: 'cs:~tataelxsi-charmers/udm'
+    scale: 1
+  udr:
+    charm: 'cs:~tataelxsi-charmers/udr'
+    scale: 1
+  pcf:
+    charm: 'cs:~tataelxsi-charmers/pcf'
+    scale: 1
+  upf1:
+    charm: 'cs:~tataelxsi-charmers/upf1'
+    scale: 1
+  webui:
+    charm: 'cs:~tataelxsi-charmers/webui'
+    scale: 1
+  smf:
+    charm: 'cs:~tataelxsi-charmers/smf'
+    scale: 1
+  natapp:
+    charm: 'cs:~tataelxsi-charmers/natapp'
+    scale: 1
+
+relations:
+  - - nrf:mongodb
+    - mongodb:mongodb
+  - - amf:nrf
+    - nrf:nrf
+  - - ausf:nrf
+    - nrf:nrf
+  - - nssf:nrf
+    - nrf:nrf
+  - - smf:upf
+    - upf1:upf
+  - - smf:nrf
+    - nrf:nrf
+  - - udm:nrf
+    - nrf:nrf
+  - - udr:mongodb
+    - mongodb:mongodb
+  - - udr:nrf
+    - nrf:nrf
+  - - webui:mongodb
+    - mongodb:mongodb
+  - - natapp:upf
+    - upf1:upf
+  - - pcf:amf
+    - amf:amf
+  - - pcf:nrf
+    - nrf:nrf
