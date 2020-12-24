@@ -19,10 +19,9 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-""" AMF test script for charm.py """
+"""AMF test script for charm.py"""
 import unittest
 
-# from unittest.mock import Mock
 from typing import NoReturn
 from ops.model import BlockedStatus
 from ops.testing import Harness
@@ -30,7 +29,7 @@ from charm import AmfCharm
 
 
 class TestCharm(unittest.TestCase):
-    """ Test script for checking relations """
+    """Test script for checking relations"""
 
     def setUp(self) -> NoReturn:
         """Test setup"""
@@ -141,7 +140,7 @@ class TestCharm(unittest.TestCase):
 
         relation_id = self.harness.add_relation("amf", "pcf")
         self.harness.add_relation_unit(relation_id, "pcf/0")
-        self.harness.charm.on.publish_amf_info.emit()
+        self.harness.charm.publish_amf_info()
         relation_data = self.harness.get_relation_data(relation_id, "amf")
         self.assertDictEqual(expected_result, relation_data)
 

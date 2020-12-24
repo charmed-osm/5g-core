@@ -19,7 +19,7 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-""" PCF test script for charm.py """
+"""PCF test script for charm.py"""
 
 import unittest
 from typing import NoReturn
@@ -30,10 +30,10 @@ from charm import PcfCharm
 
 
 class TestCharm(unittest.TestCase):
-    """ Test script for checking pod spec and relations """
+    """Test script for checking pod spec and relations"""
 
     def setUp(self) -> NoReturn:
-        """Test setup"""
+        """Test setup."""
         self.harness = Harness(PcfCharm)
         self.harness.set_leader(is_leader=True)
         self.harness.begin()

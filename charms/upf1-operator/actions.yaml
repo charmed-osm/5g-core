@@ -19,5 +19,6 @@
 # canonical@tataelxsi.onmicrosoft.com
 ##
 ---
-add-route:
-    description: "route addition and IP rules addition"
+config-interface:
+    description: |
+        updation of MTU value in upfgtp0 interface

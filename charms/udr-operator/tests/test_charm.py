@@ -19,7 +19,7 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-""" UDR test script for charm.py """
+"""UDR test script for charm.py"""
 
 import unittest
 
@@ -31,7 +31,7 @@ from charm import UdrCharm
 
 
 class TestCharm(unittest.TestCase):
-    """ Test script for checking relations """
+    """Test script for checking relations"""
 
     def setUp(self) -> NoReturn:
         """Test setup"""
@@ -74,7 +74,7 @@ class TestCharm(unittest.TestCase):
                         "GIN_MODE": "release",
                         "MONGODB_URI": "mongodb://mongodb/free5gc",
                     },
-                    "command": ["./udr", "-udrcfg", "../config/udrcfg.conf", "&"],
+                    "command": ["./udr_start.sh", "&"],
                 }
             ],
         }
@@ -96,8 +96,7 @@ class TestCharm(unittest.TestCase):
         self.harness.update_relation_data(
             mongodb_relation_id,
             "mongodb",
-            {"hostname": "mongodb", "mongodb_uri": "mongodb://mongodb/free5gc"},  # noqa
-        )
+            {"hostname": "mongodb", "mongodb_uri": "mongodb://mongodb/free5gc"},)
 
         # Checking if nrf,mongodb data is stored
         self.assertEqual(self.harness.charm.state.nrf_host, "nrf")

@@ -1,8 +1,30 @@
+# Copyright 2020 Tata Elxsi
+#
+# Licensed under the Apache License, Version 2.0 (the License); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an AS IS BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# For those usages not covered by the Apache License, Version 2.0 please
+# contact: canonical@tataelxsi.onmicrosoft.com
+#
+# To get in touch with the maintainers, please contact:
+# canonical@tataelxsi.onmicrosoft.com
+##
+---
 version: '3.8'
 
 services:
   free5gc-upf-1:
     container_name: upf1
+    image: localhost:32000/free5gc-upf-1:1.0
     build:
       context: ./upf
       args:
@@ -10,11 +32,13 @@ services:
 
   free5gc-mongodb:
     container_name: mongodb
+    image: localhost:32000/free5gc-mongo:1.0
     build:
       context: ./mongodb
 
   free5gc-nrf:
     container_name: nrf
+    image: localhost:32000/free5gc-nrf:1.0
     build:
       context: ./nrf
       args:
@@ -22,6 +46,7 @@ services:
 
   free5gc-amf:
     container_name: amf
+    image: localhost:32000/free5gc-amf:1.0
     build:
       context: ./amf
       args:
@@ -29,6 +54,7 @@ services:
 
   free5gc-ausf:
     container_name: ausf
+    image: localhost:32000/free5gc-ausf:1.0
     build:
       context: ./ausf
       args:
@@ -36,6 +62,7 @@ services:
 
   free5gc-nssf:
     container_name: nssf
+    image: localhost:32000/free5gc-nssf:1.0
     build:
       context: ./nssf
       args:
@@ -43,6 +70,7 @@ services:
 
   free5gc-pcf:
     container_name: pcf
+    image: localhost:32000/free5gc-pcf:1.0
     build:
       context: ./pcf
       args:
@@ -50,6 +78,7 @@ services:
 
   free5gc-smf:
     container_name: smf
+    image: localhost:32000/free5gc-smf:1.0
     build:
       context: ./smf
       args:
@@ -57,6 +86,7 @@ services:
 
   free5gc-udm:
     container_name: udm
+    image: localhost:32000/free5gc-udm:1.0
     build:
       context: ./udm
       args:
@@ -64,6 +94,7 @@ services:
 
   free5gc-udr:
     container_name: udr
+    image: localhost:32000/free5gc-udr:1.0
     build:
       context: ./udr
       args:
@@ -71,6 +102,7 @@ services:
 
   free5gc-webui:
     container_name: webui
+    image: localhost:32000/free5gc-webui:1.0
     build:
       context: ./webui
       args:
@@ -78,6 +110,7 @@ services:
 
   free5gc-natapp:
     container_name: natapp
+    image: localhost:32000/free5gc-natapp:1.0
     build:
       context: ./natapp
 

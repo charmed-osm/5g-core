@@ -18,37 +18,50 @@
  To get in touch with the maintainers, please contact:
  canonical@tataelxsi.onmicrosoft.com
 -->
-# natapp
+
+# Natapp
 
 ## Description
 
 Kubernetes charm to deploy Natapp
 
+## Prerequisite
+
+1. Install Charmcraft
+
+```bash
+sudo snap install charmcraft --beta
+```
+
 ## Usage
 
-Natapp requires  port 
+### Deploy
 
+To deploy Natapp charm from Charmstore, use the following command
+
+```bash
+juju deploy cs:~tataelxsi-charmers/natapp
+```
+
+#### Deploy from local repository
+
+To deploy Natapp from local repository, use the following commands
+
+```bash
+charmcraft build
+juju deploy natapp.charm
+```
+
+NOTE: Natapp can be deployed only after UPF is up because of
+      relations configured between the two.
 
 ## Developing
 
-Deploy the charm
-juju deploy
-
 Check if the charm is deployed with juju status
-
-Check if the charm is deployed with juju status
-To test 'iptables' action,run the following command
-COMMAND : sudo juju run-action natapp/<UNIT-ID> iptables
-
-To check the status and output of the action ,use the following command
-
-COMMAND:
-sudo juju show-action-status <ACTION-ID>
-sudo juju show-action-output <ACTION-ID>
 
 ## Testing
 
 The Python operator framework includes a very nice harness for testing
 operator behaviour without full deployment. Just `run_tests`:
 
-    ./run_tests
+   ./run_tests

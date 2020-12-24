@@ -20,16 +20,22 @@
 ##
 ---
 name: pcf
-description: Charm for PCF
-summary: Charm for PCF
+summary: pcf deploys the PCF as a microk8s pod
+maintainers:
+    - Tata Elxsi <canonical@tataelxsi.onmicrosoft.com>
+description: |
+    pcf deploys the free5gc developed 5g PCF,
+    as a microk8s based pod.
+    Policy Control Function(PCF) provides policy
+    based rules to control plane functions.
 tags:
     - 5gcore
 series:
     - kubernetes
+min-juju-version: 2.8.2
 deployment:
     type: stateful
     service: cluster
-
 resources:
     image:
         type: oci-image

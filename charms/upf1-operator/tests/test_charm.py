@@ -19,7 +19,7 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-""" UPF test script for charm.py """
+"""UPF test script for charm.py"""
 
 import unittest
 
@@ -32,7 +32,7 @@ from charm import Upf1Charm
 
 
 class TestCharm(unittest.TestCase):
-    """ Test script for checking relations """
+    """Test script for checking relations"""
 
     def setUp(self) -> NoReturn:
         """Test setup"""
@@ -53,7 +53,7 @@ class TestCharm(unittest.TestCase):
                     "ports": [
                         {"name": "upf1", "containerPort": 2152, "protocol": "UDP"}
                     ],
-                    "command": ["./free5gc-upfd", "-f", "../config/upfcfg.yaml", "&"],
+                    "command": ["./upf_start.sh", "&"],
                     "kubernetes": {"securityContext": {"privileged": True}},
                 }
             ],
@@ -95,16 +95,24 @@ class TestCharm(unittest.TestCase):
                             "kind": "NetworkAttachmentDefinition",
                             "metadata": {"name": "n6-network"},
                             "spec": {
-                                # pylint:disable=line-too-long
-                                "config": '{\n"cniVersion": "0.3.1",\n"name": "n6-network",\n"type": "macvlan",\n"master": "ens3",\n"mode": "bridge",\n"ipam": {\n"type": "host-local",\n"subnet": "192.168.0.0/16",\n"rangeStart": "192.168.1.100",\n"rangeEnd": "192.168.1.250",\n"gateway": "192.168.1.1"\n}\n}'  # noqa
+                                "config": '{"cniVersion": "0.3.1",'
+                                '\n"name": "n6-network",'
+                                '\n"type": "macvlan",'
+                                '\n"master": "ens3",'
+                                '\n"mode": "bridge",'
+                                '\n"ipam": {"type": "host-local",'
+                                '\n"subnet": "192.168.0.0/16",'
+                                '\n"rangeStart": "192.168.1.100",'
+                                '\n"rangeEnd": "192.168.1.250",'
+                                '\n"gateway": "192.168.1.1"\n}\n}'
                             },
                         }
                     ]
                 },
                 "pod": {
                     "annotations": {
-                        # pylint:disable=line-too-long
-                        "k8s.v1.cni.cncf.io/networks": '[\n{\n"name" : "n6-network",\n"interface": "eth1",\n"ips": ["192.168.1.215"]\n}]'  # noqa
+                        "k8s.v1.cni.cncf.io/networks": '[\n{\n"name" : "n6-network",'
+                        '\n"interface": "eth1",\n"ips": ["192.168.1.215"]\n}\n]'
                     },
                     "securityContext": {"runAsUser": 0, "runAsGroup": 0},
                 },
@@ -117,17 +125,6 @@ class TestCharm(unittest.TestCase):
         self.assertGreater(len(self.harness.charm.unit.status.message), 0)
         pod_spec, _ = self.harness.get_pod_spec()
         self.assertDictEqual(expected_result, pod_spec)
-
-    def test_publish_upf_info(self) -> NoReturn:
-        """Test to see if upf relation is updated."""
-        self.harness.charm.on.start.emit()
-        expected_result = {
-            "private_address": "upf",
-        }
-        relation_id = self.harness.add_relation("upf", "natapp")
-        self.harness.add_relation_unit(relation_id, "natapp/0")
-        relation_data = self.harness.get_relation_data(relation_id, "upf1")
-        self.assertDictEqual(expected_result, relation_data)
 
 
 if __name__ == "__main__":

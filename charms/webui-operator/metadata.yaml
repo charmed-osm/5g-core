@@ -20,12 +20,16 @@
 ##
 ---
 name: webui
+summary: webui deploys the webui as a microk8s pod
+maintainers:
+    - Tata Elxsi <canonical@tataelxsi.onmicrosoft.com>
 description: |
-  TODO: fill out the charm's description
-summary: |
-  TODO: fill out the charm's summary
+    webui deploys webui as a microk8s based pod.
+    Webui is the User Interface for adding and deleting
+    IMSI and subscriber information to database
 series:
     - kubernetes
+min-juju-version: 2.8.2
 deployment:
     type: stateful
     service: cluster

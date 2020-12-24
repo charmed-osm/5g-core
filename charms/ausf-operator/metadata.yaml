@@ -20,12 +20,18 @@
 ##
 ---
 name: ausf
-description: Charm for AUSF
-summary: Charm for AUSF
+summary: ausf deploys the AUSF as a microk8s pod
+maintainers:
+    - Tata Elxsi <canonical@tataelxsi.onmicrosoft.com>
+description: |
+    ausf deploys the free5gc developed 5g AUSF,
+    as a microk8s based pod.
+    AUSF - Authentication server function manages 5G UE authentication.
 tags:
     - 5gcore
 series:
     - kubernetes
+min-juju-version: 2.8.2
 deployment:
     type: stateful
     service: cluster

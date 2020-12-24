@@ -22,6 +22,7 @@
 options:
     gtp_port:
         type: int
-        description: 'gtp_port is used for
-                       communication between smf and upf'
+        description: |
+            gtp_port is used for
+            communication between smf and upf
         default: 2152

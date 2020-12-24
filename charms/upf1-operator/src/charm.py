@@ -19,13 +19,13 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-""" Defining upf charm events """
+"""Defining upf charm events"""
 
 import logging
 from typing import NoReturn
-from ops.charm import CharmBase, CharmEvents
+from ops.charm import CharmBase
 from ops.main import main
-from ops.framework import StoredState, EventBase, EventSource
+from ops.framework import StoredState, EventBase
 from ops.model import ActiveStatus, BlockedStatus, MaintenanceStatus
 
 from oci_image import OCIImageResource, OCIImageResourceError
@@ -36,23 +36,13 @@ from pod_spec import make_pod_spec
 logger = logging.getLogger(__name__)
 
 
-class ConfigurePodEvent(EventBase):
-    """Configure Pod event"""
-
-
-class Upf1Events(CharmEvents):
-    """UPF1 Events"""
-
-    configure_pod = EventSource(ConfigurePodEvent)
-
-
 class Upf1Charm(CharmBase):
-    """ UPF charm events class definition """
+    """UPF charm events class definition"""
 
     state = StoredState()
-    on = Upf1Events()
 
     def __init__(self, *args):
+        """UPF charm constructor."""
         super().__init__(*args)
         self.state.set_default(pod_spec=None)
 
@@ -61,12 +51,6 @@ class Upf1Charm(CharmBase):
         # Registering regular events
         self.framework.observe(self.on.start, self.configure_pod)
         self.framework.observe(self.on.config_changed, self.configure_pod)
-        self.framework.observe(self.on.upgrade_charm, self.configure_pod)
-        self.framework.observe(self.on.leader_elected, self.configure_pod)
-        self.framework.observe(self.on.update_status, self.configure_pod)
-
-        # Registering custom internal events
-        self.framework.observe(self.on.configure_pod, self.configure_pod)
 
         # Registering provided relation events
         self.framework.observe(self.on.upf_relation_changed, self._publish_upf_info)
@@ -74,29 +58,23 @@ class Upf1Charm(CharmBase):
     def _publish_upf_info(self, event: EventBase) -> NoReturn:
         """Publishes UPF IP information for SMF
           relation.7
+
         Args:
              event (EventBase): upf relation event to update SMF.
         """
-        # if event.unit is None:
-        # return
+        try:
+            if self.unit.is_leader():
+                private_ip = str(
+                    self.model.get_binding(event.relation).network.bind_address
+                )
+                if private_ip != "None":
+                    event.relation.data[self.model.unit]["private_address"] = private_ip
+        except TypeError:
+            self.unit.status = BlockedStatus("Ip not yet fetched")
+            return
 
-        logging.info("UPF Provides IP")
-        print("Entered")
-        if self.unit.is_leader():
-            private_ip = str(
-                self.model.get_binding(event.relation).network.bind_address
-            )
-            logging.info(private_ip)
-            print("Entered ip", private_ip)
-            event.relation.data[self.model.app]["private_address"] = private_ip
-
-    def configure_pod(self, event: EventBase) -> NoReturn:
-        """Assemble the pod spec and apply it, if possible.
-        Args:
-            event (EventBase): Hook or Relation event that started the
-                               function.
-        """
-        logging.info(event)
+    def configure_pod(self, _=None) -> NoReturn:
+        """Assemble the pod spec and apply it, if possible."""
         if not self.unit.is_leader():
             self.unit.status = ActiveStatus("ready")
             return

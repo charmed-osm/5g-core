@@ -19,7 +19,7 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-""" Pod spec for NatApp charm """
+"""Pod spec for NatApp charm"""
 
 import logging
 from typing import Any, Dict, List
@@ -29,44 +29,65 @@ logger = logging.getLogger(__name__)
 
 def _make_pod_ports(config: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Generate pod ports details.
+
     Args:
-        port (int): port to expose.
+        config(Dict[str, Any]):pod ports details.
+
     Returns:
         List[Dict[str, Any]]: pod port details.
     """
-    if config["natapp_port"] > 0:
-        return [
-            {
-                "name": "natapp",
-                "containerPort": config["natapp_port"],
-                "protocol": "UDP",
-            }
-        ]
-    raise ValueError("Invalid port number")
+    return [
+        {
+            "name": "natapp",
+            "containerPort": config["natapp_port"],
+            "protocol": "UDP",
+        }
+    ]
 
 
 def _make_pod_command() -> List[str]:
+    """Generate pod command.
+
+    Returns:
+        List[str]:pod command.
+    """
     return ["./start.sh", "&"]
 
 
 def _make_pod_podannotations() -> Dict[str, Any]:
     """Generate Pod Annotations.
+
     Returns:
         Dict[str, Any]: pod Annotations.
     """
-    networks = '[\n{\n"name" : "n6-network",\n"interface": "eth1",\n"ips": ["192.168.1.216"]\n}]'
-    annot = {"annotations": {"k8s.v1.cni.cncf.io/networks": networks}}
+    annot = {
+        "annotations": {
+            "k8s.v1.cni.cncf.io/networks": '[\n{\n"name" : "n6-network",'
+            '\n"interface": "eth1",\n"ips": ["192.168.1.216"]\n}\n]'
+        }
+    }
 
     return annot
 
 
 def _make_pod_privilege() -> Dict[str, Any]:
     """Generate pod privileges.
+
     Returns:
         Dict[str, Any]: pod privilege.
     """
     privil = {"securityContext": {"privileged": True}}
     return privil
+
+
+def _validate_config(config: Dict[str, Any]):
+    """Validate config data.
+
+    Args:
+        config (Dict[str, Any]): configuration information.
+    """
+    if not config.get("natapp_port") > 0:
+        raise ValueError("Invalid natapp port number")
 
 
 def make_pod_spec(
@@ -75,19 +96,20 @@ def make_pod_spec(
     app_name: str,
 ) -> Dict[str, Any]:
     """Generate the pod spec information.
+
     Args:
         image_info (Dict[str, str]): Object provided by
                                      OCIImageResource("image").fetch().
         config (Dict[str, Any]): Configuration information.
-        relation_state (Dict[str, Any]): Relation state information.
         app_name (str, optional): Application name. Defaults to "pol".
-        port (int, optional): Port for the container. Defaults to 80.
+
     Returns:
         Dict[str, Any]: Pod spec dictionary for the charm.
     """
     if not image_info:
         return None
 
+    _validate_config(config)
     ports = _make_pod_ports(config)
     command = _make_pod_command()
     kubernetes = _make_pod_privilege()

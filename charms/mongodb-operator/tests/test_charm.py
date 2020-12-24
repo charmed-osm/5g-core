@@ -19,7 +19,7 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-""" MongoDB test script for charm.py """
+"""MongoDB test script for charm.py"""
 
 import unittest
 from typing import NoReturn
@@ -30,10 +30,10 @@ from charm import MongodbCharm
 
 
 class TestCharm(unittest.TestCase):
-    """ Test script for checking relations """
+    """Test script for checking relations"""
 
     def setUp(self) -> NoReturn:
-        """Test setup"""
+        """Test setup."""
         self.harness = Harness(MongodbCharm)
         self.harness.set_leader(is_leader=True)
         self.harness.begin()
@@ -80,7 +80,7 @@ class TestCharm(unittest.TestCase):
         """Test to see if mongodb relation is updated."""
         expected_result = {
             "hostname": "mongodb",
-            "mongodb_uri": "mongodb://mongodb/free5gc",
+            "mongodb_uri": "mongodb://mongodb:27017",
         }
         self.harness.charm.on.start.emit()
         relation_id = self.harness.add_relation("mongodb", "nrf")

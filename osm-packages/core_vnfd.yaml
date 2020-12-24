@@ -13,49 +13,44 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-
+---
 vnfd-catalog:
     schema-version: "v3.0"
     vnfd:
-    -   id: core_vnfd
-        name: core_vnfd
-        short-name: core_vnfd
-        description: VNFD for 5G Core 
-        vendor: TATA ELXSI
-        version: '2.0'
-        connection-point:
-        -   name: mgmtnet
-        # Management interface
-        mgmt-interface:
-            cp: mgmt
-        
+        - id: core_vnfd
+          name: core_vnfd
+          short-name: core_vnfd
+          description: VNFD for 5G Core
+          vendor: TATA ELXSI
+          version: "2.0"
+          connection-point:
+              - name: mgmtnet
+          # Management interface
+          mgmt-interface:
+              cp: mgmt
+          # At least one VDU need to be specified
+          kdu:
+              - name: core-kdu
+                juju-bundle: bundle.yaml
+                kdu-configuration:
+                    initial-config-primitive:
+                        - name: config-interface
+                          parameter:
+                              - name: application-name
+                                data-type: STRING
+                                value: upf1
+                          seq: '1'
+                    config-primitive:
+                        - name: add-user
+                          parameter:
+                              - name: application-name
+                                data-type: STRING
+                                default-value: mongodb
+                              - name: ue-id
+                                data-type: STRING
+                                default-value: ""
 
-           # At least one VDU need to be specified
-        kdu:
-        -   name: core-kdu
-            juju-bundle: bundle.yaml
-            kdu-configuration:
-                initial-config-primitive:
-                -   name: add-route
-                    parameter:
-                    -   name: application-name
-                        data-type: STRING
-                        value: upf1
-                    seq: '1'
-                config-primitive:
-                -   name: add-user
-                    parameter:
-                    -   name: application-name
-                        data-type: STRING
-                        default-value: mongodb
-                    -   name: ue-id
-                        data-type: STRING
-                        default-value: ""
-
-
-
-        k8s-cluster:
-            nets:
-            -   id: mgmtnet
-                external-connection-point-ref: mgmt
-                                                       
+          k8s-cluster:
+              nets:
+                  - id: mgmtnet
+                    external-connection-point-ref: mgmt

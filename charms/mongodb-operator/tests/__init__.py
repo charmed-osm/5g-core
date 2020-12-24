@@ -19,7 +19,7 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-""" init script for unit test """
+"""init script for unit test"""
 import sys
 from unittest.mock import MagicMock
 

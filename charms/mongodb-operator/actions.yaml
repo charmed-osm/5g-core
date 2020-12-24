@@ -20,9 +20,16 @@
 ##
 ---
 add-user:
-    description: "Addition of subscriber information "
+    description: |
+        Addition of subscriber details such as
+        International Mobile Subscriber Identity(IMSI)
     params:
         ue-id:
-            description: "IMSI details"
+            description: |
+                IMSI is a unique number ,the First 5 digits
+                of the IMSI consists of an MCC (Mobile Country Code)
+                and MNC (Mobile Network Code) combination.
+                The remaining 10 digits are
+                the MSIN (Mobile Subscriber Identification Number)
             type: string
             default: ""

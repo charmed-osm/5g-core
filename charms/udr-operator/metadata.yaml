@@ -20,12 +20,20 @@
 ##
 ---
 name: udr
-description: Charm for UDR
-summary: Charm for UDR
+summary: udr deploys the udr as a microk8s pod
+maintainers:
+    - Tata Elxsi <canonical@tataelxsi.onmicrosoft.com>
+description: |
+    udr deploys the free5gc developed 5g udr,
+    as a microk8s based pod.
+    Unified Data Repository(UPF) serves as a unified database
+    for storing application, subscription, authentication and
+    other information for the 5G core
 tags:
     - 5gcore
 series:
     - kubernetes
+min-juju-version: 2.8.2
 deployment:
     type: stateful
     service: cluster

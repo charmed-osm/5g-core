@@ -19,33 +19,64 @@
  To get in touch with the maintainers, please contact:
  canonical@tataelxsi.onmicrosoft.com
 -->
-# upf1
+
+# UPF1
 
 ## Description
 
 Kubernetes charm to deploy UPF core component
 
+Contains Juju action add-route which is used to configure of UPF interface.
+
+## Prerequisite
+
+1. Install Charmcraft
+
+```bash
+sudo snap install charmcraft --beta
+```
+
 ## Usage
 
-UPF requires UDP port , TCP port 
+UPF exposes GTP port 2152 to integrate with RAN in the data plane.
+
+### Deploy
+
+To deploy UPF1 charm from Charmstore, use the following command
+
+```bash
+juju deploy cs:~tataelxsi-charmers/upf1
+```
+
+#### Deploy from local repository
+
+To deploy UPF from local repository, use the following commands
+
+```bash
+charmcraft build
+juju deploy upf1.charm
+```
 
 ## Developing
 
-Deploy the charm
-juju deploy
+To test add-route action,run the following command
+COMMAND : sudo juju run-action upf1/[UNIT-ID] add-route
 
-Check if the charm is deployed with juju status
+To check the status and output of the action ,use the following command
+
+COMMAND:
+sudo juju show-action-status ACTION-ID
+sudo juju show-action-output ACTION-ID
 
 Create and activate a virtualenv with the development requirements:
 
-    virtualenv -p python3 venv
-    source venv/bin/activate
-    pip install -r requirements-dev.txt
-
+   virtualenv -p python3 venv
+   source venv/bin/activate
+   pip install -r requirements-dev.txt
 
 ## Testing
 
 The Python operator framework includes a very nice harness for testing
 operator behaviour without full deployment. Just `run_tests`:
 
-    ./run_tests
+   ./run_tests

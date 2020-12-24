@@ -19,13 +19,13 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-""" Defining udr charm events """
+"""Defining udr charm events"""
 
 import logging
 from typing import Any, Dict, NoReturn
-from ops.charm import CharmBase, CharmEvents
+from ops.charm import CharmBase
 from ops.main import main
-from ops.framework import StoredState, EventBase, EventSource
+from ops.framework import StoredState, EventBase
 from ops.model import ActiveStatus, BlockedStatus, MaintenanceStatus
 
 from oci_image import OCIImageResource, OCIImageResourceError
@@ -36,23 +36,13 @@ from pod_spec import make_pod_spec
 logger = logging.getLogger(__name__)
 
 
-class ConfigurePodEvent(EventBase):
-    """Configure Pod event"""
-
-
-class UdrEvents(CharmEvents):
-    """UDR Events"""
-
-    configure_pod = EventSource(ConfigurePodEvent)
-
-
 class UdrCharm(CharmBase):
-    """ UDR charm events class definition """
+    """UDR charm events class definition"""
 
     state = StoredState()
-    on = UdrEvents()
 
     def __init__(self, *args):
+        """UDR charm constructor."""
         super().__init__(*args)
         self.state.set_default(pod_spec=None)
 
@@ -61,12 +51,6 @@ class UdrCharm(CharmBase):
         # Registering regular events
         self.framework.observe(self.on.start, self.configure_pod)
         self.framework.observe(self.on.config_changed, self.configure_pod)
-        self.framework.observe(self.on.upgrade_charm, self.configure_pod)
-        self.framework.observe(self.on.leader_elected, self.configure_pod)
-        self.framework.observe(self.on.update_status, self.configure_pod)
-
-        # Registering custom internal events
-        self.framework.observe(self.on.configure_pod, self.configure_pod)
 
         # Registering required relation changed events
         self.framework.observe(
@@ -89,9 +73,7 @@ class UdrCharm(CharmBase):
         )
 
         # -- initialize states --
-        self.state.set_default(mongodb_host=None)
-        self.state.set_default(nrf_host=None)
-        self.state.set_default(mongodb_uri=None)
+        self.state.set_default(mongodb_host=None, nrf_host=None, mongodb_uri=None)
 
     def _on_mongodb_relation_changed(self, event: EventBase) -> NoReturn:
         """Reads information about the MongoDB relation.
@@ -101,35 +83,26 @@ class UdrCharm(CharmBase):
         """
         if event.app not in event.relation.data:
             return
-        # data_loc = event.unit if event.unit else event.app
 
         mongodb_host = event.relation.data[event.app].get("hostname")
         mongodb_uri = event.relation.data[event.app].get("mongodb_uri")
-        logging.info("UDM Requires MongoDB")
-        logging.info(mongodb_host)
-        logging.info(mongodb_uri)
         if (
-            mongodb_host  # noqa
-            and mongodb_uri  # noqa
-            and (
+            mongodb_host
+            and mongodb_uri # noqa
+            and (           # noqa
                 self.state.mongodb_host != mongodb_host
-                or self.state.mongodb_uri != mongodb_uri
-            )  # noqa
+                or (self.state.mongodb_uri != mongodb_uri) # noqa
+            )
         ):
             self.state.mongodb_host = mongodb_host
             self.state.mongodb_uri = mongodb_uri
-            self.on.configure_pod.emit()
+            self.configure_pod()
 
-    def _on_mongodb_relation_departed(self, event: EventBase) -> NoReturn:
-        """Clears data from MongoDB relation.
-
-        Args:
-            event (EventBase): MongoDB relation event.
-        """
-        logging.info(event)
+    def _on_mongodb_relation_departed(self, _=None) -> NoReturn:
+        """Clears data from MongoDB relation."""
         self.state.mongodb_host = None
         self.state.mongodb_uri = None
-        self.on.configure_pod.emit()
+        self.configure_pod()
 
     def _on_nrf_relation_changed(self, event: EventBase) -> NoReturn:
         """Reads information about the NRF relation.
@@ -139,30 +112,22 @@ class UdrCharm(CharmBase):
         """
         if event.app not in event.relation.data:
             return
-        # data_loc = event.unit if event.unit else event.app
 
         nrf_host = event.relation.data[event.app].get("hostname")
-        logging.info("UDM Requires From NRF")
-        logging.info(nrf_host)
         if nrf_host and self.state.nrf_host != nrf_host:
             self.state.nrf_host = nrf_host
-            self.on.configure_pod.emit()
+            self.configure_pod()
 
-    def _on_nrf_relation_departed(self, event: EventBase) -> NoReturn:
-        """Clears data from NRF relation.
-
-        Args:
-            event (EventBase): NRF relation event.
-        """
-        logging.info(event)
+    def _on_nrf_relation_departed(self, _=None) -> NoReturn:
+        """Clears data from NRF relation departed."""
         self.state.nrf_host = None
-        self.on.configure_pod.emit()
+        self.configure_pod()
 
     def _missing_relations(self) -> str:
         """Checks if there missing relations.
 
         Returns:
-            str: string with missing relations
+            str: string with missing relations.
         """
         data_status = {"nrf": self.state.nrf_host, "mongodb": self.state.mongodb_uri}
         missing_relations = [k for k, v in data_status.items() if not v]
@@ -179,17 +144,12 @@ class UdrCharm(CharmBase):
             "nrf_host": self.state.nrf_host,
             "mongodb_host": self.state.mongodb_host,
             "mongodb_uri": self.state.mongodb_uri,
-        }  # noqa
+        }
 
         return relation_state
 
-    def configure_pod(self, event: EventBase) -> NoReturn:
-        """Assemble the pod spec and apply it, if possible.
-        Args:
-            event (EventBase): Hook or Relation event that started the
-                               function.
-        """
-        logging.info(event)
+    def configure_pod(self, _=None) -> NoReturn:
+        """Assemble the pod spec and apply it, if possible."""
         missing = self._missing_relations()
         if missing:
             status = "Waiting for {0} relation{1}"

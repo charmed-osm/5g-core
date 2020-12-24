@@ -19,7 +19,7 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-""" AUSF test script for charm.py """
+"""AUSF test script for charm.py"""
 
 import unittest
 
@@ -31,7 +31,7 @@ from charm import AusfCharm
 
 
 class TestCharm(unittest.TestCase):
-    """ Test script for checking relations """
+    """Test script for checking relations"""
 
     def setUp(self) -> NoReturn:
         """Test setup"""

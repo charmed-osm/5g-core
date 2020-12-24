@@ -19,44 +19,64 @@
  To get in touch with the maintainers, please contact:
  canonical@tataelxsi.onmicrosoft.com
 -->
-# mongodb
+
+# Mongodb
 
 ## Description
 
 Kubernetes charm to deploy Mongo DB
 
-Possible action in this is adduser to mongomongodb
+Contains Juju action add-user which is used to add IMSI/Subscriber information.
+
+## Prerequisite
+
+1. Install Charmcraft
+
+```bash
+sudo snap install charmcraft --beta
+```
 
 ## Usage
 
-Mongodb port needed to be configured
+Mongodb exposes port 27017 to perform database operations.
+
+### Deploy
+
+To deploy MongoDB charm from Charmstore, use the following command
+
+```bash
+juju deploy cs:~tataelxsi-charmers/mongodb
+```
+
+#### Deploy from local repository
+
+To deploy Mongodb from local repository, use the following commands
+
+```bash
+charmcraft build
+juju deploy mongodb.charm
+```
 
 ## Developing
 
-Deploy the charm
-juju deploy
-
-Check if the charm is deployed with juju status
-
 To test mongodb insert action,run the following command
-COMMAND : sudo juju run-action mongodb/<UNIT-ID> adduser ueid=<imsi-no>
+COMMAND : sudo juju run-action mongodb/[UNIT-ID] add-user ue-id=[imsi-no]
 
 To check the status and output of the action ,use the following command
 
 COMMAND:
-sudo juju show-action-status <ACTION-ID>
-sudo juju show-action-output <ACTION-ID>
-
+sudo juju show-action-status ACTION-ID
+sudo juju show-action-output ACTION-ID
 
 Create and activate a virtualenv with the development requirements:
 
-    virtualenv -p python3 venv
-    source venv/bin/activate
-    pip install -r requirements-dev.txt
+   virtualenv -p python3 venv
+   source venv/bin/activate
+   pip install -r requirements-dev.txt
 
 ## Testing
 
 The Python operator framework includes a very nice harness for testing
 operator behaviour without full deployment. Just `run_tests`:
 
-    ./run_tests
+   ./run_tests

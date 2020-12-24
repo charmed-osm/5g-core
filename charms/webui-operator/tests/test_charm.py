@@ -19,7 +19,7 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-""" WebUI test script for charm.py """
+"""WebUI test script for charm.py"""
 
 import unittest
 
@@ -31,7 +31,7 @@ from charm import WebuiCharm
 
 
 class TestCharm(unittest.TestCase):
-    """ Test script for checking relations """
+    """Test script for checking relations"""
 
     def setUp(self) -> NoReturn:
         """Test setup"""
@@ -72,8 +72,9 @@ class TestCharm(unittest.TestCase):
                     "envConfig": {
                         "ALLOW_ANONYMOUS_LOGIN": "yes",
                         "GIN_MODE": "release",
+                        "MONGODB_URI": "mongodb://mongodb:27017",
                     },
-                    "command": ["./webui", "&"],
+                    "command": ["./webui_start.sh", "&"],
                 }
             ],
         }
@@ -86,7 +87,9 @@ class TestCharm(unittest.TestCase):
         mongodb_relation_id = self.harness.add_relation("mongodb", "mongodb")
         self.harness.add_relation_unit(mongodb_relation_id, "mongodb/0")
         self.harness.update_relation_data(
-            mongodb_relation_id, "mongodb", {"hostname": "mongodb"}
+            mongodb_relation_id,
+            "mongodb",
+            {"hostname": "mongodb", "mongodb_uri": "mongodb://mongodb:27017"},
         )
 
         # Checking if nrf data is stored
@@ -99,7 +102,7 @@ class TestCharm(unittest.TestCase):
         self.assertDictEqual(expected_result, pod_spec)
 
     def test_on_mongodb_app_relation_changed(self) -> NoReturn:
-        """Test to see if kafka relation is updated."""
+        """Test to see if mongo relation is updated."""
         self.harness.charm.on.start.emit()
 
         self.assertIsNone(self.harness.charm.state.mongodb_host)
@@ -107,7 +110,9 @@ class TestCharm(unittest.TestCase):
         relation_id = self.harness.add_relation("mongodb", "mongodb")
         self.harness.add_relation_unit(relation_id, "mongodb/0")
         self.harness.update_relation_data(
-            relation_id, "mongodb", {"hostname": "mongodb"}
+            relation_id,
+            "mongodb",
+            {"hostname": "mongodb", "mongodb_uri": "mongodb://mongodb:27017"},
         )
 
         self.assertEqual(self.harness.charm.state.mongodb_host, "mongodb")

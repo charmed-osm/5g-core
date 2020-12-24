@@ -19,13 +19,13 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-""" Defining amf charm events """
+"""Defining amf charm events"""
 import logging
 
 from typing import Any, Dict, NoReturn
-from ops.charm import CharmBase, CharmEvents
+from ops.charm import CharmBase
 from ops.main import main
-from ops.framework import StoredState, EventBase, EventSource
+from ops.framework import StoredState, EventBase
 from ops.model import ActiveStatus, BlockedStatus, MaintenanceStatus
 
 from oci_image import OCIImageResource, OCIImageResourceError
@@ -35,28 +35,13 @@ from pod_spec import make_pod_spec
 logger = logging.getLogger(__name__)
 
 
-class ConfigurePodEvent(EventBase):
-    """Configure Pod event"""
-
-
-class PublishAmfEvent(EventBase):
-    """Configure Pod event"""
-
-
-class AmfEvents(CharmEvents):
-    """AMF Events"""
-
-    configure_pod = EventSource(ConfigurePodEvent)
-    publish_amf_info = EventSource(PublishAmfEvent)
-
-
 class AmfCharm(CharmBase):
-    """ AMF charm events class definition """
+    """AMF charm events class definition"""
 
     state = StoredState()
-    on = AmfEvents()
 
     def __init__(self, *args) -> NoReturn:
+        """AMF charm constructor."""
         super().__init__(*args)
         # Internal state initialization
         self.state.set_default(pod_spec=None)
@@ -66,11 +51,6 @@ class AmfCharm(CharmBase):
         # Registering regular events
         self.framework.observe(self.on.start, self.configure_pod)
         self.framework.observe(self.on.config_changed, self.configure_pod)
-        self.framework.observe(self.on.upgrade_charm, self.configure_pod)
-
-        # Registering custom internal events
-        self.framework.observe(self.on.configure_pod, self.configure_pod)
-        self.framework.observe(self.on.publish_amf_info, self.publish_amf_info)
 
         # Registering required relation changed events
         self.framework.observe(
@@ -85,53 +65,41 @@ class AmfCharm(CharmBase):
         # -- initialize states --
         self.state.set_default(nrf_host=None)
 
-    def publish_amf_info(self, event: EventBase) -> NoReturn:
+    def publish_amf_info(self, _=None) -> NoReturn:
         """Publishes AMF information
-          relation.7
-        Args:
-             event (EventBase): AMF relation event .
+        relation.7.
         """
-        logging.info(event)
         if not self.unit.is_leader():
             return
         relation_id = self.model.relations.__getitem__("amf")
         for i in relation_id:
             relation = self.model.get_relation("amf", i.id)
-            logging.info("AMF Provides")
-            logging.info(self.model.app.name)
             relation.data[self.model.app]["hostname"] = self.model.app.name
 
     def _on_nrf_relation_changed(self, event: EventBase) -> NoReturn:
         """Reads information about the NRF relation.
+
         Args:
            event (EventBase): NRF relation event.
         """
         if event.app not in event.relation.data:
             return
-        # data_loc = event.unit if event.unit else event.app
 
         nrf_host = event.relation.data[event.app].get("hostname")
-        logging.info("AMF Requires From NRF")
-        logging.info(nrf_host)
         if nrf_host and self.state.nrf_host != nrf_host:
             self.state.nrf_host = nrf_host
-            self.on.configure_pod.emit()
+            self.configure_pod()
 
-    def _on_nrf_relation_departed(self, event: EventBase) -> NoReturn:
-        """Clears data from NRF relation.
-
-        Args:
-            event (EventBase): NRF relation event.
-        """
-        logging.info(event)
+    def _on_nrf_relation_departed(self, _=None) -> NoReturn:
+        """Clears data from NRF relation departed."""
         self.state.nrf_host = None
-        self.on.configure_pod.emit()
+        self.configure_pod()
 
     def _missing_relations(self) -> str:
         """Checks if there missing relations.
 
         Returns:
-            str: string with missing relations
+            str: string with missing relations.
         """
         data_status = {"nrf": self.state.nrf_host}
         missing_relations = [k for k, v in data_status.items() if not v]
@@ -148,13 +116,8 @@ class AmfCharm(CharmBase):
 
         return relation_state
 
-    def configure_pod(self, event: EventBase) -> NoReturn:
-        """Assemble the pod spec and apply it, if possible.
-        Args:
-            event (EventBase): Hook or Relation event that started the
-                               function.
-        """
-        logging.info(event)
+    def configure_pod(self, _=None) -> NoReturn:
+        """Assemble the pod spec and apply it, if possible."""
         missing = self._missing_relations()
         if missing:
             status = "Waiting for {0} relation{1}"
@@ -176,18 +139,23 @@ class AmfCharm(CharmBase):
             self.unit.status = BlockedStatus("Error fetching image information")
             return
 
-        pod_spec = make_pod_spec(
-            image_info,
-            self.model.config,
-            self.model.app.name,
-        )
+        try:
+            pod_spec = make_pod_spec(
+                image_info,
+                self.model.config,
+                self.model.app.name,
+            )
+        except ValueError as exc:
+            logger.exception("Config/Relation data validation error")
+            self.unit.status = BlockedStatus(str(exc))
+            return
 
         if self.state.pod_spec != pod_spec:
             self.model.pod.set_spec(pod_spec)
             self.state.pod_spec = pod_spec
 
         self.unit.status = ActiveStatus("ready")
-        self.on.publish_amf_info.emit()
+        self.publish_amf_info()
 
 
 if __name__ == "__main__":

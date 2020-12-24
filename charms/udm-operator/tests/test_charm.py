@@ -19,7 +19,7 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-""" UDM test script for charm.py """
+"""UDM test script for charm.py"""
 
 import unittest
 
@@ -31,10 +31,10 @@ from charm import UdmCharm
 
 
 class TestCharm(unittest.TestCase):
-    """ Test script for checking relations """
+    """Test script for checking relations"""
 
     def setUp(self) -> NoReturn:
-        """Test setup"""
+        """Test setup."""
         self.harness = Harness(UdmCharm)
         self.harness.set_leader(is_leader=True)
         self.harness.begin()

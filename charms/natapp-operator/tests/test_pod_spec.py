@@ -19,7 +19,7 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-""" test script for pod spec.py """
+"""test script for pod spec.py"""
 from typing import NoReturn
 import unittest
 
@@ -43,17 +43,18 @@ class TestPodSpec(unittest.TestCase):
         portdict = {
             "natapp_port": 9999,
         }
-        # pylint:disable=W0212
         pod_ports = pod_spec._make_pod_ports(portdict)
 
         self.assertListEqual(expected_result, pod_ports)
 
     def test_make_pod_podannotations(self) -> NoReturn:
         """Testing make pod envconfig configuration."""
-        # pylint:disable=line-too-long
-        networks = '[\n{\n"name" : "n6-network",\n"interface": "eth1",\n"ips": ["192.168.1.216"]\n}]'  # noqa
-        expected_result = {"annotations": {"k8s.v1.cni.cncf.io/networks": networks}}
-        # pylint:disable=W0212
+        expected_result = {
+            "annotations": {
+                "k8s.v1.cni.cncf.io/networks": '[\n{\n"name" : "n6-network",'
+                '\n"interface": "eth1",\n"ips": ["192.168.1.216"]\n}\n]'
+            }
+        }
         pod_annotation = pod_spec._make_pod_podannotations()
         self.assertDictEqual(expected_result, pod_annotation)
 
@@ -61,7 +62,6 @@ class TestPodSpec(unittest.TestCase):
         """Testing make pod command."""
 
         expected_result = ["./start.sh", "&"]
-        # pylint:disable=W0212
         pod_command = pod_spec._make_pod_command()
         self.assertEqual(expected_result, pod_command)
 
@@ -69,12 +69,17 @@ class TestPodSpec(unittest.TestCase):
         """Testing make pod envconfig configuration."""
 
         expected_result = {"securityContext": {"privileged": True}}
-        # pylint:disable=W0212
         pod_privilege = pod_spec._make_pod_privilege()
         self.assertDictEqual(expected_result, pod_privilege)
 
+    def test_validate_config(self) -> NoReturn:
+        """Testing config data scenario."""
+        config = {"natapp_port": -2}
+        with self.assertRaises(ValueError):
+            pod_spec._validate_config(config)
+
     def test_make_pod_spec(self) -> NoReturn:
-        """Testing make pod spec"""
+        """Testing make pod spec."""
         image_info = {"upstream-source": "localhost:32000/free5gc-natapp:1.0"}
         config = {
             "natapp_port": -2,

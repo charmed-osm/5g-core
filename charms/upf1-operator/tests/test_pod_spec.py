@@ -19,7 +19,7 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-""" test script for pod spec.py """
+"""test script for pod spec.py"""
 
 from typing import NoReturn
 import unittest
@@ -40,20 +40,18 @@ class TestPodSpec(unittest.TestCase):
             }
         ]
         dictport = {"gtp_port": 2152}
-        # pylint:disable=W0212
         pod_ports = pod_spec._make_pod_ports(dictport)
         self.assertListEqual(expected_result, pod_ports)
 
     def test_make_pod_command(self) -> NoReturn:
-        """Testing make pod command"""
+        """Testing make pod command."""
 
-        expected_result = ["./free5gc-upfd", "-f", "../config/upfcfg.yaml", "&"]
-        # pylint:disable=W0212
+        expected_result = ["./upf_start.sh", "&"]
         pod_command = pod_spec._make_pod_command()
         self.assertEqual(expected_result, pod_command)
 
     def test_make_pod_services(self) -> NoReturn:
-        """Teting make pod envconfig configuration."""
+        """Teting make pod services."""
         appname = "upf1"
         expected_result = [
             {
@@ -72,12 +70,11 @@ class TestPodSpec(unittest.TestCase):
                 },
             }
         ]
-        # pylint:disable=W0212
         pod_services = pod_spec._make_pod_services(appname)
         self.assertEqual(expected_result, pod_services)
 
     def test_make_pod_custom_resource_definitions(self) -> NoReturn:
-        """Teting make pod privilege"""
+        """Teting make pod custom resource definitions."""
         expected_result = [
             {
                 "name": "network-attachment-definitions.k8s.cni.cncf.io",
@@ -93,14 +90,13 @@ class TestPodSpec(unittest.TestCase):
                 },
             }
         ]
-        # pylint:disable=W0212
         pod_custom_resource_definitions = (
             pod_spec._make_pod_custom_resource_definitions()
         )
         self.assertEqual(expected_result, pod_custom_resource_definitions)
 
     def test_make_pod_custom_resources(self) -> NoReturn:
-        """Testing make pod customResources"""
+        """Testing make pod customResources."""
         expected_result = {
             "network-attachment-definitions.k8s.cni.cncf.io": [
                 {
@@ -108,39 +104,51 @@ class TestPodSpec(unittest.TestCase):
                     "kind": "NetworkAttachmentDefinition",
                     "metadata": {"name": "n6-network"},
                     "spec": {
-                        # pylint:disable=line-too-long
-                        "config": '{\n"cniVersion": "0.3.1",\n"name": "n6-network",\n"type": "macvlan",\n"master": "ens3",\n"mode": "bridge",\n"ipam": {\n"type": "host-local",\n"subnet": "192.168.0.0/16",\n"rangeStart": "192.168.1.100",\n"rangeEnd": "192.168.1.250",\n"gateway": "192.168.1.1"\n}\n}'  # noqa
+                        "config": '{"cniVersion": "0.3.1",'
+                        '\n"name": "n6-network",'
+                        '\n"type": "macvlan",'
+                        '\n"master": "ens3",'
+                        '\n"mode": "bridge",'
+                        '\n"ipam": {"type": "host-local",'
+                        '\n"subnet": "192.168.0.0/16",'
+                        '\n"rangeStart": "192.168.1.100",'
+                        '\n"rangeEnd": "192.168.1.250",'
+                        '\n"gateway": "192.168.1.1"\n}\n}'
                     },
                 }
             ]
         }
-        # pylint:disable=W0212
         pod_custom_resources = pod_spec._make_pod_custom_resources()
         self.assertEqual(expected_result, pod_custom_resources)
 
     def test_make_pod_podannotations(self) -> NoReturn:
-        """Testing make pod privilege"""
-        # pylint:disable=line-too-long
-        networks = '[\n{\n"name" : "n6-network",\n"interface": "eth1",\n"ips": ["192.168.1.215"]\n}]'  # noqa
+        """Testing make pod annotations."""
         expected_result = {
-            "annotations": {"k8s.v1.cni.cncf.io/networks": networks},
+            "annotations": {
+                "k8s.v1.cni.cncf.io/networks": '[\n{\n"name" : "n6-network",'
+                '\n"interface": "eth1",\n"ips": ["192.168.1.215"]\n}\n]'
+            },
             "securityContext": {"runAsUser": 0000, "runAsGroup": 0000},
         }
-        # pylint:disable=W0212
         pod_podannotations = pod_spec._make_pod_podannotations()
         self.assertDictEqual(expected_result, pod_podannotations)
 
     def test_make_pod_privilege(self) -> NoReturn:
-        """Teting make pod privilege"""
+        """Teting make pod privilege."""
         expected_result = {
             "securityContext": {"privileged": True},
         }
-        # pylint:disable=W0212
         pod_privilege = pod_spec._make_pod_privilege()
         self.assertDictEqual(expected_result, pod_privilege)
 
+    def test_validate_config(self) -> NoReturn:
+        """Testing validate config."""
+        config = {"gtp_port": 1234}
+        with self.assertRaises(ValueError):
+            pod_spec._validate_config(config)
+
     def test_make_pod_spec(self) -> NoReturn:
-        """Testing make pod spec"""
+        """Testing make pod spec."""
         image_info = {"upstream-source": "localhost:32000/free5gc-upf1:1.0"}
         config = {
             "gtp_port": 9999,

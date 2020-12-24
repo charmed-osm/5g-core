@@ -19,7 +19,7 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-""" SMF test script for charm.py """
+"""SMF test script for charm.py"""
 
 import unittest
 
@@ -31,10 +31,10 @@ from charm import SmfCharm
 
 
 class TestCharm(unittest.TestCase):
-    """ Test script for checking pod spec and relations """
+    """Test script for checking pod spec and relations"""
 
     def setUp(self) -> NoReturn:
-        """Test setup"""
+        """Test setup."""
         self.harness = Harness(SmfCharm)
         self.harness.set_leader(is_leader=True)
         self.harness.begin()
@@ -92,7 +92,7 @@ class TestCharm(unittest.TestCase):
         upf_relation_id = self.harness.add_relation("upf", "upf")
         self.harness.add_relation_unit(upf_relation_id, "upf/0")
         self.harness.update_relation_data(
-            upf_relation_id, "upf", {"private_address": "10.45.30.27"}
+            upf_relation_id, "upf/0", {"private_address": "10.45.30.27"}
         )
 
         # Checking if nrf,upf data is stored
@@ -115,7 +115,7 @@ class TestCharm(unittest.TestCase):
         upf_relation_id = self.harness.add_relation("upf", "upf")
         self.harness.add_relation_unit(upf_relation_id, "upf/0")
         self.harness.update_relation_data(
-            upf_relation_id, "upf", {"private_address": "upf"}
+            upf_relation_id, "upf/0", {"private_address": "upf"}
         )
 
         # Verifying status

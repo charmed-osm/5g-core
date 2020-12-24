@@ -22,5 +22,6 @@
 options:
   mongo_port:
     type: int
-    description: 'mongo_port holds all subscriber information'
+    description: |
+        mongo_port holds all subscriber information
     default: 27017

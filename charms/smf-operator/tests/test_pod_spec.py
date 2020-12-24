@@ -19,7 +19,7 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-""" test script for pod spec.py """
+"""test script for pod spec.py"""
 from typing import NoReturn
 import unittest
 import pod_spec
@@ -39,19 +39,9 @@ class TestPodSpec(unittest.TestCase):
                 "protocol": "TCP",
             }
         ]
-        # pylint:disable=W0212
         pod_ports = pod_spec._make_pod_ports()
 
         self.assertListEqual(expected_result, pod_ports)
-
-    def test_check_data(self) -> NoReturn:
-        """Testing check data."""
-        expected_result = True
-        config = {"gin_mode": "release"}
-        relation = {"upf_host": "127.0.0.1"}
-        # pylint:disable=W0212
-        check_data = pod_spec._check_data(config, relation)
-        self.assertEqual(expected_result, check_data)
 
     def test_make_pod_envconfig(self) -> NoReturn:
         """Testing make pod envconfig configuration."""
@@ -62,19 +52,29 @@ class TestPodSpec(unittest.TestCase):
         }
         mode = {"gin_mode": "release"}
         ipadd = {"upf_host": "127.0.0.1"}
-        # pylint:disable=W0212
         pod_envconfig = pod_spec._make_pod_envconfig(mode, ipadd)
         self.assertDictEqual(expected_result, pod_envconfig)
 
     def test_make_pod_command(self) -> NoReturn:
         """Testing make pod command."""
         expected_result = ["./ipscript.sh", "&"]
-        # pylint:disable=W0212
         pod_command = pod_spec._make_pod_command()
         self.assertEqual(expected_result, pod_command)
 
+    def test_validate_config(self) -> NoReturn:
+        """Testing config data scenario."""
+        config = {"gin_mode": "xyz"}
+        with self.assertRaises(ValueError):
+            pod_spec._validate_config(config)
+
+    def test_validate_relation(self) -> NoReturn:
+        """Testing relation data scenario."""
+        relation_state = {"upf_host": "xyz"}
+        with self.assertRaises(ValueError):
+            pod_spec._validate_relation_state(relation_state)
+
     def test_make_pod_spec(self) -> NoReturn:
-        """Testing make pod spec"""
+        """Testing make pod spec."""
         image_info = {"upstream-source": "localhost:32000/free5gc-smf:1.0"}
         config = {
             "gin_mode": "release",

@@ -20,21 +20,27 @@
 ##
 ---
 name: mongodb
-description: Charm for MongoDb
-summary: Charm for MongoDb
+summary: mongodb deploys the MongoDB as a microk8s pod
+maintainers:
+    - Tata Elxsi <canonical@tataelxsi.onmicrosoft.com>
+description: |
+    mongodb deploys the DataBase - MongoDB,
+    as a microk8s based pod.
+    Mongodb exposes port using load balancer for communication.
+    IMSI/Subscriber information is mainted here through Action.
+    All components information are maintained here.
 tags:
     - 5gcore
 series:
     - kubernetes
+min-juju-version: 2.8.2
 deployment:
     type: stateful
     service: loadbalancer
-
 resources:
     image:
         type: oci-image
         description: docker image for MongoDB
-
 provides:
     mongodb:
         interface: mongodb

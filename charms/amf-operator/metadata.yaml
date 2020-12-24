@@ -20,12 +20,19 @@
 ##
 ---
 name: amf
-description: Charm for AMF
-summary: Charm for AMF
+summary: AMF deploys the AMF as a microk8s pod
+maintainers:
+    - Tata Elxsi <canonical@tataelxsi.onmicrosoft.com>
+description: |
+    amf deploys the free5gc developed 5g AMF,
+    as a microk8s based pod.
+    SCTP port is exposed using loadbalancer,
+    which is used for control plane communication with RAN
 tags:
     - 5gcore
 series:
     - kubernetes
+min-juju-version: 2.8.2
 deployment:
     type: stateful
     service: cluster

@@ -19,13 +19,13 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-""" Defining pcf charm events """
+"""Defining pcf charm events"""
 
 import logging
 from typing import NoReturn, Any, Dict
-from ops.charm import CharmBase, CharmEvents
+from ops.charm import CharmBase
 from ops.main import main
-from ops.framework import StoredState, EventBase, EventSource
+from ops.framework import StoredState, EventBase
 from ops.model import ActiveStatus, BlockedStatus, MaintenanceStatus
 
 from oci_image import OCIImageResource, OCIImageResourceError
@@ -35,26 +35,13 @@ from pod_spec import make_pod_spec
 logger = logging.getLogger(__name__)
 
 
-class ConfigurePodEvent(EventBase):
-    """Configure Pod event"""
-
-
-class PcfEvents(CharmEvents):
-    """PCF Events"""
-
-    configure_pod = EventSource(ConfigurePodEvent)
-
-
-logger = logging.getLogger(__name__)
-
-
 class PcfCharm(CharmBase):
-    """ PCF charm events class definition """
+    """PCF charm events class definition"""
 
     state = StoredState()
-    on = PcfEvents()
 
     def __init__(self, *args):
+        """PCF charm constructor."""
         super().__init__(*args)
         self.state.set_default(pod_spec=None)
 
@@ -63,10 +50,6 @@ class PcfCharm(CharmBase):
         # Registering regular events
         self.framework.observe(self.on.start, self.configure_pod)
         self.framework.observe(self.on.config_changed, self.configure_pod)
-        self.framework.observe(self.on.upgrade_charm, self.configure_pod)
-
-        # Registering custom internal events
-        self.framework.observe(self.on.configure_pod, self.configure_pod)
 
         # Registering required relation changed events
         self.framework.observe(
@@ -89,8 +72,7 @@ class PcfCharm(CharmBase):
         )
 
         # -- initialize states --
-        self.state.set_default(amf_host=None)
-        self.state.set_default(nrf_host=None)
+        self.state.set_default(amf_host=None, nrf_host=None)
 
     def _on_amf_relation_changed(self, event: EventBase) -> NoReturn:
         """Reads information about the AMF relation.
@@ -100,24 +82,16 @@ class PcfCharm(CharmBase):
         """
         if event.app not in event.relation.data:
             return
-        # data_loc = event.unit if event.unit else event.app
 
         amf_host = event.relation.data[event.app].get("hostname")
-        logging.info("PCF Requires From AMF")
-        logging.info(amf_host)
         if amf_host and self.state.amf_host != amf_host:
             self.state.amf_host = amf_host
-            self.on.configure_pod.emit()
+            self.configure_pod()
 
-    def _on_amf_relation_departed(self, event: EventBase) -> NoReturn:
-        """Clears data from AMF relation.
-
-        Args:
-            event (EventBase): AMF relation event.
-        """
-        logging.info(event)
+    def _on_amf_relation_departed(self, _=None) -> NoReturn:
+        """Clears data from AMF relation departed."""
         self.state.amf_host = None
-        self.on.configure_pod.emit()
+        self.configure_pod()
 
     def _on_nrf_relation_changed(self, event: EventBase) -> NoReturn:
         """Reads information about the NRF relation.
@@ -127,24 +101,16 @@ class PcfCharm(CharmBase):
         """
         if event.app not in event.relation.data:
             return
-        # data_loc = event.unit if event.unit else event.app
 
         nrf_host = event.relation.data[event.app].get("hostname")
-        logging.info("PCF Requires From NRF")
-        logging.info(nrf_host)
         if nrf_host and self.state.nrf_host != nrf_host:
             self.state.nrf_host = nrf_host
-            self.on.configure_pod.emit()
+            self.configure_pod()
 
-    def _on_nrf_relation_departed(self, event: EventBase) -> NoReturn:
-        """Clears data from NRF relation.
-
-        Args:
-            event (EventBase): NRF relation event.
-        """
-        logging.info(event)
+    def _on_nrf_relation_departed(self, _=None) -> NoReturn:
+        """Clears data from NRF relation."""
         self.state.nrf_host = None
-        self.on.configure_pod.emit()
+        self.configure_pod()
 
     def _missing_relations(self) -> str:
         """Checks if there missing relations.
@@ -170,13 +136,8 @@ class PcfCharm(CharmBase):
 
         return relation_state
 
-    def configure_pod(self, event: EventBase) -> NoReturn:
-        """Assemble the pod spec and apply it, if possible.
-        Args:
-            event (EventBase): Hook or Relation event that started the
-                               function.
-        """
-        logging.info(event)
+    def configure_pod(self, _=None) -> NoReturn:
+        """Assemble the pod spec and apply it, if possible."""
         missing = self._missing_relations()
         if missing:
             status = "Waiting for {0} relation{1}"

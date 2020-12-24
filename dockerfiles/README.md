@@ -18,7 +18,8 @@
  To get in touch with the maintainers, please contact:
  canonical@tataelxsi.onmicrosoft.com
 -->
-# 5g-core dockerfiles
+
+# 5G-Core dockerfiles
 
 The current directory holds the dockerfiles for core components
 
@@ -26,10 +27,12 @@ The current directory holds the dockerfiles for core components
 
 Consists of 12 components dockerfiles, 1 base dockerfile and a base Makefile.
 
-Base Dockerfile and Makefile:
-Used to build the free5gc base image. This image would be used as base image to build all the free5gc components.
+### Base Dockerfile and Makefile
 
-Component Dockerfiles:
+Used to build the free5gc base image. This image would be
+used as base image to build all the free5gc components.
+
+### Component Dockerfiles
 
 * amf
 * ausf
@@ -44,27 +47,36 @@ Component Dockerfiles:
 * upf
 * webui
 
-## Prerequisites
-
-Install docker-compose using the below command
-
-sudo curl -L "https://github.com/docker/compose/releases/download/1.25.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-
-Build base image for free5gc components
-
-sudo make base
-
 ## Usage
 
-To build all components Images
+To build images of all the 5G Core Components,
 
-sudo docker-compose build
+```bash
+cd ..
+./build_docker_images.sh
+```
+
+To push the built images to registry,
+
+```bash
+docker push localhost:32000/free5gc-mongo:1.0
+docker push localhost:32000/free5gc-nrf:1.0
+docker push localhost:32000/free5gc-amf:1.0
+docker push localhost:32000/free5gc-ausf:1.0
+docker push localhost:32000/free5gc-nssf:1.0
+docker push localhost:32000/free5gc-udm:1.0
+docker push localhost:32000/free5gc-udr:1.0
+docker push localhost:32000/free5gc-pcf:1.0
+docker push localhost:32000/free5gc-upf-1:1.0
+docker push localhost:32000/free5gc-webui:1.0
+docker push localhost:32000/free5gc-smf:1.0
+docker push localhost:32000/free5gc-natapp:1.0
+```
 
 ## Exposed Ports
 
 ----------------------------------------------------------
-|     NF       |   Exposed Ports  | Dependencies         |        
+|     NF       |   Exposed Ports  | Dependencies         |
 ----------------------------------------------------------
 |    amf       |      29518       |   nrf                |
 ----------------------------------------------------------
@@ -86,7 +98,7 @@ sudo docker-compose build
 ----------------------------------------------------------
 |   webui      |      5000        |   mongodb            |
 ----------------------------------------------------------
-|   mongodb    |      27017       |   N/A                | 
+|   mongodb    |      27017       |   N/A                |
 ----------------------------------------------------------
 |   natapp     |      N/A         |   upf                |
 ----------------------------------------------------------

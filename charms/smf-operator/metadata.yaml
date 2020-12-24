@@ -20,12 +20,19 @@
 ##
 ---
 name: smf
-description: Charm for SMF
-summary: Charm for SMF
+summary: SMF deploys the SMF as a microk8s pod
+maintainers:
+    - Tata Elxsi <canonical@tataelxsi.onmicrosoft.com>
+description: |
+    smf deploys the free5gc developed 5g SMF,
+    as a microk8s based pod.
+    Session Management function(SMF) is used for interacting
+    with data plane and creating and managing PDU sessions
 tags:
     - 5gcore
 series:
     - kubernetes
+min-juju-version: 2.8.2
 deployment:
     type: stateful
     service: cluster
@@ -33,7 +40,6 @@ resources:
     image:
         type: oci-image
         description: docker image for SMF
-
 requires:
     upf:
         interface: upf

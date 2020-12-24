@@ -19,7 +19,7 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-""" NRF test script for charm.py """
+"""NRF test script for charm.py"""
 
 import unittest
 
@@ -31,10 +31,10 @@ from charm import NrfCharm
 
 
 class TestCharm(unittest.TestCase):
-    """ Test script for checking relations """
+    """Test script for checking relations"""
 
     def setUp(self) -> NoReturn:
-        """Test setup"""
+        """Test setup."""
         self.harness = Harness(NrfCharm)
         self.harness.set_leader(is_leader=True)
         self.harness.begin()
@@ -74,7 +74,7 @@ class TestCharm(unittest.TestCase):
                         "MONGODB_URI": "mongodb://mongodb/free5gc",
                         "GIN_MODE": "release",
                     },
-                    "command": ["./nrf", "-nrfcfg", "../config/nrfcfg.conf", "&"],
+                    "command": ["./nrf_start.sh", "&"],
                 }
             ],
         }
@@ -87,9 +87,7 @@ class TestCharm(unittest.TestCase):
         self.harness.add_relation_unit(nrf_relation_id, "mongodb/0")
         self.harness.update_relation_data(
             nrf_relation_id,
-            "mongodb",
-            {"hostname": "mongodb", "mongodb_uri": "mongodb://mongodb/free5gc"},  # noqa
-        )
+            "mongodb", {"hostname": "mongodb", "mongodb_uri": "mongodb://mongodb/free5gc"},)
 
         # Checking if nrf data is stored
         self.assertEqual(self.harness.charm.state.mongodb_host, "mongodb")
@@ -114,8 +112,7 @@ class TestCharm(unittest.TestCase):
         self.harness.update_relation_data(
             relation_id,
             "mongodb",
-            {"hostname": "mongodb", "mongodb_uri": "mongodb://mongodb/free5gc"},  # noqa
-        )
+            {"hostname": "mongodb", "mongodb_uri": "mongodb://mongodb/free5gc"},)
 
         self.assertEqual(self.harness.charm.state.mongodb_host, "mongodb")
         self.assertEqual(
@@ -139,7 +136,7 @@ class TestCharm(unittest.TestCase):
 
         relation_id = self.harness.add_relation("nrf", "amf")
         self.harness.add_relation_unit(relation_id, "amf/0")
-        self.harness.charm.on.publish_nrf_info.emit()
+        self.harness.charm.publish_nrf_info()
         relation_data = self.harness.get_relation_data(relation_id, "nrf")
         self.assertDictEqual(expected_result, relation_data)
 

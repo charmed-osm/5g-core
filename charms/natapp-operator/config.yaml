@@ -23,4 +23,5 @@ options:
     natapp_port:
         type: int
         default: 2601
-        description: "natapp_port exposes natapp process"
+        description: |
+            natapp_port exposes natapp process

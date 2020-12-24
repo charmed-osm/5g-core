@@ -19,7 +19,7 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-""" NatApp test script for charm.py """
+"""NatApp test script for charm.py"""
 
 import unittest
 from typing import NoReturn
@@ -33,10 +33,10 @@ from charm import NatappCharm
 
 
 class TestCharm(unittest.TestCase):
-    """ Test script for checking relations """
+    """Test script for checking relations"""
 
     def setUp(self) -> NoReturn:
-        """Test setup"""
+        """Test setup."""
         self.harness = Harness(NatappCharm)
         self.harness.set_leader(is_leader=True)
         self.harness.begin()
@@ -57,9 +57,12 @@ class TestCharm(unittest.TestCase):
     def test_on_start_with_relations(self) -> NoReturn:
         """Test installation with any relation."""
         self.harness.charm.on.start.emit()
-        # pylint:disable=line-too-long
-        networks = '[\n{\n"name" : "n6-network",\n"interface": "eth1",\n"ips": ["192.168.1.216"]\n}]'  # noqa
-        annot = {"annotations": {"k8s.v1.cni.cncf.io/networks": networks}}
+        annot = {
+            "annotations": {
+                "k8s.v1.cni.cncf.io/networks": '[\n{\n"name" : "n6-network",'
+                '\n"interface": "eth1",\n"ips": ["192.168.1.216"]\n}\n]'
+            }
+        }
         expected_result = {
             "version": 3,
             "containers": [
@@ -87,7 +90,7 @@ class TestCharm(unittest.TestCase):
         upf_relation_id = self.harness.add_relation("upf", "upf")
         self.harness.add_relation_unit(upf_relation_id, "upf/0")
         self.harness.update_relation_data(
-            upf_relation_id, "upf", {"private_address": "upf"}
+            upf_relation_id, "upf/0", {"private_address": "upf"}
         )
 
         # Checking if nrf data is stored
@@ -108,7 +111,7 @@ class TestCharm(unittest.TestCase):
         upf_relation_id = self.harness.add_relation("upf", "upf")
         self.harness.add_relation_unit(upf_relation_id, "upf/0")
         self.harness.update_relation_data(
-            upf_relation_id, "upf", {"private_address": "upf"}
+            upf_relation_id, "upf/0", {"private_address": "upf"}
         )
 
         self.assertEqual(self.harness.charm.state.upf_host, "upf")

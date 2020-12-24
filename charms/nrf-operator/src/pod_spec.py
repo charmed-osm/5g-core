@@ -19,7 +19,7 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-""" Pod spec for NRF charm """
+"""Pod spec for NRF charm"""
 
 import logging
 from typing import Any, Dict, List
@@ -30,48 +30,61 @@ NRF_PORT = 29510
 
 def _make_pod_ports() -> List[Dict[str, Any]]:
     """Generate pod ports details.
-    Args:
-        port (int): port to expose.
+
     Returns:
         List[Dict[str, Any]]: pod port details.
     """
     return [{"name": "nrf", "containerPort": NRF_PORT, "protocol": "TCP"}]
 
 
-def _check_data(config: Dict[str, Any], relation_state: Dict[str, Any]) -> bool:
-    if relation_state["mongodb_uri"] != "mongodb://mongodb/free5gc":
-        if config["gin_mode"] != "release" and config["gin_mode"] != "debug":
-            raise ValueError("Invalid gin_mode and invalid db_uri")
-        raise ValueError("Invalid mongodb_uri")
-    if config["gin_mode"] != "release" and config["gin_mode"] != "debug":
-        raise ValueError("Invalid gin_mode")
-    return True
-
-
 def _make_pod_envconfig(
     config: Dict[str, Any], relation_state: Dict[str, Any]
 ) -> Dict[str, Any]:
     """Generate pod environment configuration.
+
     Args:
         config (Dict[str, Any]): configuration information.
         relation_state (Dict[str, Any]): relation state information.
+
     Returns:
         Dict[str, Any]: pod environment configuration.
     """
-    envconfig = {}
-    if _check_data(config, relation_state):
-        envconfig = {
-            # General configuration
-            "ALLOW_ANONYMOUS_LOGIN": "yes",
-            "GIN_MODE": config["gin_mode"],
-            "MONGODB_URI": relation_state["mongodb_uri"],
-        }
-
-    return envconfig
+    return {
+        "ALLOW_ANONYMOUS_LOGIN": "yes",
+        "GIN_MODE": config["gin_mode"],
+        "MONGODB_URI": relation_state["mongodb_uri"],
+    }
 
 
 def _make_pod_command() -> List[str]:
-    return ["./nrf", "-nrfcfg", "../config/nrfcfg.conf", "&"]
+    """Generate pod command.
+
+    Returns:
+        List[str]:pod command.
+    """
+    return ["./nrf_start.sh", "&"]
+
+
+def _validate_config(config: Dict[str, Any]):
+    """Validate config data.
+
+    Args:
+        config (Dict[str, Any]): configuration information.
+    """
+    valid_gin_modes = ["release", "debug"]
+    if config.get("gin_mode") not in valid_gin_modes:
+        raise ValueError("Invalid gin_mode")
+
+
+def _validate_relation_state(relation_state: Dict[str, Any]):
+    """Validate relation data.
+
+    Args:
+        relation (Dict[str, Any]): relation information.
+    """
+    uri = relation_state.get("mongodb_uri")
+    if not uri or not isinstance(uri, str) or not uri.startswith("mongodb://"):
+        raise ValueError("Invalid mongodb_uri")
 
 
 def make_pod_spec(
@@ -81,18 +94,22 @@ def make_pod_spec(
     app_name: str,
 ) -> Dict[str, Any]:
     """Generate the pod spec information.
+
     Args:
         image_info (Dict[str, str]): Object provided by
                                      OCIImageResource("image").fetch().
         config (Dict[str, Any]): Configuration information.
         relation_state (Dict[str, Any]): Relation state information.
         app_name (str, optional): Application name. Defaults to "pol".
-        port (int, optional): Port for the container. Defaults to 80.
+
     Returns:
         Dict[str, Any]: Pod spec dictionary for the charm.
     """
     if not image_info:
         return None
+
+    _validate_config(config)
+    _validate_relation_state(relation_state)
     env_config = _make_pod_envconfig(config, relation_state)
     if not env_config:
         raise ValueError("Env config Value Error")

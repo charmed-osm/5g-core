@@ -19,12 +19,12 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-""" Defining amf charm events """
+"""Defining amf charm events"""
 import logging
 from typing import Any, Dict, NoReturn
-from ops.charm import CharmBase, CharmEvents
+from ops.charm import CharmBase
 from ops.main import main
-from ops.framework import StoredState, EventBase, EventSource
+from ops.framework import StoredState, EventBase
 from ops.model import ActiveStatus, BlockedStatus, MaintenanceStatus
 
 from oci_image import OCIImageResource, OCIImageResourceError
@@ -35,23 +35,13 @@ from pod_spec import make_pod_spec
 logger = logging.getLogger(__name__)
 
 
-class ConfigurePodEvent(EventBase):
-    """Configure Pod event"""
-
-
-class AusfEvents(CharmEvents):
-    """AUSF Events"""
-
-    configure_pod = EventSource(ConfigurePodEvent)
-
-
 class AusfCharm(CharmBase):
-    """ AUSF charm events class definition """
+    """AUSF charm events class definition"""
 
     state = StoredState()
-    on = AusfEvents()
 
     def __init__(self, *args):
+        """AUSF charm constructor."""
         super().__init__(*args)
         self.state.set_default(pod_spec=None)
 
@@ -60,12 +50,6 @@ class AusfCharm(CharmBase):
         # Registering regular events
         self.framework.observe(self.on.start, self.configure_pod)
         self.framework.observe(self.on.config_changed, self.configure_pod)
-        self.framework.observe(self.on.upgrade_charm, self.configure_pod)
-        self.framework.observe(self.on.leader_elected, self.configure_pod)
-        self.framework.observe(self.on.update_status, self.configure_pod)
-
-        # Registering custom internal events
-        self.framework.observe(self.on.configure_pod, self.configure_pod)
 
         # Registering required relation changed events
         self.framework.observe(
@@ -88,24 +72,16 @@ class AusfCharm(CharmBase):
         """
         if event.app not in event.relation.data:
             return
-        # data_loc = event.unit if event.unit else event.app
 
         nrf_host = event.relation.data[event.app].get("hostname")
-        logging.info("AUSF Requires From NRF")
-        logging.info(nrf_host)
         if nrf_host and self.state.nrf_host != nrf_host:
             self.state.nrf_host = nrf_host
-            self.on.configure_pod.emit()
+            self.configure_pod()
 
-    def _on_nrf_relation_departed(self, event: EventBase) -> NoReturn:
-        """Clears data from NRF relation.
-
-        Args:
-            event (EventBase): NRF relation event.
-        """
-        logging.info(event)
+    def _on_nrf_relation_departed(self, _=None) -> NoReturn:
+        """Clears data from NRF relation."""
         self.state.nrf_host = None
-        self.on.configure_pod.emit()
+        self.configure_pod()
 
     def _missing_relations(self) -> str:
         """Checks if there missing relations.
@@ -128,13 +104,8 @@ class AusfCharm(CharmBase):
 
         return relation_state
 
-    def configure_pod(self, event: EventBase) -> NoReturn:
-        """Assemble the pod spec and apply it, if possible.
-        Args:
-            event (EventBase): Hook or Relation event that started the
-                               function.
-        """
-        logging.info(event)
+    def configure_pod(self, _=None) -> NoReturn:
+        """Assemble the pod spec and apply it, if possible."""
         missing = self._missing_relations()
         if missing:
             status = "Waiting for {0} relation{1}"
@@ -156,11 +127,16 @@ class AusfCharm(CharmBase):
             self.unit.status = BlockedStatus("Error fetching image information")
             return
 
-        pod_spec = make_pod_spec(
-            image_info,
-            self.model.config,
-            self.model.app.name,
-        )
+        try:
+            pod_spec = make_pod_spec(
+                image_info,
+                self.model.config,
+                self.model.app.name,
+            )
+        except ValueError as exc:
+            logger.exception("Config/Relation data validation error")
+            self.unit.status = BlockedStatus(str(exc))
+            return
 
         if self.state.pod_spec != pod_spec:
             self.model.pod.set_spec(pod_spec)

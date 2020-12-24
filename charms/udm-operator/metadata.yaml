@@ -20,12 +20,19 @@
 ##
 ---
 name: udm
-description: Charm for UDM
-summary: Charm for UDM
+summary: udm deploys the udm as a microk8s pod
+maintainers:
+    - Tata Elxsi <canonical@tataelxsi.onmicrosoft.com>
+description: |
+    udm deploys the free5gc developed 5g UDM,
+    as a microk8s based pod.
+    Unified Data management(UDM) manages user data in a centralized manner.
+    Manages data for user registration, authorization and networks.
 tags:
     - 5gcore
 series:
     - kubernetes
+min-juju-version: 2.8.2
 deployment:
     type: stateful
     service: cluster

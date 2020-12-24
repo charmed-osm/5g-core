@@ -19,13 +19,13 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-""" Defining mongodb charm events """
+"""Defining mongodb charm events"""
 
 import logging
 from typing import NoReturn
-from ops.charm import CharmBase, CharmEvents
+from ops.charm import CharmBase
 from ops.main import main
-from ops.framework import StoredState, EventBase, EventSource
+from ops.framework import StoredState, EventBase
 from ops.model import ActiveStatus, BlockedStatus, MaintenanceStatus
 
 from oci_image import OCIImageResource, OCIImageResourceError
@@ -35,23 +35,13 @@ from pod_spec import make_pod_spec
 logger = logging.getLogger(__name__)
 
 
-class ConfigurePodEvent(EventBase):
-    """Configure Pod event"""
-
-
-class MongodbEvents(CharmEvents):
-    """MongoDB Events"""
-
-    configure_pod = EventSource(ConfigurePodEvent)
-
-
 class MongodbCharm(CharmBase):
-    """ MongoDB charm events class definition """
+    """MongoDB charm events class definition"""
 
     state = StoredState()
-    on = MongodbEvents()
 
     def __init__(self, *args):
+        """Mongodb charm constructor."""
         super().__init__(*args)
         # Internal state initialization
         self.state.set_default(pod_spec=None)
@@ -61,12 +51,6 @@ class MongodbCharm(CharmBase):
         # Registering regular events
         self.framework.observe(self.on.start, self.configure_pod)
         self.framework.observe(self.on.config_changed, self.configure_pod)
-        self.framework.observe(self.on.upgrade_charm, self.configure_pod)
-        self.framework.observe(self.on.leader_elected, self.configure_pod)
-        self.framework.observe(self.on.update_status, self.configure_pod)
-
-        # Registering custom internal events
-        self.framework.observe(self.on.configure_pod, self.configure_pod)
 
         # Registering required relation joined events
         self.framework.observe(
@@ -76,27 +60,20 @@ class MongodbCharm(CharmBase):
     def _publish_mongodb_info(self, event: EventBase) -> NoReturn:
         """Publishes MongoDB information for NRF
           relation.7
+
         Args:
              event (EventBase): MongoDB relation event to update NRF.
         """
-        logging.info("MongoDB Provides to NRF")
-        logging.info(self.model.app.name)
-
         if self.unit.is_leader():
             rel_data = {
                 "hostname": self.model.app.name,
-                "mongodb_uri": "mongodb://mongodb/free5gc",
+                "mongodb_uri": f"mongodb://{self.model.app.name}:27017",
             }
             for k, param in rel_data.items():
                 event.relation.data[self.model.app][k] = param
 
-    def configure_pod(self, event: EventBase) -> NoReturn:
-        """Assemble the pod spec and apply it, if possible.
-        Args:
-            event (EventBase): Hook or Relation event that started the
-                               function.
-        """
-        logging.info(event)
+    def configure_pod(self, _=None) -> NoReturn:
+        """Assemble the pod spec and apply it, if possible."""
         if not self.unit.is_leader():
             self.unit.status = ActiveStatus("ready")
             return
@@ -108,7 +85,8 @@ class MongodbCharm(CharmBase):
             self.unit.status = MaintenanceStatus("Fetching image information")
             image_info = self.image.fetch()
         except OCIImageResourceError:
-            self.unit.status = BlockedStatus("Error fetching image information")  # noqa
+            self.unit.status = BlockedStatus(
+                "Error fetching image information")
             return
         try:
             pod_spec = make_pod_spec(
