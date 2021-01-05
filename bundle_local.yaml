@@ -104,8 +104,8 @@ relations:
     - nrf:nrf
   - - webui:mongodb
     - mongodb:mongodb
-  - - natapp:upf
-    - upf1:upf
+  - - upf1:natapp
+    - natapp:natapp
   - - pcf:amf
     - amf:amf
   - - pcf:nrf

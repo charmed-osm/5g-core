@@ -22,6 +22,7 @@
 """NatApp test script for charm.py"""
 
 import unittest
+import json
 from typing import NoReturn
 
 from ops.testing import Harness
@@ -41,28 +42,63 @@ class TestCharm(unittest.TestCase):
         self.harness.set_leader(is_leader=True)
         self.harness.begin()
 
-    def test_on_start_without_relations(self) -> NoReturn:
-        """Test installation without any relation."""
-        self.harness.charm.on.start.emit()
-
-        # Verifying status
-        self.assertIsInstance(self.harness.charm.unit.status, BlockedStatus)
-
-        # Verifying status message
-        self.assertGreater(len(self.harness.charm.unit.status.message), 0)
-        self.assertTrue(
-            self.harness.charm.unit.status.message.startswith("Waiting for")
-        )
-
-    def test_on_start_with_relations(self) -> NoReturn:
+    def test_on_configure_change(self) -> NoReturn:
         """Test installation with any relation."""
         self.harness.charm.on.start.emit()
+        config_data = "192.168.1.216"
+        second_interface = [
+            {"name": "n6-network", "interface": "eth1", "ips": [config_data]}
+        ]
+
         annot = {
-            "annotations": {
-                "k8s.v1.cni.cncf.io/networks": '[\n{\n"name" : "n6-network",'
-                '\n"interface": "eth1",\n"ips": ["192.168.1.216"]\n}\n]'
-            }
+            "annotations": {"k8s.v1.cni.cncf.io/networks": json.dumps(second_interface)}
         }
+        custom_resource_def = [
+            {
+                "name": "network-attachment-definitions.k8s.cni.cncf.io",
+                "spec": {
+                    "group": "k8s.cni.cncf.io",
+                    "scope": "Namespaced",
+                    "names": {
+                        "kind": "NetworkAttachmentDefinition",
+                        "singular": "network-attachment-definition",
+                        "plural": "network-attachment-definitions",
+                    },
+                    "versions": [{"name": "v1", "served": True, "storage": True}],
+                },
+            }
+        ]
+        pdn_subnet = "192.168.0.0/16"
+        pdn_ip_range_start = "192.168.1.100"
+        pdn_ip_range_end = "192.168.1.250"
+        pdn_gateway_ip = "192.168.1.1"
+        ipam_body = {
+            "type": "host-local",
+            "subnet": pdn_subnet,
+            "rangeStart": pdn_ip_range_start,
+            "rangeEnd": pdn_ip_range_end,
+            "gateway": pdn_gateway_ip,
+        }
+        config_body = {
+            "cniVersion": "0.3.1",
+            "name": "n6-network",
+            "type": "macvlan",
+            "master": "ens3",
+            "mode": "bridge",
+            "ipam": ipam_body,
+        }
+
+        custom_resource = {
+            "network-attachment-definitions.k8s.cni.cncf.io": [
+                {
+                    "apiVersion": "k8s.cni.cncf.io/v1",
+                    "kind": "NetworkAttachmentDefinition",
+                    "metadata": {"name": "n6-network"},
+                    "spec": {"config": json.dumps(config_body)},
+                }
+            ]
+        }
+
         expected_result = {
             "version": 3,
             "containers": [
@@ -81,48 +117,34 @@ class TestCharm(unittest.TestCase):
                     "kubernetes": {"securityContext": {"privileged": True}},
                 }
             ],
-            "kubernetesResources": {"pod": annot},
+            "kubernetesResources": {
+                "customResourceDefinitions": custom_resource_def,
+                "customResources": custom_resource,
+                "pod": annot,
+            },
         }
-        # Check if nrf is initialized
-        self.assertIsNone(self.harness.charm.state.upf_host)
 
-        # Initializing the nrf relation
-        upf_relation_id = self.harness.add_relation("upf", "upf")
-        self.harness.add_relation_unit(upf_relation_id, "upf/0")
-        self.harness.update_relation_data(
-            upf_relation_id, "upf/0", {"private_address": "upf"}
-        )
-
-        # Checking if nrf data is stored
-        self.assertEqual(self.harness.charm.state.upf_host, "upf")
-
-        # Verifying status
-        self.assertNotIsInstance(self.harness.charm.unit.status, BlockedStatus)
-
-        pod_spec, _ = self.harness.get_pod_spec()
-        self.assertDictEqual(expected_result, pod_spec)
-
-    def test_on_upf_app_relation_changed(self) -> NoReturn:
-        """Test to see if upf relation is updated."""
-        self.harness.charm.on.start.emit()
-
-        self.assertIsNone(self.harness.charm.state.upf_host)
-
-        upf_relation_id = self.harness.add_relation("upf", "upf")
-        self.harness.add_relation_unit(upf_relation_id, "upf/0")
-        self.harness.update_relation_data(
-            upf_relation_id, "upf/0", {"private_address": "upf"}
-        )
-
-        self.assertEqual(self.harness.charm.state.upf_host, "upf")
         # Verifying status
         self.assertNotIsInstance(self.harness.charm.unit.status, BlockedStatus)
 
         # Verifying status message
         self.assertGreater(len(self.harness.charm.unit.status.message), 0)
-        self.assertFalse(
-            self.harness.charm.unit.status.message.startswith("Waiting for ")
-        )
+        pod_spec, _ = self.harness.get_pod_spec()
+        self.assertDictEqual(expected_result, pod_spec)
+
+    def test_publish_natapp_info(self) -> NoReturn:
+        """Test to see if upf relation is updated."""
+        self.harness.charm.on.start.emit()
+        expected_result = {
+            "hostname": "natapp",
+            "static_ip": "192.168.70.15",
+        }
+        relation_id = self.harness.add_relation("natapp", "upf1")
+        self.harness.add_relation_unit(relation_id, "upf1/0")
+        relation_data = {"hostname": "natapp", "static_ip": "192.168.70.15"}
+        self.harness.update_relation_data(relation_id, "natapp", relation_data)
+        relation_data = self.harness.get_relation_data(relation_id, "natapp")
+        self.assertDictEqual(expected_result, relation_data)
 
 
 if __name__ == "__main__":

@@ -43,6 +43,17 @@ class TestPodSpec(unittest.TestCase):
         pod_ports = pod_spec._make_pod_ports(dictport)
         self.assertListEqual(expected_result, pod_ports)
 
+    def test_make_pod_envconfig(self) -> NoReturn:
+        """Testing make pod envconfig configuration."""
+        expected_result = {
+            "UE_RANGE": "60.60.0.0/24",
+            "STATIC_IP": "192.168.70.15",
+        }
+        ue_range = {"ue_range": "60.60.0.0/24"}
+        ipadd = {"natapp_ip": "192.168.70.15"}
+        pod_envconfig = pod_spec._make_pod_envconfig(ue_range, ipadd)
+        self.assertDictEqual(expected_result, pod_envconfig)
+
     def test_make_pod_command(self) -> NoReturn:
         """Testing make pod command."""
 
@@ -73,60 +84,12 @@ class TestPodSpec(unittest.TestCase):
         pod_services = pod_spec._make_pod_services(appname)
         self.assertEqual(expected_result, pod_services)
 
-    def test_make_pod_custom_resource_definitions(self) -> NoReturn:
-        """Teting make pod custom resource definitions."""
-        expected_result = [
-            {
-                "name": "network-attachment-definitions.k8s.cni.cncf.io",
-                "spec": {
-                    "group": "k8s.cni.cncf.io",
-                    "scope": "Namespaced",
-                    "names": {
-                        "kind": "NetworkAttachmentDefinition",
-                        "singular": "network-attachment-definition",
-                        "plural": "network-attachment-definitions",
-                    },
-                    "versions": [{"name": "v1", "served": True, "storage": True}],
-                },
-            }
-        ]
-        pod_custom_resource_definitions = (
-            pod_spec._make_pod_custom_resource_definitions()
-        )
-        self.assertEqual(expected_result, pod_custom_resource_definitions)
-
-    def test_make_pod_custom_resources(self) -> NoReturn:
-        """Testing make pod customResources."""
-        expected_result = {
-            "network-attachment-definitions.k8s.cni.cncf.io": [
-                {
-                    "apiVersion": "k8s.cni.cncf.io/v1",
-                    "kind": "NetworkAttachmentDefinition",
-                    "metadata": {"name": "n6-network"},
-                    "spec": {
-                        "config": '{"cniVersion": "0.3.1",'
-                        '\n"name": "n6-network",'
-                        '\n"type": "macvlan",'
-                        '\n"master": "ens3",'
-                        '\n"mode": "bridge",'
-                        '\n"ipam": {"type": "host-local",'
-                        '\n"subnet": "192.168.0.0/16",'
-                        '\n"rangeStart": "192.168.1.100",'
-                        '\n"rangeEnd": "192.168.1.250",'
-                        '\n"gateway": "192.168.1.1"\n}\n}'
-                    },
-                }
-            ]
-        }
-        pod_custom_resources = pod_spec._make_pod_custom_resources()
-        self.assertEqual(expected_result, pod_custom_resources)
-
     def test_make_pod_podannotations(self) -> NoReturn:
         """Testing make pod annotations."""
         expected_result = {
             "annotations": {
                 "k8s.v1.cni.cncf.io/networks": '[\n{\n"name" : "n6-network",'
-                '\n"interface": "eth1",\n"ips": ["192.168.1.215"]\n}\n]'
+                '\n"interface": "eth1",\n"ips": []\n}\n]'
             },
             "securityContext": {"runAsUser": 0000, "runAsGroup": 0000},
         }
@@ -147,6 +110,12 @@ class TestPodSpec(unittest.TestCase):
         with self.assertRaises(ValueError):
             pod_spec._validate_config(config)
 
+    def test_validate_relation(self) -> NoReturn:
+        """Testing relation data scenario."""
+        relation_state = {"natapp_ip": "xvz"}
+        with self.assertRaises(ValueError):
+            pod_spec._validate_relation_state(relation_state)
+
     def test_make_pod_spec(self) -> NoReturn:
         """Testing make pod spec."""
         image_info = {"upstream-source": "localhost:32000/free5gc-upf1:1.0"}
@@ -154,9 +123,10 @@ class TestPodSpec(unittest.TestCase):
             "gtp_port": 9999,
         }
         app_name = "upf1"
+        relation_state = {"natapp_ip": "192.168.70.15"}
 
         with self.assertRaises(ValueError):
-            pod_spec.make_pod_spec(image_info, config, app_name)
+            pod_spec.make_pod_spec(image_info, config, app_name, relation_state)
 
 
 if __name__ == "__main__":

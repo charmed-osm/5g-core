@@ -42,3 +42,7 @@ resources:
 provides:
     upf:
         interface: upf
+requires:
+    natapp:
+        interface: natapp
+

@@ -59,8 +59,8 @@ juju deploy upf1.charm
 
 ## Developing
 
-To test add-route action,run the following command
-COMMAND : sudo juju run-action upf1/[UNIT-ID] add-route
+To test config-interface action,run the following command
+COMMAND : sudo juju run-action upf1/[UNIT-ID] config-interface
 
 To check the status and output of the action ,use the following command
 
