@@ -22,7 +22,9 @@
 """Pod spec for NatApp charm"""
 
 import logging
+import json
 from typing import Any, Dict, List
+from IPy import IP
 
 logger = logging.getLogger(__name__)
 
@@ -54,17 +56,67 @@ def _make_pod_command() -> List[str]:
     return ["./start.sh", "&"]
 
 
-def _make_pod_podannotations() -> Dict[str, Any]:
+def _make_pod_custom_resource_definitions():
+    """Generate pod custom resource definitions."""
+    return [
+        {
+            "name": "network-attachment-definitions.k8s.cni.cncf.io",
+            "spec": {
+                "group": "k8s.cni.cncf.io",
+                "scope": "Namespaced",
+                "names": {
+                    "kind": "NetworkAttachmentDefinition",
+                    "singular": "network-attachment-definition",
+                    "plural": "network-attachment-definitions",
+                },
+                "versions": [{"name": "v1", "served": True, "storage": True}],
+            },
+        }
+    ]
+
+
+def _make_pod_custom_resources(config: Dict[str, Any]):
+    """Generate pod customresources."""
+    ipam_body = {
+        "type": "host-local",
+        "subnet": config["pdn_subnet"],
+        "rangeStart": config["pdn_ip_range_start"],
+        "rangeEnd": config["pdn_ip_range_end"],
+        "gateway": config["pdn_gateway_ip"],
+    }
+    config_body = {
+        "cniVersion": "0.3.1",
+        "name": "n6-network",
+        "type": "macvlan",
+        "master": "ens3",
+        "mode": "bridge",
+        "ipam": ipam_body,
+    }
+
+    custom_resources = {
+        "network-attachment-definitions.k8s.cni.cncf.io": [
+            {
+                "apiVersion": "k8s.cni.cncf.io/v1",
+                "kind": "NetworkAttachmentDefinition",
+                "metadata": {"name": "n6-network"},
+                "spec": {"config": json.dumps(config_body)},
+            }
+        ]
+    }
+    return custom_resources
+
+
+def _make_pod_podannotations(config: Dict[str, Any]) -> Dict[str, Any]:
     """Generate Pod Annotations.
 
     Returns:
         Dict[str, Any]: pod Annotations.
     """
+    second_interface = [
+        {"name": "n6-network", "interface": "eth1", "ips": [config["static_ip"]]}
+    ]
     annot = {
-        "annotations": {
-            "k8s.v1.cni.cncf.io/networks": '[\n{\n"name" : "n6-network",'
-            '\n"interface": "eth1",\n"ips": ["192.168.1.216"]\n}\n]'
-        }
+        "annotations": {"k8s.v1.cni.cncf.io/networks": json.dumps(second_interface)}
     }
 
     return annot
@@ -88,6 +140,20 @@ def _validate_config(config: Dict[str, Any]):
     """
     if not config.get("natapp_port") > 0:
         raise ValueError("Invalid natapp port number")
+    pdn_subnet = config.get("pdn_subnet")
+    pdn_ip_range_start = config.get("pdn_ip_range_start")
+    pdn_ip_range_end = config.get("pdn_ip_range_end")
+    pdn_gateway_ip = config.get("pdn_gateway_ip")
+    static_ip = config.get("static_ip")
+    for pdn_conf in (
+        pdn_subnet,
+        pdn_ip_range_start,
+        pdn_ip_range_end,
+        pdn_gateway_ip,
+        static_ip,
+    ):
+        if not IP(pdn_conf):
+            raise ValueError("Value error in pdn ip configuration")
 
 
 def make_pod_spec(
@@ -113,7 +179,9 @@ def make_pod_spec(
     ports = _make_pod_ports(config)
     command = _make_pod_command()
     kubernetes = _make_pod_privilege()
-    podannotations = _make_pod_podannotations()
+    custom_resource_definitions = _make_pod_custom_resource_definitions()
+    custom_resources = _make_pod_custom_resources(config)
+    podannotations = _make_pod_podannotations(config)
     return {
         "version": 3,
         "containers": [
@@ -127,6 +195,8 @@ def make_pod_spec(
             }
         ],
         "kubernetesResources": {
+            "customResourceDefinitions": custom_resource_definitions,
+            "customResources": custom_resources,
             "pod": podannotations,
         },
     }

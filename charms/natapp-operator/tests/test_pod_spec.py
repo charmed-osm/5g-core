@@ -22,6 +22,7 @@
 """test script for pod spec.py"""
 from typing import NoReturn
 import unittest
+import json
 
 import pod_spec
 
@@ -47,15 +48,82 @@ class TestPodSpec(unittest.TestCase):
 
         self.assertListEqual(expected_result, pod_ports)
 
+    def test_make_pod_custom_resource_definitions(self) -> NoReturn:
+        """Teting make pod custom resource definitions."""
+        expected_result = [
+            {
+                "name": "network-attachment-definitions.k8s.cni.cncf.io",
+                "spec": {
+                    "group": "k8s.cni.cncf.io",
+                    "scope": "Namespaced",
+                    "names": {
+                        "kind": "NetworkAttachmentDefinition",
+                        "singular": "network-attachment-definition",
+                        "plural": "network-attachment-definitions",
+                    },
+                    "versions": [{"name": "v1", "served": True, "storage": True}],
+                },
+            }
+        ]
+        pod_custom_resource_definitions = (
+            pod_spec._make_pod_custom_resource_definitions()
+        )
+        self.assertEqual(expected_result, pod_custom_resource_definitions)
+
+    def test_make_pod_custom_resources(self) -> NoReturn:
+        """Testing make pod customResources."""
+        config = {
+            "pdn_subnet": "192.168.0.0/16",
+            "pdn_ip_range_start": "192.168.1.100",
+            "pdn_ip_range_end": "192.168.1.250",
+            "pdn_gateway_ip": "192.168.1.1",
+        }
+        pdn_subnet = "192.168.0.0/16"
+        pdn_ip_range_start = "192.168.1.100"
+        pdn_ip_range_end = "192.168.1.250"
+        pdn_gateway_ip = "192.168.1.1"
+        pod_custom_resources = pod_spec._make_pod_custom_resources(config)
+        ipam_body = {
+            "type": "host-local",
+            "subnet": pdn_subnet,
+            "rangeStart": pdn_ip_range_start,
+            "rangeEnd": pdn_ip_range_end,
+            "gateway": pdn_gateway_ip,
+        }
+        config_body = {
+            "cniVersion": "0.3.1",
+            "name": "n6-network",
+            "type": "macvlan",
+            "master": "ens3",
+            "mode": "bridge",
+            "ipam": ipam_body,
+        }
+
+        expected_result = {
+            "network-attachment-definitions.k8s.cni.cncf.io": [
+                {
+                    "apiVersion": "k8s.cni.cncf.io/v1",
+                    "kind": "NetworkAttachmentDefinition",
+                    "metadata": {"name": "n6-network"},
+                    "spec": {"config": json.dumps(config_body)},
+                }
+            ]
+        }
+        self.assertDictEqual(expected_result, pod_custom_resources)
+
     def test_make_pod_podannotations(self) -> NoReturn:
         """Testing make pod envconfig configuration."""
+        config = {"static_ip": "192.168.1.216"}
+        config_data = "192.168.1.216"
+        second_interface = [
+            {"name": "n6-network", "interface": "eth1", "ips": [config_data]}
+        ]
+
         expected_result = {
-            "annotations": {
-                "k8s.v1.cni.cncf.io/networks": '[\n{\n"name" : "n6-network",'
-                '\n"interface": "eth1",\n"ips": ["192.168.1.216"]\n}\n]'
-            }
+            "annotations": {"k8s.v1.cni.cncf.io/networks": json.dumps(second_interface)}
         }
-        pod_annotation = pod_spec._make_pod_podannotations()
+
+        pod_annotation = pod_spec._make_pod_podannotations(config)
         self.assertDictEqual(expected_result, pod_annotation)
 
     def test_make_pod_command(self) -> NoReturn:

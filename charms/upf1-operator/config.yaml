@@ -26,3 +26,9 @@ options:
             gtp_port is used for
             communication between smf and upf
         default: 2152
+    ue_range:
+        type: string
+        description: |
+            UE_IP range for route entry
+            route packets of UE
+        default: "60.60.0.0/24"

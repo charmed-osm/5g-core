@@ -22,7 +22,7 @@
 """Defining NatApp charm events"""
 
 import logging
-from typing import Any, Dict, NoReturn
+from typing import NoReturn
 from ops.charm import CharmBase
 from ops.main import main
 from ops.framework import StoredState, EventBase
@@ -41,7 +41,7 @@ class NatappCharm(CharmBase):
     state = StoredState()
 
     def __init__(self, *args):
-        "Natapp charm constructor."""
+        "Natapp charm constructor." ""
         super().__init__(*args)
         self.state.set_default(pod_spec=None)
 
@@ -51,68 +51,35 @@ class NatappCharm(CharmBase):
         self.framework.observe(self.on.start, self.configure_pod)
         self.framework.observe(self.on.config_changed, self.configure_pod)
 
-        # Registering required relation changed events
+        # Registering provided relation events
         self.framework.observe(
-            self.on.upf_relation_changed, self._on_upf_relation_changed
+            self.on.natapp_relation_changed, self._publish_natapp_info
         )
 
-        # Registering required relation departed events
-        self.framework.observe(
-            self.on.upf_relation_departed, self._on_upf_relation_departed
-        )
-
-        # -- initialize states --
-        self.state.set_default(upf_host=None)
-
-    def _on_upf_relation_changed(self, event: EventBase) -> NoReturn:
-        """Reads information about the upf relation.
+    def _publish_natapp_info(self, event: EventBase) -> NoReturn:
+        """Publishes NATAPP IP information for UPF
+          relation.7
 
         Args:
-           event (EventBase): upf relation event.
+             event (EventBase): Natapp relation event to update UPF.
         """
-        if event.unit not in event.relation.data:
+        config = self.model.config
+        try:
+            static_ip = config["static_ip"]
+            if self.unit.is_leader():
+                rel_data = {
+                    "hostname": self.model.app.name,
+                    "static_ip": static_ip,
+                }
+                for k, param in rel_data.items():
+                    event.relation.data[self.model.app][k] = param
+
+        except TypeError:
+            self.unit.status = BlockedStatus("Ip not yet fetched")
             return
-
-        upf_host = event.relation.data[event.unit].get("private_address")
-        if upf_host and self.state.upf_host != upf_host:
-            self.state.upf_host = upf_host
-            self.configure_pod()
-
-    def _on_upf_relation_departed(self, _=None) -> NoReturn:
-        """Clears data from UPF relation departed."""
-        self.state.upf_host = None
-        self.on.configure_pod.emit()
-
-    def _missing_relations(self) -> str:
-        """Checks if there missing relations.
-
-        Returns:
-            str: string with missing relations
-        """
-        data_status = {"upf": self.state.upf_host}
-        missing_relations = [k for k, v in data_status.items() if not v]
-        return ", ".join(missing_relations)
-
-    @property
-    def relation_state(self) -> Dict[str, Any]:
-        """Collects relation state configuration for pod spec assembly.
-
-        Returns:
-            Dict[str, Any]: relation state information.
-        """
-        relation_state = {"upf_host": self.state.upf_host}
-
-        return relation_state
 
     def configure_pod(self, _=None) -> NoReturn:
         """Assemble the pod spec and apply it, if possible."""
-        missing = self._missing_relations()
-        if missing:
-            status = "Waiting for {0} relation{1}"
-            self.unit.status = BlockedStatus(
-                status.format(missing, "s" if "," in missing else "")
-            )
-            return
         if not self.unit.is_leader():
             self.unit.status = ActiveStatus("ready")
             return

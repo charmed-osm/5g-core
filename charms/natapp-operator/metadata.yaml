@@ -41,6 +41,6 @@ resources:
     image:
         type: oci-image
         description: docker image for NATAPP
-requires:
-    upf:
-        interface: upf
+provides:
+    natapp:
+        interface: natapp

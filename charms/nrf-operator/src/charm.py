@@ -87,14 +87,11 @@ class NrfCharm(CharmBase):
             return
         mongodb_host = event.relation.data[event.app].get("hostname")
         mongodb_uri = event.relation.data[event.app].get("mongodb_uri")
-        if (
-            mongodb_host
-            and mongodb_uri # noqa
-            and (           # noqa
-                self.state.mongodb_host != mongodb_host
-                or (self.state.mongodb_uri != mongodb_uri) #noqa
-            )
-        ):
+        validate_mongodb = mongodb_host and mongodb_uri
+        host_state = self.state.mongodb_host != mongodb_host
+        uri_state = self.state.mongodb_uri != mongodb_uri
+        validate_state = host_state or uri_state
+        if (validate_mongodb and validate_state):
             self.state.mongodb_host = mongodb_host
             self.state.mongodb_uri = mongodb_uri
             self.configure_pod()
