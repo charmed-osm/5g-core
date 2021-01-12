@@ -49,11 +49,11 @@ To deploy Natapp from local repository, use the following commands
 
 ```bash
 charmcraft build
-juju deploy natapp.charm
+juju deploy ./natapp.charm
 ```
 
 NOTE: Natapp can be deployed only after UPF is up because of
-      relations configured between the two.
+relations configured between the two.
 
 ## Developing
 
@@ -64,4 +64,4 @@ Check if the charm is deployed with juju status
 The Python operator framework includes a very nice harness for testing
 operator behaviour without full deployment. Just `run_tests`:
 
-   ./run_tests
+./run_tests

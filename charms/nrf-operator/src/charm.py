@@ -51,7 +51,6 @@ class NrfCharm(CharmBase):
         self.image = OCIImageResource(self, "image")
 
         # Registering regular events
-        self.framework.observe(self.on.start, self.configure_pod)
         self.framework.observe(self.on.config_changed, self.configure_pod)
 
         # Registering required relation changed events
@@ -64,18 +63,17 @@ class NrfCharm(CharmBase):
             self.on.mongodb_relation_departed, self._on_mongodb_relation_departed
         )
 
+        self.framework.observe(self.on.nrf_relation_joined, self.publish_nrf_info)
+
         # -- initialize states --
         self.state.set_default(mongodb_host=None, mongodb_uri=None)
 
-    def publish_nrf_info(self, _=None) -> NoReturn:
+    def publish_nrf_info(self, event) -> NoReturn:
         """Publishes NRF information
         relation.7
         """
         if self.unit.is_leader():
-            relation_id = self.model.relations.__getitem__("nrf")
-            for i in relation_id:
-                relation = self.model.get_relation("nrf", i.id)
-                relation.data[self.model.app]["hostname"] = self.model.app.name
+            event.relation.data[self.app]["hostname"] = self.app.name
 
     def _on_mongodb_relation_changed(self, event: EventBase) -> NoReturn:
         """Reads information about the MongoDB relation.
@@ -166,7 +164,6 @@ class NrfCharm(CharmBase):
             self.state.pod_spec = pod_spec
 
         self.unit.status = ActiveStatus("ready")
-        self.publish_nrf_info()
 
 
 if __name__ == "__main__":

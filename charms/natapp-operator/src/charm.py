@@ -48,12 +48,11 @@ class NatappCharm(CharmBase):
         self.image = OCIImageResource(self, "image")
 
         # Registering regular events
-        self.framework.observe(self.on.start, self.configure_pod)
         self.framework.observe(self.on.config_changed, self.configure_pod)
 
         # Registering provided relation events
         self.framework.observe(
-            self.on.natapp_relation_changed, self._publish_natapp_info
+            self.on.natapp_relation_joined, self._publish_natapp_info
         )
 
     def _publish_natapp_info(self, event: EventBase) -> NoReturn:
@@ -65,6 +64,7 @@ class NatappCharm(CharmBase):
         """
         config = self.model.config
         try:
+            # remove static IP
             static_ip = config["static_ip"]
             if self.unit.is_leader():
                 rel_data = {

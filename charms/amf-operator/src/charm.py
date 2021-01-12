@@ -49,7 +49,6 @@ class AmfCharm(CharmBase):
         self.image = OCIImageResource(self, "image")
 
         # Registering regular events
-        self.framework.observe(self.on.start, self.configure_pod)
         self.framework.observe(self.on.config_changed, self.configure_pod)
 
         # Registering required relation changed events
@@ -62,19 +61,15 @@ class AmfCharm(CharmBase):
             self.on.nrf_relation_departed, self._on_nrf_relation_departed
         )
 
+        self.framework.observe(self.on.amf_relation_joined, self.publish_amf_info)
+
         # -- initialize states --
         self.state.set_default(nrf_host=None)
 
-    def publish_amf_info(self, _=None) -> NoReturn:
-        """Publishes AMF information
-        relation.7.
-        """
-        if not self.unit.is_leader():
-            return
-        relation_id = self.model.relations.__getitem__("amf")
-        for i in relation_id:
-            relation = self.model.get_relation("amf", i.id)
-            relation.data[self.model.app]["hostname"] = self.model.app.name
+    def publish_amf_info(self, event) -> NoReturn:
+        """Publishes AMF information"""
+        if self.unit.is_leader():
+            event.relation.data[self.app]["hostname"] = self.app.name
 
     def _on_nrf_relation_changed(self, event: EventBase) -> NoReturn:
         """Reads information about the NRF relation.
@@ -155,7 +150,6 @@ class AmfCharm(CharmBase):
             self.state.pod_spec = pod_spec
 
         self.unit.status = ActiveStatus("ready")
-        self.publish_amf_info()
 
 
 if __name__ == "__main__":
