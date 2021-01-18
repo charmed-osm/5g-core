@@ -53,3 +53,5 @@ VOLUME [ "/free5gc/support/TLS" ]
 EXPOSE 29503
 COPY udmcfg.conf /free5gc/config/udmcfg.conf
 COPY free5GC.conf /free5gc/config/free5GC.conf
+COPY udm_start.sh /free5gc/${F5GC_MODULE}/udm_start.sh
+RUN chmod +x /free5gc/${F5GC_MODULE}/udm_start.sh

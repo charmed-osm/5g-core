@@ -40,8 +40,7 @@ class TestCharm(unittest.TestCase):
 
     def test_on_configure_pod(self) -> NoReturn:
         """Test installation without any relation."""
-        self.harness.charm.on.start.emit()
-
+        self.harness.charm.on.config_changed.emit()
         expected_result = {
             "version": 3,
             "containers": [
@@ -82,7 +81,6 @@ class TestCharm(unittest.TestCase):
             "hostname": "mongodb",
             "mongodb_uri": "mongodb://mongodb:27017",
         }
-        self.harness.charm.on.start.emit()
         relation_id = self.harness.add_relation("mongodb", "nrf")
         self.harness.add_relation_unit(relation_id, "nrf/0")
         relation_data = self.harness.get_relation_data(relation_id, "mongodb")

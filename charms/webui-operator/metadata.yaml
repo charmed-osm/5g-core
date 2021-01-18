@@ -22,21 +22,21 @@
 name: webui
 summary: webui deploys the webui as a microk8s pod
 maintainers:
-    - Tata Elxsi <canonical@tataelxsi.onmicrosoft.com>
+  - Tata Elxsi <canonical@tataelxsi.onmicrosoft.com>
 description: |
-    webui deploys webui as a microk8s based pod.
-    Webui is the User Interface for adding and deleting
-    IMSI and subscriber information to database
+  webui deploys webui as a microk8s based pod.
+  Webui is the User Interface for adding and deleting
+  IMSI and subscriber information to database
 series:
-    - kubernetes
+  - kubernetes
 min-juju-version: 2.8.2
 deployment:
-    type: stateful
-    service: cluster
+  type: stateful
+  service: cluster
 resources:
-    image:
-        type: oci-image
-        description: docker image for Webui
+  image:
+    type: oci-image
+    description: docker image for Webui
 requires:
-    mongodb:
-        interface: mongodb
+  mongodb:
+    interface: mongodb

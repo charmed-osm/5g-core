@@ -1,0 +1,3 @@
+[TYPECHECK]
+generated-members=nrf_relation_changed,nrf_relation_departed,upf_relation_changed,upf_relation_departed
+

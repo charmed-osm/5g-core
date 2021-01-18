@@ -40,7 +40,7 @@ class TestCharm(unittest.TestCase):
 
     def test_config_changed(self) -> NoReturn:
         """Test installation without any relation."""
-        self.harness.charm.on.start.emit()
+        self.harness.charm.on.config_changed.emit()
         expected_result = {
             "version": 3,
             "containers": [
@@ -58,8 +58,10 @@ class TestCharm(unittest.TestCase):
                     "envConfig": {
                         "ALLOW_ANONYMOUS_LOGIN": "yes",
                         "GIN_MODE": "release",
+                        "NRF_HOST": "nrf",
+                        "AMF_HOST": "amf",
                     },
-                    "command": ["./pcf", "-pcfcfg", "../config/pcfcfg.conf", "&"],
+                    "command": ["./pcf_start.sh", "&"],
                 },
             ],
         }
@@ -92,7 +94,6 @@ class TestCharm(unittest.TestCase):
 
     def test_on_nrf_app_relation_changed(self) -> NoReturn:
         """Test to see if Nrf relation is updated."""
-        self.harness.charm.on.start.emit()
 
         self.assertIsNone(self.harness.charm.state.nrf_host)
 

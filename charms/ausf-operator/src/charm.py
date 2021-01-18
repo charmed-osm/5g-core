@@ -48,7 +48,6 @@ class AusfCharm(CharmBase):
         self.image = OCIImageResource(self, "image")
 
         # Registering regular events
-        self.framework.observe(self.on.start, self.configure_pod)
         self.framework.observe(self.on.config_changed, self.configure_pod)
 
         # Registering required relation changed events
@@ -132,6 +131,7 @@ class AusfCharm(CharmBase):
                 image_info,
                 self.model.config,
                 self.model.app.name,
+                self.relation_state,
             )
         except ValueError as exc:
             logger.exception("Config/Relation data validation error")

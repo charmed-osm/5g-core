@@ -56,6 +56,8 @@ def _make_pod_envconfig(
         "ALLOW_ANONYMOUS_LOGIN": "yes",
         "GIN_MODE": config["gin_mode"],
         "MONGODB_URI": relation_state["mongodb_uri"],
+        "NRF_HOST": relation_state["nrf_host"],
+        "MONGODB_HOST": relation_state["mongodb_host"],
     }
 
 
@@ -86,7 +88,11 @@ def _validate_relation_state(relation_state: Dict[str, Any]):
         relation (Dict[str, Any]): relation information.
     """
     uri = relation_state.get("mongodb_uri")
-    if not uri or not isinstance(uri, str) or not uri.startswith("mongodb://"):
+    mongodb_host = relation_state.get("mongodb_host")
+    nrf_host = relation_state.get("nrf_host")
+    uri_state = not uri or not isinstance(uri, str)
+    host_state = not uri.startswith("mongodb://") or not mongodb_host or not nrf_host
+    if uri_state or host_state:
         raise ValueError("Invalid mongodb_uri")
 
 

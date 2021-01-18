@@ -39,7 +39,9 @@ def _make_pod_ports() -> List[Dict[str, Any]]:
     return [{"name": "pcf", "containerPort": PCF_PORT, "protocol": "TCP"}]
 
 
-def _make_pod_envconfig(config: Dict[str, Any]) -> Dict[str, Any]:
+def _make_pod_envconfig(
+    config: Dict[str, Any], relation_state: Dict[str, Any]
+) -> Dict[str, Any]:
     """Generate pod environment configuration.
 
     Args:
@@ -52,6 +54,8 @@ def _make_pod_envconfig(config: Dict[str, Any]) -> Dict[str, Any]:
         # General configuration
         "ALLOW_ANONYMOUS_LOGIN": "yes",
         "GIN_MODE": config["gin_mode"],
+        "NRF_HOST": relation_state["nrf_host"],
+        "AMF_HOST": relation_state["amf_host"],
     }
 
 
@@ -61,7 +65,7 @@ def _make_pod_command() -> List[str]:
     Returns:
         List[str]:pod command.
     """
-    return ["./pcf", "-pcfcfg", "../config/pcfcfg.conf", "&"]
+    return ["./pcf_start.sh", "&"]
 
 
 def _validate_config(config: Dict[str, Any]):
@@ -75,10 +79,23 @@ def _validate_config(config: Dict[str, Any]):
         raise ValueError("Invalid gin_mode")
 
 
+def _validate_relation_state(relation_state: Dict[str, Any]):
+    """Validate relation data.
+
+    Args:
+        relation (Dict[str, Any]): relation state information.
+    """
+    nrf_host = relation_state.get("nrf_host")
+    amf_host = relation_state.get("amf_host")
+    if not nrf_host or not amf_host:
+        raise ValueError("Value error in nrf relations")
+
+
 def make_pod_spec(
     image_info: Dict[str, str],
     config: Dict[str, Any],
     app_name: str,
+    relation_state: Dict[str, Any],
 ) -> Dict[str, Any]:
     """Generate the pod spec information.
 
@@ -95,8 +112,9 @@ def make_pod_spec(
         return None
 
     _validate_config(config)
+    _validate_relation_state(relation_state)
     ports = _make_pod_ports()
-    env_config = _make_pod_envconfig(config)
+    env_config = _make_pod_envconfig(config, relation_state)
     command = _make_pod_command()
     return {
         "version": 3,

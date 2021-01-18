@@ -22,7 +22,9 @@
 
 
 upf1=$(echo $IPADDR1)
+nrf_app_name=$(echo $NRF_HOST)
 find /free5gc/config/smfcfg.conf -type f -exec sed -i "s/upf1/$upf1/g" {} \;
+sed -i "s~\<nrf_app\>~$nrf_app_name~g" /free5gc/config/smfcfg.conf
 #while true; do echo '.'; sleep 5 ; done
 cd /free5gc/smf
 ./smf -smfcfg ../config/smfcfg.conf -uerouting ../config/uerouting.yaml

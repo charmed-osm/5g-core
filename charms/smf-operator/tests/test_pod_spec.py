@@ -49,10 +49,11 @@ class TestPodSpec(unittest.TestCase):
             "ALLOW_ANONYMOUS_LOGIN": "yes",
             "GIN_MODE": "release",
             "IPADDR1": "127.0.0.1",
+            "NRF_HOST": "nrf",
         }
         mode = {"gin_mode": "release"}
-        ipadd = {"upf_host": "127.0.0.1"}
-        pod_envconfig = pod_spec._make_pod_envconfig(mode, ipadd)
+        relation = {"upf_host": "127.0.0.1", "nrf_host": "nrf"}
+        pod_envconfig = pod_spec._make_pod_envconfig(mode, relation)
         self.assertDictEqual(expected_result, pod_envconfig)
 
     def test_make_pod_command(self) -> NoReturn:
@@ -69,7 +70,7 @@ class TestPodSpec(unittest.TestCase):
 
     def test_validate_relation(self) -> NoReturn:
         """Testing relation data scenario."""
-        relation_state = {"upf_host": "xyz"}
+        relation_state = {"upf_host": "xyz", "nrf_host": None}
         with self.assertRaises(ValueError):
             pod_spec._validate_relation_state(relation_state)
 
@@ -80,7 +81,7 @@ class TestPodSpec(unittest.TestCase):
             "gin_mode": "release",
         }
         app_name = "smf"
-        relation_state = {"upf_host": "127.0.0.500"}
+        relation_state = {"upf_host": "127.0.0.500", "nrf_host": None}
 
         with self.assertRaises(ValueError):
             pod_spec.make_pod_spec(image_info, config, relation_state, app_name)

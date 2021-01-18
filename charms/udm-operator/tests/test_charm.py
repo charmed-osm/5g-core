@@ -41,7 +41,7 @@ class TestCharm(unittest.TestCase):
 
     def test_on_start_without_relations(self) -> NoReturn:
         """Test installation without any relation."""
-        self.harness.charm.on.start.emit()
+        self.harness.charm.on.config_changed.emit()
 
         # Verifying status
         self.assertIsInstance(self.harness.charm.unit.status, BlockedStatus)
@@ -54,7 +54,6 @@ class TestCharm(unittest.TestCase):
 
     def test_on_start_with_relations(self) -> NoReturn:
         """Test installation with any relation."""
-        self.harness.charm.on.start.emit()
         expected_result = {
             "version": 3,
             "containers": [
@@ -72,8 +71,9 @@ class TestCharm(unittest.TestCase):
                     "envConfig": {
                         "ALLOW_ANONYMOUS_LOGIN": "yes",
                         "GIN_MODE": "release",
+                        "NRF_HOST": "nrf",
                     },
-                    "command": ["./udm", "-udmcfg", "../config/udmcfg.conf", "&"],
+                    "command": ["./udm_start.sh", "&"],
                 }
             ],
         }
@@ -98,7 +98,6 @@ class TestCharm(unittest.TestCase):
 
     def test_on_nrf_app_relation_changed(self) -> NoReturn:
         """Test to see if kafka relation is updated."""
-        self.harness.charm.on.start.emit()
 
         self.assertIsNone(self.harness.charm.state.nrf_host)
 

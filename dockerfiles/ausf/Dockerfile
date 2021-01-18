@@ -53,3 +53,5 @@ VOLUME [ "/free5gc/support/TLS" ]
 EXPOSE 29509
 COPY ausfcfg.conf /free5gc/config/ausfcfg.conf
 COPY free5GC.conf /free5gc/config/free5GC.conf
+COPY ausf_start.sh /free5gc/${F5GC_MODULE}/ausf_start.sh
+RUN chmod +x /free5gc/${F5GC_MODULE}/ausf_start.sh

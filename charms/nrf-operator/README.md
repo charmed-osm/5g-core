@@ -50,23 +50,23 @@ To deploy NRF from local repository, use the following commands
 
 ```bash
 charmcraft build
-juju deploy nrf.charm
+juju deploy ./nrf.charm
 ```
 
 NOTE: NRF can be deployed only after MongoDB is up because of
-      relations configured between the two.
+relations configured between the two.
 
 ## Developing
 
 Create and activate a virtualenv with the development requirements:
 
-   virtualenv -p python3 venv
-   source venv/bin/activate
-   pip install -r requirements-dev.txt
+virtualenv -p python3 venv
+source venv/bin/activate
+pip install -r requirements-dev.txt
 
 ## Testing
 
 The Python operator framework includes a very nice harness for testing
 operator behaviour without full deployment. Just `run_tests`:
 
-   ./run_tests
+./run_tests

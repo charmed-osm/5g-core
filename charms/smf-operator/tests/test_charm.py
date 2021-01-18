@@ -41,7 +41,7 @@ class TestCharm(unittest.TestCase):
 
     def test_on_start_without_relations(self) -> NoReturn:
         """Test installation without any relation."""
-        self.harness.charm.on.start.emit()
+        self.harness.charm.on.config_changed.emit()
 
         # Verifying status
         self.assertIsInstance(self.harness.charm.unit.status, BlockedStatus)
@@ -73,6 +73,7 @@ class TestCharm(unittest.TestCase):
                         "ALLOW_ANONYMOUS_LOGIN": "yes",
                         "GIN_MODE": "release",
                         "IPADDR1": "10.45.30.27",
+                        "NRF_HOST": "nrf",
                     },
                     "command": ["./ipscript.sh", "&"],
                 }

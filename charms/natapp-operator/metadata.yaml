@@ -22,25 +22,25 @@
 name: natapp
 summary: natapp deploys the natapp as a microk8s pod
 maintainers:
-    - Tata Elxsi <canonical@tataelxsi.onmicrosoft.com>
+  - Tata Elxsi <canonical@tataelxsi.onmicrosoft.com>
 description: |
-    natapp deploys the internet gateway component for the 5g core,
-    as a microk8s based pod.
-    Enables data network accessibility for UE.
-    Natapp is the entity which acts as a gateway, and also requires forwarding
-    to be enabled in the linux kernel to route the traffic to external world.
+  natapp deploys the internet gateway component for the 5g core,
+  as a microk8s based pod.
+  Enables data network accessibility for UE.
+  Natapp is the entity which acts as a gateway, and also requires forwarding
+  to be enabled in the linux kernel to route the traffic to external world.
 tags:
-    - 5gcore
+  - 5gcore
 series:
-    - kubernetes
+  - kubernetes
 min-juju-version: 2.8.2
 deployment:
-    type: stateful
-    service: cluster
+  type: stateful
+  service: cluster
 resources:
-    image:
-        type: oci-image
-        description: docker image for NATAPP
+  image:
+    type: oci-image
+    description: docker image for NATAPP
 provides:
-    natapp:
-        interface: natapp
+  natapp:
+    interface: natapp

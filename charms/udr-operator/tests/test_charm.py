@@ -41,7 +41,7 @@ class TestCharm(unittest.TestCase):
 
     def test_on_start_without_relations(self) -> NoReturn:
         """Test installation without any relation."""
-        self.harness.charm.on.start.emit()
+        self.harness.charm.on.config_changed.emit()
 
         # Verifying status
         self.assertIsInstance(self.harness.charm.unit.status, BlockedStatus)
@@ -54,7 +54,6 @@ class TestCharm(unittest.TestCase):
 
     def test_on_start_with_relations(self) -> NoReturn:
         """Test installation with any relation."""
-        self.harness.charm.on.start.emit()
         expected_result = {
             "version": 3,
             "containers": [
@@ -73,13 +72,14 @@ class TestCharm(unittest.TestCase):
                         "ALLOW_ANONYMOUS_LOGIN": "yes",
                         "GIN_MODE": "release",
                         "MONGODB_URI": "mongodb://mongodb/free5gc",
+                        "NRF_HOST": "nrf",
+                        "MONGODB_HOST": "mongodb",
                     },
                     "command": ["./udr_start.sh", "&"],
                 }
             ],
         }
 
-        self.harness.charm.on.start.emit()
         # Check if nrf,mongodb is initialized
         self.assertIsNone(self.harness.charm.state.nrf_host)
         self.assertIsNone(self.harness.charm.state.mongodb_host)
@@ -113,7 +113,7 @@ class TestCharm(unittest.TestCase):
 
     def test_on_mongodb_relation_changed(self) -> NoReturn:
         """Test to see if kafka relation is updated."""
-        self.harness.charm.on.start.emit()
+        self.harness.charm.on.config_changed.emit()
 
         self.assertIsNone(self.harness.charm.state.mongodb_host)
 
@@ -136,7 +136,6 @@ class TestCharm(unittest.TestCase):
 
     def test_on_nrf_app_relation_changed(self) -> NoReturn:
         """Test to see if kafka relation is updated."""
-        self.harness.charm.on.start.emit()
 
         self.assertIsNone(self.harness.charm.state.nrf_host)
 

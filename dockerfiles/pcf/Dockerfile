@@ -53,3 +53,5 @@ VOLUME [ "/free5gc/support/TLS" ]
 EXPOSE 29507
 COPY pcfcfg.conf /free5gc/config/pcfcfg.conf
 COPY free5GC.conf /free5gc/config/free5GC.conf
+COPY pcf_start.sh /free5gc/${F5GC_MODULE}/pcf_start.sh
+RUN chmod +x /free5gc/${F5GC_MODULE}/pcf_start.sh

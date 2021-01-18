@@ -23,40 +23,40 @@ description: 5g Core Bundle
 bundle: kubernetes
 applications:
   mongodb:
-    charm: 'cs:~tataelxsi-charmers/mongodb'
+    charm: "cs:~tataelxsi-charmers/mongodb"
     scale: 1
   nrf:
-    charm: 'cs:~tataelxsi-charmers/nrf'
+    charm: "cs:~tataelxsi-charmers/nrf"
     scale: 1
   amf:
-    charm: 'cs:~tataelxsi-charmers/amf'
+    charm: "cs:~tataelxsi-charmers/amf"
     scale: 1
   ausf:
-    charm: 'cs:~tataelxsi-charmers/ausf'
+    charm: "cs:~tataelxsi-charmers/ausf"
     scale: 1
   nssf:
-    charm: 'cs:~tataelxsi-charmers/nssf'
+    charm: "cs:~tataelxsi-charmers/nssf"
     scale: 1
   udm:
-    charm: 'cs:~tataelxsi-charmers/udm'
+    charm: "cs:~tataelxsi-charmers/udm"
     scale: 1
   udr:
-    charm: 'cs:~tataelxsi-charmers/udr'
+    charm: "cs:~tataelxsi-charmers/udr"
     scale: 1
   pcf:
-    charm: 'cs:~tataelxsi-charmers/pcf'
+    charm: "cs:~tataelxsi-charmers/pcf"
     scale: 1
   upf1:
-    charm: 'cs:~tataelxsi-charmers/upf1'
+    charm: "cs:~tataelxsi-charmers/upf1"
     scale: 1
   webui:
-    charm: 'cs:~tataelxsi-charmers/webui'
+    charm: "cs:~tataelxsi-charmers/webui"
     scale: 1
   smf:
-    charm: 'cs:~tataelxsi-charmers/smf'
+    charm: "cs:~tataelxsi-charmers/smf"
     scale: 1
   natapp:
-    charm: 'cs:~tataelxsi-charmers/natapp'
+    charm: "cs:~tataelxsi-charmers/natapp"
     scale: 1
 
 relations:

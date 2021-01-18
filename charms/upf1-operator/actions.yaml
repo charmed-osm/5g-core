@@ -20,5 +20,5 @@
 ##
 ---
 config-interface:
-    description: |
-        updation of MTU value in upfgtp0 interface
+  description: |
+    updation of MTU value in upfgtp0 interface

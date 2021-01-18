@@ -51,10 +51,12 @@ class TestPodSpec(unittest.TestCase):
             "ALLOW_ANONYMOUS_LOGIN": "yes",
             "MONGODB_URI": "mongodb://mongodb/free5gc",
             "GIN_MODE": "release",
+            "MONGODB_HOST": "mongodb",
         }
         mode = {"gin_mode": "release"}
         relation = {
             "mongodb_uri": "mongodb://mongodb/free5gc",
+            "mongodb_host": "mongodb"
         }
         pod_envconfig = pod_spec._make_pod_envconfig(mode, relation)
         self.assertDictEqual(expected_result, pod_envconfig)
@@ -74,7 +76,7 @@ class TestPodSpec(unittest.TestCase):
 
     def test_validate_relation(self) -> NoReturn:
         """Testing relation data scenario."""
-        relation_state = {"mongodb_uri": "norelation_mongo"}
+        relation_state = {"mongodb_uri": "norelation_mongo", "mongodb_host": None}
         with self.assertRaises(ValueError):
             pod_spec._validate_relation_state(relation_state)
 
@@ -85,6 +87,6 @@ class TestPodSpec(unittest.TestCase):
             "gin_mode": "release",
         }
         app_name = "nrf"
-        relation_state = {"mongodb_uri": "norelation_mongodb"}
+        relation_state = {"mongodb_uri": "norelation_mongodb", "mongodb_host": None}
         with self.assertRaises(ValueError):
             pod_spec.make_pod_spec(image_info, config, relation_state, app_name)

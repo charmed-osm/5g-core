@@ -49,12 +49,13 @@ class Upf1Charm(CharmBase):
         self.image = OCIImageResource(self, "image")
 
         # Registering regular events
-        self.framework.observe(self.on.start, self.configure_pod)
         self.framework.observe(self.on.config_changed, self.configure_pod)
-        self.framework.observe(self.on.update_status, self.publish_upf_info)
         # Registering required relation changed events
         self.framework.observe(
             self.on.natapp_relation_changed, self._on_natapp_relation_changed
+        )
+        self.framework.observe(
+            self.on.upf_relation_joined, self.publish_upf_info
         )
 
         # Registering required relation departed events
@@ -66,7 +67,7 @@ class Upf1Charm(CharmBase):
         self.state.set_default(natapp_ip=None)
         self.state.set_default(natapp_host=None)
 
-    def publish_upf_info(self, _=None) -> NoReturn:
+    def publish_upf_info(self, event: EventBase) -> NoReturn:
         """Publishes UPF IP information for SMF
           relation.7
 
@@ -76,14 +77,18 @@ class Upf1Charm(CharmBase):
         if not self.unit.is_leader():
             return
         try:
-            relation_id = self.model.relations.__getitem__("upf")
-            for i in relation_id:
-                relation = self.model.get_relation("upf", i.id)
-                private_ip = str(self.model.get_binding(relation).network.bind_address)
-                if private_ip != "None":
-                    logger.info(private_ip)
-                    relation.data[self.model.unit]["private_address"] = private_ip
+            private_ip = self.model.get_binding(event.relation).network.bind_address
+            logger.info("UPF ip")
+            logger.info(str(private_ip))
+            if private_ip:
+                logger.info(str(private_ip))
+                event.relation.data[self.model.unit]["private_address"] = str(
+                    private_ip
+                )
+            else:
+                event.defer()
         except TypeError:
+            event.defer()
             self.unit.status = BlockedStatus("Ip not yet fetched")
             return
 
@@ -105,7 +110,6 @@ class Upf1Charm(CharmBase):
         if validate_natapp and validate_state:
             self.state.natapp_ip = natapp_ip
             self.state.natapp_host = natapp_host
-            self.publish_upf_info()
             self.configure_pod()
 
     def _on_natapp_relation_departed(self, _=None) -> NoReturn:
@@ -174,7 +178,6 @@ class Upf1Charm(CharmBase):
             self.state.pod_spec = pod_spec
 
         self.unit.status = ActiveStatus("ready")
-        self.publish_upf_info()
 
 
 if __name__ == "__main__":

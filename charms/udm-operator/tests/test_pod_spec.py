@@ -50,15 +50,17 @@ class TestPodSpec(unittest.TestCase):
         expected_result = {
             "ALLOW_ANONYMOUS_LOGIN": "yes",
             "GIN_MODE": "release",
+            "NRF_HOST": "nrf"
         }
         mode = {"gin_mode": "release"}
-        pod_envconfig = pod_spec._make_pod_envconfig(mode)
+        relation = {"nrf_host": "nrf"}
+        pod_envconfig = pod_spec._make_pod_envconfig(mode, relation)
         self.assertDictEqual(expected_result, pod_envconfig)
 
     def test_make_pod_command(self) -> NoReturn:
         """Teting make pod command."""
 
-        expected_result = ["./udm", "-udmcfg", "../config/udmcfg.conf", "&"]
+        expected_result = ["./udm_start.sh", "&"]
         pod_command = pod_spec._make_pod_command()
         self.assertEqual(expected_result, pod_command)
 
@@ -68,6 +70,12 @@ class TestPodSpec(unittest.TestCase):
         with self.assertRaises(ValueError):
             pod_spec._validate_config(config)
 
+    def test_validate_relation(self) -> NoReturn:
+        """Testing relation data scenario."""
+        relation_state = {"nrf_host": None}
+        with self.assertRaises(ValueError):
+            pod_spec._validate_relation_state(relation_state)
+
     def test_make_pod_spec(self) -> NoReturn:
         """Teting make pod spec."""
         image_info = {"upstream-source": "localhost:32000/free5gc-udm:1.0"}
@@ -75,5 +83,6 @@ class TestPodSpec(unittest.TestCase):
             "gin_mode": "notrelease",
         }
         app_name = "udm"
+        relation_state = {"nrf_host": None}
         with self.assertRaises(ValueError):
-            pod_spec.make_pod_spec(image_info, config, app_name)
+            pod_spec.make_pod_spec(image_info, config, relation_state, app_name)

@@ -44,7 +44,7 @@ class TestCharm(unittest.TestCase):
 
     def test_on_configure_change(self) -> NoReturn:
         """Test installation with any relation."""
-        self.harness.charm.on.start.emit()
+        self.harness.charm.on.config_changed.emit()
         config_data = "192.168.1.216"
         second_interface = [
             {"name": "n6-network", "interface": "eth1", "ips": [config_data]}
@@ -134,7 +134,6 @@ class TestCharm(unittest.TestCase):
 
     def test_publish_natapp_info(self) -> NoReturn:
         """Test to see if upf relation is updated."""
-        self.harness.charm.on.start.emit()
         expected_result = {
             "hostname": "natapp",
             "static_ip": "192.168.70.15",

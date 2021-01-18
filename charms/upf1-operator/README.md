@@ -54,29 +54,29 @@ To deploy UPF from local repository, use the following commands
 
 ```bash
 charmcraft build
-juju deploy upf1.charm
+juju deploy ./upf1.charm
 ```
 
 ## Developing
 
 To test config-interface action,run the following command
-COMMAND : sudo juju run-action upf1/[UNIT-ID] config-interface
+COMMAND : juju run-action upf1/[UNIT-ID] config-interface
 
 To check the status and output of the action ,use the following command
 
 COMMAND:
-sudo juju show-action-status ACTION-ID
-sudo juju show-action-output ACTION-ID
+juju show-action-status ACTION-ID
+juju show-action-output ACTION-ID
 
 Create and activate a virtualenv with the development requirements:
 
-   virtualenv -p python3 venv
-   source venv/bin/activate
-   pip install -r requirements-dev.txt
+virtualenv -p python3 venv
+source venv/bin/activate
+pip install -r requirements-dev.txt
 
 ## Testing
 
 The Python operator framework includes a very nice harness for testing
 operator behaviour without full deployment. Just `run_tests`:
 
-   ./run_tests
+./run_tests

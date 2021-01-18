@@ -23,6 +23,8 @@
 
 
 mongodb_uri=$(echo $MONGODB_URI)
+nrf_app_name=$(echo $NRF_HOST)
+sed -i "s~\<nrf_app\>~$nrf_app_name~g" /free5gc/config/udrcfg.conf
 sed -i "s~\<mongo_uri\>~$mongodb_uri~g" /free5gc/config/udrcfg.conf
 cd /free5gc/udr
 ./udr -udrcfg ../config/udrcfg.conf

@@ -54,6 +54,7 @@ def _make_pod_envconfig(config: Dict[str, Any], relation_state: Dict[str, Any]) 
         "ALLOW_ANONYMOUS_LOGIN": "yes",
         "GIN_MODE": config["gin_mode"],
         "MONGODB_URI": relation_state["mongodb_uri"],
+        "MONGODB_HOST": relation_state["mongodb_host"],
     }
 
 
@@ -75,6 +76,20 @@ def _validate_config(config: Dict[str, Any]):
     valid_gin_modes = ["release", "debug"]
     if config.get("gin_mode") not in valid_gin_modes:
         raise ValueError("Invalid gin_mode")
+
+
+def _validate_relation_state(relation_state: Dict[str, Any]):
+    """Validate relation data.
+
+    Args:
+        relation (Dict[str, Any]): relation information.
+    """
+    uri = relation_state.get("mongodb_uri")
+    mongodb_host = relation_state.get("mongodb_host")
+    uri_state = not uri or not isinstance(uri, str)
+    host_state = not uri.startswith("mongodb://") or not mongodb_host
+    if uri_state or host_state:
+        raise ValueError("Value error in mongodb relations")
 
 
 def make_pod_spec(
@@ -99,6 +114,7 @@ def make_pod_spec(
         return None
 
     _validate_config(config)
+    _validate_relation_state(relation_state)
     ports = _make_pod_ports()
     env_config = _make_pod_envconfig(config, relation_state)
     command = _make_pod_command()

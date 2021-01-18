@@ -23,7 +23,8 @@ Copyright 2020 Tata Elxsi
 # Create and Onboard 5g-core osm packages
 
 > To create osm vnf and ns packages, use the following commands which will
-generate a vnf package structure named core_vnf and ns package structure named core_ns
+> generate a vnf package structure named core_vnf and ns package structure
+> named core_ns
 
 ```bash
 osm package-create vnf core
@@ -35,12 +36,6 @@ osm package-create ns core
 ```bash
 cp core_vnfd.yaml core_vnf/
 cp core_nsd.yaml core_ns/
-```
-
-> To place the bundles in vnf package
-
-```bash
-mkdir -p "core_vnf/juju-bundles" && cp ../bundle/bundle.yaml "core_vnf/juju-bundles"
 ```
 
 > To onboard packages into OSM, use the following commands
@@ -68,10 +63,10 @@ osm vim-create --name <vim_name> --user <username> --password <password> --auth_
 
 vim-create command helps to add vim to OSM where,
 
-- "vim_name" is the name of the vim being created.
-- "username"and "password" are the credentials of Openstack.
-- "tenant_name" is the tenant to be associated to the user in the Openstack.
-- "openstack-url" is the URL of Openstack which will be used as VIM.
+* "vim_name" is the name of the vim being created.
+* "username"and "password" are the credentials of Openstack.
+* "tenant_name" is the tenant to be associated to the user in the Openstack.
+* "openstack-url" is the URL of Openstack which will be used as VIM.
 
 ## K8sCluster
 
@@ -83,9 +78,9 @@ osm k8scluster-add --creds <kube.yaml> --version '1.19' --vim <vim_name>
 K8scluster add helps to attach a cluster with OSM which will be used for knf deployment.
 where,
 
-- "kube.yaml" is the configuration of microk8s cluster obtained from "microk8s config>kube.yaml".
-- "vim_name" is the vim created in the last setup.
-- "cluster_name" a unique name to identify your cluster.
+* "kube.yaml" is the configuration of microk8s cluster obtained from "microk8s config>kube.yaml".
+* "vim_name" is the vim created in the last setup.
+* "cluster_name" a unique name to identify your cluster.
 
 Note:[Prerequisites and microk8s setup for 5g-core](../README.md)
 
@@ -96,7 +91,7 @@ osm ns-create --ns_name core --nsd_name core_nsd --vim_account <vim_name>
 ```
 
 > ns-create will instantiate the 5g-core network service use
-"vim_name" thats added to osm.
+> "vim_name" thats added to osm.
 
 ## Verifying the services
 
@@ -105,7 +100,7 @@ osm ns-list
 ```
 
 > Will display the ns-created with ns-id, with status active and configured
-which means the service is up along with its day1 operations.
+> which means the service is up along with its day1 operations.
 
 ```bash
 osm ns-show
@@ -126,8 +121,7 @@ osm ns-action core --vnf_name 1 --kdu_name core-kdu --action_name
 add-user --params '{application-name: mongodb,ue-id: imsi-2089300007487 }'
 ```
 
-- where "core" is the network service name, "1" points to vnf member index
+* where "core" is the network service name, "1" points to vnf member index
   and "core-kdu" is the kdu name used in package.
 
-- "ueid" parameter should hold the desired imsi number.
-
+* "ueid" parameter should hold the desired imsi number.

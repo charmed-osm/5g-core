@@ -57,6 +57,7 @@ def _make_pod_envconfig(
         "ALLOW_ANONYMOUS_LOGIN": "yes",
         "GIN_MODE": config["gin_mode"],
         "IPADDR1": relation_state["upf_host"],
+        "NRF_HOST": relation_state["nrf_host"],
     }
 
 
@@ -87,8 +88,9 @@ def _validate_relation_state(relation_state: Dict[str, Any]):
         relation (Dict[str, Any]): relation information.
     """
     upf_host = relation_state.get("upf_host")
-    if not IP(upf_host):
-        raise ValueError("Value Error in upf_host")
+    nrf_host = relation_state.get("nrf_host")
+    if not IP(upf_host) or not nrf_host:
+        raise ValueError("Value Error in relations")
 
 
 def make_pod_spec(

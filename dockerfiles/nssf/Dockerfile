@@ -53,3 +53,5 @@ VOLUME [ "/free5gc/support/TLS" ]
 EXPOSE 29531
 COPY nssfcfg.conf /free5gc/config/nssfcfg.conf
 COPY free5GC.conf /free5gc/config/free5GC.conf
+COPY nssf_start.sh /free5gc/${F5GC_MODULE}/nssf_start.sh
+RUN chmod +x /free5gc/${F5GC_MODULE}/nssf_start.sh

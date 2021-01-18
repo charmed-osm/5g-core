@@ -42,7 +42,7 @@ class TestCharm(unittest.TestCase):
 
     def test_on_start_without_relations(self) -> NoReturn:
         """Test installation without any relation."""
-        self.harness.charm.on.start.emit()
+        self.harness.charm.on.config_changed.emit()
 
         # Verifying status
         self.assertIsInstance(self.harness.charm.unit.status, BlockedStatus)
@@ -55,7 +55,6 @@ class TestCharm(unittest.TestCase):
 
     def test_on_start_with_relations(self) -> NoReturn:
         """Test installation with any relation."""
-        self.harness.charm.on.start.emit()
         annot = {
             "annotations": {
                 "k8s.v1.cni.cncf.io/networks": '[\n{\n"name" : "n6-network",'
@@ -123,7 +122,6 @@ class TestCharm(unittest.TestCase):
 
     def test_on_config_change(self) -> NoReturn:
         """Test installation without any relation."""
-        self.harness.charm.on.start.emit()
 
         expected_result = {
             "version": 3,
@@ -192,7 +190,7 @@ class TestCharm(unittest.TestCase):
 
     def test_on_natapp_app_relation_changed(self) -> NoReturn:
         """Test to see if upf app relation is updated."""
-        self.harness.charm.on.start.emit()
+        self.harness.charm.on.config_changed.emit()
 
         self.assertIsNone(self.harness.charm.state.natapp_ip)
 
@@ -213,12 +211,10 @@ class TestCharm(unittest.TestCase):
 
     def test_publish_upf_info(self) -> NoReturn:
         """Test to see if upf relation is updated."""
-        self.harness.charm.on.start.emit()
         expected_result = {
             "private_address": "127.1.1.1",
         }
         relation_id = self.harness.add_relation("upf", "smf")
-        self.harness.add_relation_unit(relation_id, "smf/0")
         relation_data = {"private_address": "127.1.1.1"}
         self.harness.update_relation_data(relation_id, "upf1", relation_data)
         relation_data = self.harness.get_relation_data(relation_id, "upf1")

@@ -20,32 +20,32 @@
 ##
 ---
 options:
-    natapp_port:
-        type: int
-        default: 2601
-        description: |
-            natapp_port exposes natapp process
-    pdn_subnet:
-        type: string
-        description: 'an inerface will be created in natapp pod
-                        with pdn_subnet which will be used for
-                        communication between natapp and upf1'
-        default: "192.168.0.0/16"
-    pdn_ip_range_start:
-        type: string
-        description: 'pdn_ip_range_start is the pdn_subnet range
-                        start for pdn_subnet'
-        default: "192.168.1.100"
-    pdn_ip_range_end:
-        type: string
-        description: 'pdn_ip_range_end is the pdn_subnet range
-                        end for pdn_subnet'
-        default: "192.168.1.250"
-    pdn_gateway_ip:
-        type: string
-        description: 'pdn_gateway_ip is the gateway ip for pdn_subnet'
-        default: "192.168.1.1"
-    static_ip:
-        type: string
-        description: 'static ip for pod annotations'
-        default: "192.168.1.216"
+  natapp_port:
+    type: int
+    default: 2601
+    description: |
+      natapp_port exposes natapp process
+  pdn_subnet:
+    type: string
+    description: "an inerface will be created in natapp pod
+      with pdn_subnet which will be used for
+      communication between natapp and upf1"
+    default: "192.168.0.0/16"
+  pdn_ip_range_start:
+    type: string
+    description: "pdn_ip_range_start is the pdn_subnet range
+      start for pdn_subnet"
+    default: "192.168.1.100"
+  pdn_ip_range_end:
+    type: string
+    description: "pdn_ip_range_end is the pdn_subnet range
+      end for pdn_subnet"
+    default: "192.168.1.250"
+  pdn_gateway_ip:
+    type: string
+    description: "pdn_gateway_ip is the gateway ip for pdn_subnet"
+    default: "192.168.1.1"
+  static_ip:
+    type: string
+    description: "static ip for pod annotations"
+    default: "192.168.1.216"

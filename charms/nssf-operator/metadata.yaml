@@ -22,25 +22,25 @@
 name: nssf
 summary: nssf deploys the nssf as a microk8s pod
 maintainers:
-    - Tata Elxsi <canonical@tataelxsi.onmicrosoft.com>
+  - Tata Elxsi <canonical@tataelxsi.onmicrosoft.com>
 description: |
-    nssf deploys the free5gc developed 5g NSSF,
-    as a microk8s based pod.
-    Network slice selection function(NSSF) is used to select
-    the network slice instance of 5g components.
+  nssf deploys the free5gc developed 5g NSSF,
+  as a microk8s based pod.
+  Network slice selection function(NSSF) is used to select
+  the network slice instance of 5g components.
 tags:
-    - 5gcore
+  - 5gcore
 series:
-    - kubernetes
+  - kubernetes
 min-juju-version: 2.8.2
 deployment:
-    type: stateful
-    service: cluster
+  type: stateful
+  service: cluster
 resources:
-    image:
-        type: oci-image
-        description: docker image for NSSF
+  image:
+    type: oci-image
+    description: docker image for NSSF
 
 requires:
-    nrf:
-        interface: nrf
+  nrf:
+    interface: nrf

@@ -20,9 +20,9 @@
 ##
 ---
 options:
-    gin_mode:
-        type: string
-        description: |
-            gin implements a HTTP web framework and
-            possible values are debug and release
-        default: 'release'
+  gin_mode:
+    type: string
+    description: |
+      gin implements a HTTP web framework and
+      possible values are debug and release
+    default: "release"

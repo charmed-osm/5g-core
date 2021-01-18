@@ -53,3 +53,5 @@ VOLUME [ "/free5gc/support/TLS" ]
 EXPOSE 29518
 COPY amfcfg.conf /free5gc/config/amfcfg.conf
 COPY free5GC.conf /free5gc/config/free5GC.conf
+COPY amf_start.sh /free5gc/${F5GC_MODULE}/amf_start.sh
+RUN chmod +x /free5gc/${F5GC_MODULE}/amf_start.sh

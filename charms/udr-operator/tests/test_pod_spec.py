@@ -51,10 +51,15 @@ class TestPodSpec(unittest.TestCase):
             "ALLOW_ANONYMOUS_LOGIN": "yes",
             "GIN_MODE": "release",
             "MONGODB_URI": "mongodb://mongodb/free5gc",
+            "NRF_HOST": "nrf",
+            "MONGODB_HOST": "mongodb",
         }
-        mongodb_uri = {"mongodb_uri": "mongodb://mongodb/free5gc"}
+        relation = {
+            "mongodb_uri": "mongodb://mongodb/free5gc",
+            "nrf_host": "nrf", "mongodb_host": "mongodb",
+        }
         mode = {"gin_mode": "release"}
-        pod_envconfig = pod_spec._make_pod_envconfig(mode, mongodb_uri)
+        pod_envconfig = pod_spec._make_pod_envconfig(mode, relation)
         self.assertDictEqual(expected_result, pod_envconfig)
 
     def test_make_pod_command(self) -> NoReturn:
@@ -72,7 +77,10 @@ class TestPodSpec(unittest.TestCase):
 
     def test_validate_relation(self) -> NoReturn:
         """Testing relation data exception scenario."""
-        relation_state = {"mongodb_uri": "norelation_mongodb"}
+        relation_state = {
+            "mongodb_uri": "norelation_mongodb",
+            "nrf_host": None, "mongodb_host": None
+        }
         with self.assertRaises(ValueError):
             pod_spec._validate_relation_state(relation_state)
 
@@ -83,6 +91,9 @@ class TestPodSpec(unittest.TestCase):
             "gin_mode": "notrelease",
         }
         app_name = ("udr",)
-        relation_state = {"mongodb_uri": "nomongodb://mongodb/free5gc"}
+        relation_state = {
+            "mongodb_uri": "nomongodb://mongodb/free5gc",
+            "nrf_host": None, "mongodb_host": None
+        }
         with self.assertRaises(ValueError):
             pod_spec.make_pod_spec(image_info, config, relation_state, app_name)

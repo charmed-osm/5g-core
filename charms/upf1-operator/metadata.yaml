@@ -22,27 +22,26 @@
 name: upf1
 summary: upf1 deploys the upf as a microk8s pod
 maintainers:
-    - Tata Elxsi <canonical@tataelxsi.onmicrosoft.com>
+  - Tata Elxsi <canonical@tataelxsi.onmicrosoft.com>
 description: |
-    upf1 deploys the free5gc developed 5g upf,
-    as a microk8s based pod.
-    User Plane function (UPF) exposes GTP port for data plane functionality
+  upf1 deploys the free5gc developed 5g upf,
+  as a microk8s based pod.
+  User Plane function (UPF) exposes GTP port for data plane functionality
 tags:
-    - 5gcore
+  - 5gcore
 series:
-    - kubernetes
+  - kubernetes
 min-juju-version: 2.8.2
 deployment:
-    type: stateful
-    service: loadbalancer
+  type: stateful
+  service: loadbalancer
 resources:
-    image:
-        type: oci-image
-        description: docker image for UPF1
+  image:
+    type: oci-image
+    description: docker image for UPF1
 provides:
-    upf:
-        interface: upf
+  upf:
+    interface: upf
 requires:
-    natapp:
-        interface: natapp
-
+  natapp:
+    interface: natapp
