@@ -50,7 +50,7 @@ class TestPodSpec(unittest.TestCase):
         expected_result = {
             "ALLOW_ANONYMOUS_LOGIN": "yes",
             "GIN_MODE": "release",
-            "NRF_HOST": "nrf"
+            "NRF_HOST": "nrf",
         }
         mode = {"gin_mode": "release"}
         relation = {"nrf_host": "nrf"}
@@ -85,4 +85,4 @@ class TestPodSpec(unittest.TestCase):
         app_name = "udm"
         relation_state = {"nrf_host": None}
         with self.assertRaises(ValueError):
-            pod_spec.make_pod_spec(image_info, config, relation_state, app_name)
+            pod_spec.make_pod_spec(image_info, config, app_name, relation_state)

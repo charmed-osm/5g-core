@@ -62,15 +62,17 @@ class TestCharm(unittest.TestCase):
             },
             "securityContext": {"runAsUser": 0000, "runAsGroup": 0000},
         }
-        service = [{
-            "name": "upf-e",
-            "labels": {"juju-app": "upf1"},
-            "spec": {
-                "selector": {"juju-app": "upf1"},
-                "ports": [{"protocol": "TCP", "port": 80, "targetPort": 80}],
-                "type": "ClusterIP",
-            },
-        }]
+        service = [
+            {
+                "name": "upf-e",
+                "labels": {"juju-app": "upf1"},
+                "spec": {
+                    "selector": {"juju-app": "upf1"},
+                    "ports": [{"protocol": "TCP", "port": 80, "targetPort": 80}],
+                    "type": "ClusterIP",
+                },
+            }
+        ]
 
         expected_result = {
             "version": 3,

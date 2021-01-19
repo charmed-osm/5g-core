@@ -54,9 +54,7 @@ class Upf1Charm(CharmBase):
         self.framework.observe(
             self.on.natapp_relation_changed, self._on_natapp_relation_changed
         )
-        self.framework.observe(
-            self.on.upf_relation_joined, self.publish_upf_info
-        )
+        self.framework.observe(self.on.upf_relation_joined, self.publish_upf_info)
 
         # Registering required relation departed events
         self.framework.observe(

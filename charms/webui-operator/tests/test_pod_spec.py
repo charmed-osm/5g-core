@@ -78,7 +78,8 @@ class TestPodSpec(unittest.TestCase):
         """Testing relation data scenario."""
         relation_state = {
             "mongodb_uri": "norelation_mongodb",
-            "nrf_host": None, "mongodb_host": None
+            "nrf_host": None,
+            "mongodb_host": None,
         }
         with self.assertRaises(ValueError):
             pod_spec._validate_relation_state(relation_state)
@@ -90,7 +91,8 @@ class TestPodSpec(unittest.TestCase):
         app_name = "webui"
         relation_state = {
             "mongodb_uri": "nomongodb://mongodb/free5gc",
-            "nrf_host": None, "mongodb_host": None
+            "nrf_host": None,
+            "mongodb_host": None,
         }
         with self.assertRaises(ValueError):
             pod_spec.make_pod_spec(image_info, config, relation_state, app_name)

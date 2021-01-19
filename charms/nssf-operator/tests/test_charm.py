@@ -71,7 +71,7 @@ class TestCharm(unittest.TestCase):
                     "envConfig": {
                         "ALLOW_ANONYMOUS_LOGIN": "yes",
                         "GIN_MODE": "release",
-                        "NRF_HOST": "nrf"
+                        "NRF_HOST": "nrf",
                     },
                     "command": ["./nssf_start.sh", "&"],
                 }

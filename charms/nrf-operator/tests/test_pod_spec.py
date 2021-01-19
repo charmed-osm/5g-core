@@ -56,7 +56,7 @@ class TestPodSpec(unittest.TestCase):
         mode = {"gin_mode": "release"}
         relation = {
             "mongodb_uri": "mongodb://mongodb/free5gc",
-            "mongodb_host": "mongodb"
+            "mongodb_host": "mongodb",
         }
         pod_envconfig = pod_spec._make_pod_envconfig(mode, relation)
         self.assertDictEqual(expected_result, pod_envconfig)

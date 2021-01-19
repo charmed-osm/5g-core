@@ -56,7 +56,8 @@ class TestPodSpec(unittest.TestCase):
         }
         relation = {
             "mongodb_uri": "mongodb://mongodb/free5gc",
-            "nrf_host": "nrf", "mongodb_host": "mongodb",
+            "nrf_host": "nrf",
+            "mongodb_host": "mongodb",
         }
         mode = {"gin_mode": "release"}
         pod_envconfig = pod_spec._make_pod_envconfig(mode, relation)
@@ -79,7 +80,8 @@ class TestPodSpec(unittest.TestCase):
         """Testing relation data exception scenario."""
         relation_state = {
             "mongodb_uri": "norelation_mongodb",
-            "nrf_host": None, "mongodb_host": None
+            "nrf_host": None,
+            "mongodb_host": None,
         }
         with self.assertRaises(ValueError):
             pod_spec._validate_relation_state(relation_state)
@@ -93,7 +95,8 @@ class TestPodSpec(unittest.TestCase):
         app_name = ("udr",)
         relation_state = {
             "mongodb_uri": "nomongodb://mongodb/free5gc",
-            "nrf_host": None, "mongodb_host": None
+            "nrf_host": None,
+            "mongodb_host": None,
         }
         with self.assertRaises(ValueError):
             pod_spec.make_pod_spec(image_info, config, relation_state, app_name)

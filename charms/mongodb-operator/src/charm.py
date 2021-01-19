@@ -84,8 +84,7 @@ class MongodbCharm(CharmBase):
             self.unit.status = MaintenanceStatus("Fetching image information")
             image_info = self.image.fetch()
         except OCIImageResourceError:
-            self.unit.status = BlockedStatus(
-                "Error fetching image information")
+            self.unit.status = BlockedStatus("Error fetching image info")
             return
         try:
             pod_spec = make_pod_spec(

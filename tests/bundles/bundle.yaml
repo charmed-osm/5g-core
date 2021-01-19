@@ -1,13 +1,13 @@
 # Copyright 2020 Tata Elxsi
 #
-# Licensed under the Apache License, Version 2.0 (the License); you may
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
 #
 #         http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an AS IS BASIS, WITHOUT
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
@@ -18,71 +18,46 @@
 # To get in touch with the maintainers, please contact:
 # canonical@tataelxsi.onmicrosoft.com
 ##
-
 ---
-description: 5g Core Bundle for Functional Testing
+description: 5g Core Bundle
 bundle: kubernetes
 applications:
   mongodb:
-    charm: "../../charms/mongodb-operator/mongodb.charm"
+    charm: "cs:~tataelxsi-charmers/mongodb"
     scale: 1
-    resources:
-      image: "localhost:32000/free5gc-mongo:1.0"
   nrf:
-    charm: "../../charms/nrf-operator/nrf.charm"
+    charm: "cs:~tataelxsi-charmers/nrf"
     scale: 1
-    resources:
-      image: "localhost:32000/free5gc-nrf:1.0"
   amf:
-    charm: "../../charms/amf-operator/amf.charm"
+    charm: "cs:~tataelxsi-charmers/amf"
     scale: 1
-    resources:
-      image: "localhost:32000/free5gc-amf:1.0"
   ausf:
-    charm: "../../charms/ausf-operator/ausf.charm"
+    charm: "cs:~tataelxsi-charmers/ausf"
     scale: 1
-    resources:
-      image: "localhost:32000/free5gc-ausf:1.0"
   nssf:
-    charm: "../../charms/nssf-operator/nssf.charm"
+    charm: "cs:~tataelxsi-charmers/nssf"
     scale: 1
-    resources:
-      image: "localhost:32000/free5gc-nssf:1.0"
   udm:
-    charm: "../../charms/udm-operator/udm.charm"
+    charm: "cs:~tataelxsi-charmers/udm"
     scale: 1
-    resources:
-      image: "localhost:32000/free5gc-udm:1.0"
   udr:
-    charm: "../../charms/udr-operator/udr.charm"
+    charm: "cs:~tataelxsi-charmers/udr"
     scale: 1
-    resources:
-      image: "localhost:32000/free5gc-udr:1.0"
   pcf:
-    charm: "../../charms/pcf-operator/pcf.charm"
+    charm: "cs:~tataelxsi-charmers/pcf"
     scale: 1
-    resources:
-      image: "localhost:32000/free5gc-pcf:1.0"
   upf1:
-    charm: "../../charms/upf1-operator/upf1.charm"
+    charm: "cs:~tataelxsi-charmers/upf1"
     scale: 1
-    resources:
-      image: "localhost:32000/free5gc-upf-1:1.0"
   webui:
-    charm: "../../charms/webui-operator/webui.charm"
+    charm: "cs:~tataelxsi-charmers/webui"
     scale: 1
-    resources:
-      image: "localhost:32000/free5gc-webui:1.0"
   smf:
-    charm: "../../charms/smf-operator/smf.charm"
+    charm: "cs:~tataelxsi-charmers/smf"
     scale: 1
-    resources:
-      image: "localhost:32000/free5gc-smf:1.0"
   natapp:
-    charm: "../../charms/natapp-operator/natapp.charm"
+    charm: "cs:~tataelxsi-charmers/natapp"
     scale: 1
-    resources:
-      image: "localhost:32000/free5gc-natapp:1.0"
 
 relations:
   - - nrf:mongodb

@@ -110,7 +110,7 @@ class TestPodSpec(unittest.TestCase):
         app_name = "amf"
         relation_state = {"nrf_host": None}
         with self.assertRaises(ValueError):
-            pod_spec.make_pod_spec(image_info, config, relation_state, app_name)
+            pod_spec.make_pod_spec(image_info, config, app_name, relation_state)
 
 
 if __name__ == "__main__":

@@ -63,9 +63,8 @@ class TestPodSpec(unittest.TestCase):
 
     def test_make_pod_spec(self) -> NoReturn:
         """Testing make pod spec."""
-        image_info = {
-            "upstream-source": "localhost:32000/free5gc-mongodb:1.0"
-        }
+        image = "localhost:32000/free5gc-mongodb:1.0"
+        image_info = {"upstream-source": image}
         config = {
             "mongo_port": 9999,
         }

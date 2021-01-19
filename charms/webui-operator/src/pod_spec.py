@@ -39,7 +39,9 @@ def _make_pod_ports() -> List[Dict[str, Any]]:
     return [{"name": "webui", "containerPort": WEB_UI_PORT, "protocol": "TCP"}]
 
 
-def _make_pod_envconfig(config: Dict[str, Any], relation_state: Dict[str, Any]) -> Dict[str, Any]:
+def _make_pod_envconfig(
+    config: Dict[str, Any], relation_state: Dict[str, Any]
+) -> Dict[str, Any]:
     """Generate pod environment configuration.
 
     Args:

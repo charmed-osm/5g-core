@@ -87,7 +87,9 @@ class TestCharm(unittest.TestCase):
         self.harness.add_relation_unit(nrf_relation_id, "mongodb/0")
         self.harness.update_relation_data(
             nrf_relation_id,
-            "mongodb", {"hostname": "mongodb", "mongodb_uri": "mongodb://mongodb/free5gc"},)
+            "mongodb",
+            {"hostname": "mongodb", "mongodb_uri": "mongodb://mongodb/free5gc"},
+        )
 
         # Checking if nrf data is stored
         self.assertEqual(self.harness.charm.state.mongodb_host, "mongodb")
@@ -111,7 +113,8 @@ class TestCharm(unittest.TestCase):
         self.harness.update_relation_data(
             relation_id,
             "mongodb",
-            {"hostname": "mongodb", "mongodb_uri": "mongodb://mongodb/free5gc"},)
+            {"hostname": "mongodb", "mongodb_uri": "mongodb://mongodb/free5gc"},
+        )
 
         self.assertEqual(self.harness.charm.state.mongodb_host, "mongodb")
         self.assertEqual(

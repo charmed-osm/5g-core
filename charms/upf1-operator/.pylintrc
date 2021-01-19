@@ -1,2 +1,2 @@
 [TYPECHECK]
-generated-members=upf_relation_changed
+generated-members=upf_relation_joined,natapp_relation_changed,natapp_relation_departed
