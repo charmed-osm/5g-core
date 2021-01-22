@@ -307,10 +307,13 @@ test voice traffic flows, a SIP client called PJSIP is already installed in the
 UE application. Follow the below steps,
 
 a. Traverse to /pjproject directory in the UE pod.
+
 b. alice.cfg is configured for an user named alice which is already available
 in IMS by default.
+
 Note: The username, password and id can be changed to any user added from day-2
 action of IMS as well.
+
 c. Add the following content to /etc/hosts file,
 
 > <PCSCF_LB_IP> mnc001.mcc001.3gppnetwork.org
@@ -318,6 +321,7 @@ c. Add the following content to /etc/hosts file,
 
 Where <PCSCF-LB_IP> is the loadbalancer IP of PCSCF application and
 mnc001.mcc001.3gppnetwork.org is the domain added in coredns of IMS cluster.
+
 d. Execute the following command to register the user alice with IMS,
 
 ```bash
@@ -329,8 +333,10 @@ can be tested between the two users.
 
 e. After registration of both users, press ‘m’ from UE application's alice
 and then press enter to initiate a SIP call.
+
 f. Give bob’s id and then press enter. The message “Calling”
 can be observed in alice’s UE pod.
+
 g. Then in bob’s server, the following message can be seen,
 
 > Press ‘a’ to answer or ‘h’ to hangup
@@ -340,10 +346,12 @@ h. Press a and then enter. Then the following message will be displayed,
 > Answer with code:
 
 i. Type 200 and enter.
+
 j. After this “Confirmed” message can be seen in both alice and bob
 indicating that the call between alice and bob is successful and that RTP
 packets are being sent between alice and bob. The same can be verified by
 capturing SIP packets using ngrep, tcpdump or wireshark.
+
 k. Then to end/hangup the call, press h and then enter from alice. Verify the
 “Disconnected” message in both alice and bob.
 
