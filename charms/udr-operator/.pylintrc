@@ -1,2 +1,2 @@
 [TYPECHECK]
-generated-members=nrf_relation_changed,nrf_relation_departed,mongodb_relation_changed,mongodb_relation_departed
+generated-members=nrf_relation_changed,nrf_relation_broken,mongodb_relation_changed,mongodb_relation_broken

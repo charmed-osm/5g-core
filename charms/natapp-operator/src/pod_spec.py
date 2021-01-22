@@ -88,7 +88,7 @@ def _make_pod_custom_resources(config: Dict[str, Any]):
         "cniVersion": "0.3.1",
         "name": "n6-network",
         "type": "macvlan",
-        "master": "ens3",
+        "master": config["master_interface"],
         "mode": "bridge",
         "ipam": ipam_body,
     }
@@ -144,6 +144,7 @@ def _validate_config(config: Dict[str, Any]):
     pdn_ip_range_start = config.get("pdn_ip_range_start")
     pdn_ip_range_end = config.get("pdn_ip_range_end")
     pdn_gateway_ip = config.get("pdn_gateway_ip")
+    master_interface = config.get("master_interface")
     static_ip = config.get("static_ip")
     for pdn_conf in (
         pdn_subnet,
@@ -152,8 +153,8 @@ def _validate_config(config: Dict[str, Any]):
         pdn_gateway_ip,
         static_ip,
     ):
-        if not IP(pdn_conf):
-            raise ValueError("Value error in pdn ip configuration")
+        if not str(master_interface) or not IP(pdn_conf):
+            raise ValueError("Invalid config")
 
 
 def make_pod_spec(

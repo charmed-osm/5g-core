@@ -77,6 +77,7 @@ class TestPodSpec(unittest.TestCase):
             "pdn_ip_range_start": "192.168.1.100",
             "pdn_ip_range_end": "192.168.1.250",
             "pdn_gateway_ip": "192.168.1.1",
+            "master_interface": "ens3",
         }
         pdn_subnet = "192.168.0.0/16"
         pdn_ip_range_start = "192.168.1.100"
@@ -90,11 +91,12 @@ class TestPodSpec(unittest.TestCase):
             "rangeEnd": pdn_ip_range_end,
             "gateway": pdn_gateway_ip,
         }
+        master_interface = "ens3"
         config_body = {
             "cniVersion": "0.3.1",
             "name": "n6-network",
             "type": "macvlan",
-            "master": "ens3",
+            "master": master_interface,
             "mode": "bridge",
             "ipam": ipam_body,
         }
@@ -142,7 +144,10 @@ class TestPodSpec(unittest.TestCase):
 
     def test_validate_config(self) -> NoReturn:
         """Testing config data scenario."""
-        config = {"natapp_port": -2}
+        config = {
+            "natapp_port": -2,
+            "master_interface": 234,
+        }
         with self.assertRaises(ValueError):
             pod_spec._validate_config(config)
 
@@ -151,6 +156,7 @@ class TestPodSpec(unittest.TestCase):
         image_info = {"upstream-source": "localhost:32000/free5gc-natapp:1.0"}
         config = {
             "natapp_port": -2,
+            "master_interface": 234,
         }
         app_name = "natapp"
         with self.assertRaises(ValueError):

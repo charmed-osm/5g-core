@@ -58,9 +58,9 @@ class NrfCharm(CharmBase):
             self.on.mongodb_relation_changed, self._on_mongodb_relation_changed
         )
 
-        # Registering required relation departed events
+        # Registering required relation broken events
         self.framework.observe(
-            self.on.mongodb_relation_departed, self._on_mongodb_relation_departed
+            self.on.mongodb_relation_broken, self._on_mongodb_relation_broken
         )
 
         # -- initialize states --
@@ -95,7 +95,7 @@ class NrfCharm(CharmBase):
             self.state.mongodb_uri = mongodb_uri
             self.configure_pod()
 
-    def _on_mongodb_relation_departed(self, _=None) -> NoReturn:
+    def _on_mongodb_relation_broken(self, _=None) -> NoReturn:
         """Clears data from MongoDB relation."""
         self.state.mongodb_host = None
         self.state.mongodb_uri = None

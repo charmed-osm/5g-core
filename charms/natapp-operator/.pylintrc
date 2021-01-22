@@ -1,2 +1,2 @@
 [TYPECHECK]
-generated-members=upf_relation_changed,upf_relation_departed,configure_pod,natapp_relation_changed
+generated-members=upf_relation_changed,upf_relation_broken,configure_pod,natapp_relation_changed

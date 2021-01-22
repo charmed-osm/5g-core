@@ -56,9 +56,9 @@ class Upf1Charm(CharmBase):
         )
         self.framework.observe(self.on.upf_relation_joined, self.publish_upf_info)
 
-        # Registering required relation departed events
+        # Registering required relation broken events
         self.framework.observe(
-            self.on.natapp_relation_departed, self._on_natapp_relation_departed
+            self.on.natapp_relation_broken, self._on_natapp_relation_broken
         )
 
         # -- initialize states --
@@ -110,7 +110,7 @@ class Upf1Charm(CharmBase):
             self.state.natapp_host = natapp_host
             self.configure_pod()
 
-    def _on_natapp_relation_departed(self, _=None) -> NoReturn:
+    def _on_natapp_relation_broken(self, _=None) -> NoReturn:
         """Clears data from UPF relation."""
         self.state.natapp_ip = None
         self.state.natapp_host = None

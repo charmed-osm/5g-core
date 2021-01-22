@@ -146,11 +146,25 @@ juju bootstrap microk8s
 
 ### Deploy
 
-To deploy 5G Core from Charmstore, use the following command
+To deploy 5G Core from Charmstore, use the following steps
+
+a. Deploy core applications
 
 ```bash
 juju deploy cs:~tataelxsi-charmers/core-5g
 ```
+
+b. Configuring interface
+
+Update master_interface field to your server's main interface name with the
+following command:
+
+```bash
+juju config natapp master_interface="<interface_name>"
+```
+
+where interface_name stands for server's main interface name where core is
+deployed
 
 #### Deploy from local repository
 
@@ -204,6 +218,18 @@ f. Create a model in Juju and deploy 5G Core,
 juju add-model 5g-core
 juju deploy ./bundle_local.yaml
 ```
+
+g. Configuring interface
+
+Update master_interface field to your server's main interface name with the
+following command:
+
+```bash
+juju config natapp master_interface="<interface_name>"
+```
+
+where interface_name stands for server's main interface name where core is
+deployed
 
 ### Integration
 

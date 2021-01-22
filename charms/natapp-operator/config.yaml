@@ -49,3 +49,8 @@ options:
     type: string
     description: "static ip for pod annotations"
     default: "192.168.1.216"
+  master_interface:
+    type: string
+    description: |
+      master interface name for multus config
+    default: "ens3"

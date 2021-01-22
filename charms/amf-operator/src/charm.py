@@ -56,9 +56,9 @@ class AmfCharm(CharmBase):
             self.on.nrf_relation_changed, self._on_nrf_relation_changed
         )
 
-        # Registering required relation departed events
+        # Registering required relation broken events
         self.framework.observe(
-            self.on.nrf_relation_departed, self._on_nrf_relation_departed
+            self.on.nrf_relation_broken, self._on_nrf_relation_broken
         )
 
         # -- initialize states --
@@ -89,7 +89,7 @@ class AmfCharm(CharmBase):
             self.state.nrf_host = nrf_host
             self.configure_pod()
 
-    def _on_nrf_relation_departed(self, _=None) -> NoReturn:
+    def _on_nrf_relation_broken(self, _=None) -> NoReturn:
         """Clears data from NRF relation departed."""
         self.state.nrf_host = None
         self.configure_pod()

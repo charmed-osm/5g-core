@@ -56,9 +56,9 @@ class SmfCharm(CharmBase):
             self.on.upf_relation_changed, self._on_upf_relation_changed
         )
 
-        # Registering required relation departed events
+        # Registering required relation broken events
         self.framework.observe(
-            self.on.upf_relation_departed, self._on_upf_relation_departed
+            self.on.upf_relation_broken, self._on_upf_relation_broken
         )
 
         # Registering required relation changed events
@@ -66,9 +66,9 @@ class SmfCharm(CharmBase):
             self.on.nrf_relation_changed, self._on_nrf_relation_changed
         )
 
-        # Registering required relation departed events
+        # Registering required relation broken events
         self.framework.observe(
-            self.on.nrf_relation_departed, self._on_nrf_relation_departed
+            self.on.nrf_relation_broken, self._on_nrf_relation_broken
         )
 
         # -- initialize states --
@@ -88,7 +88,7 @@ class SmfCharm(CharmBase):
             self.state.upf_host = upf_host
             self.configure_pod()
 
-    def _on_upf_relation_departed(self, _=None) -> NoReturn:
+    def _on_upf_relation_broken(self, _=None) -> NoReturn:
         """Clears data from UPF relation."""
         self.state.upf_host = None
         self.configure_pod()
@@ -107,7 +107,7 @@ class SmfCharm(CharmBase):
             self.state.nrf_host = nrf_host
             self.configure_pod()
 
-    def _on_nrf_relation_departed(self, _=None) -> NoReturn:
+    def _on_nrf_relation_broken(self, _=None) -> NoReturn:
         """Clears data from NRF relation."""
         self.state.nrf_host = None
         self.configure_pod()
