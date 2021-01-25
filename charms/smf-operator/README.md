@@ -49,7 +49,7 @@ To deploy SMF from local repository, use the following commands
 
 ```bash
 charmcraft build
-juju deploy ./smf.charm
+juju deploy ./smf.charm --resource image=tataelxsi5g/smf:3.0
 ```
 
 NOTE: SMF can be deployed only after NRF and UPF are up because of

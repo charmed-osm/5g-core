@@ -40,7 +40,7 @@ resources:
   image:
     type: oci-image
     description: docker image for NSSF
-
+    upstream-source: tataelxsi5g/nssf:3.0
 requires:
   nrf:
     interface: nrf

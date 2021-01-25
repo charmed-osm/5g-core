@@ -50,7 +50,7 @@ To deploy UDM from local repository, use the following commands
 
 ```bash
 charmcraft build
-juju deploy ./udm.charm
+juju deploy ./udm.charm --resource image=tataelxsi5g/udm:3.0
 ```
 
 NOTE: UDM can be deployed only after NRF is up because of

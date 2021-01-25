@@ -50,7 +50,7 @@ To deploy AUSF from local repository, use the following commands
 
 ```bash
 charmcraft build
-juju deploy ./ausf.charm
+juju deploy ./ausf.charm --resource image=tataelxsi5g/ausf:3.0
 ```
 
 NOTE: AUSF can be deployed only after NRF is up because

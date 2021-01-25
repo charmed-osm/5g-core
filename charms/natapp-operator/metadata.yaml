@@ -41,6 +41,7 @@ resources:
   image:
     type: oci-image
     description: docker image for NATAPP
+    upstream-source: tataelxsi5g/natapp:2.0
 provides:
   natapp:
     interface: natapp

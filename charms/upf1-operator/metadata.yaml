@@ -39,6 +39,7 @@ resources:
   image:
     type: oci-image
     description: docker image for UPF1
+    upstream-source: tataelxsi5g/upf1:3.0
 provides:
   upf:
     interface: upf

@@ -50,7 +50,7 @@ To deploy Webui from local repository, use the following commands
 
 ```bash
 charmcraft build
-juju deploy ./webui.charm
+juju deploy ./webui.charm --resource image=tataelxsi5g/webui:2.0
 ```
 
 NOTE: Webui can be deployed only after MongoDB is up because of

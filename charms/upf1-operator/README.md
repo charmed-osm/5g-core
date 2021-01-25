@@ -45,7 +45,7 @@ UPF exposes GTP port 2152 to integrate with RAN in the data plane.
 To deploy UPF1 charm from Charmstore, use the following command
 
 ```bash
-juju deploy cs:~tataelxsi-charmers/upf1
+juju deploy cs:~tataelxsi-charmers/upf1 --resource image=tataelxsi5g/upf1:3.0
 ```
 
 #### Deploy from local repository
@@ -56,6 +56,9 @@ To deploy UPF from local repository, use the following commands
 charmcraft build
 juju deploy ./upf1.charm
 ```
+
+NOTE: UPF1 can be deployed only after Natapp is up because of
+relations configured between the two.
 
 ## Developing
 

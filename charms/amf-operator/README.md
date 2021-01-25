@@ -52,7 +52,7 @@ To deploy AMF from local repository, use the following commands
 
 ```bash
 charmcraft build
-juju deploy ./amf.charm
+juju deploy ./amf.charm --resource image=tataelxsi5g/amf:3.0
 ```
 
 NOTE: AMF can be deployed only after NRF is up because of

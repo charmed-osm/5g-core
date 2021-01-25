@@ -50,7 +50,7 @@ To deploy PCF from local repository, use the following commands
 
 ```bash
 charmcraft build
-juju deploy ./pcf.charm
+juju deploy ./pcf.charm --resource image=tataelxsi5g/pcf:3.0
 ```
 
 NOTE: PCF can be deployed only after NRF and AMF are up because of

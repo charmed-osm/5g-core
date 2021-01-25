@@ -50,7 +50,7 @@ To deploy UDR from local repository, use the following commands
 
 ```bash
 charmcraft build
-juju deploy ./udr.charm
+juju deploy ./udr.charm --resource image=tataelxsi5g/udr:3.0
 ```
 
 NOTE: UDR can be deployed only after NRF is up because of

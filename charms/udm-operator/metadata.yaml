@@ -40,7 +40,7 @@ resources:
   image:
     type: oci-image
     description: docker image for UDM
-
+    upstream-source: tataelxsi5g/udm:3.0
 requires:
   nrf:
     interface: nrf

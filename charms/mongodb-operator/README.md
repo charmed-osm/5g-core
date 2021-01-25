@@ -54,7 +54,7 @@ To deploy Mongodb from local repository, use the following commands
 
 ```bash
 charmcraft build
-juju deploy ./mongodb.charm
+juju deploy ./mongodb.charm --resource image=tataelxsi5g/mongodb:2.0
 ```
 
 ## Developing

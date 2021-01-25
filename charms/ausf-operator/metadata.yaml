@@ -39,6 +39,7 @@ resources:
   image:
     type: oci-image
     description: docker image for AUSF
+    upstream-source: tataelxsi5g/ausf:3.0
 requires:
   nrf:
     interface: nrf

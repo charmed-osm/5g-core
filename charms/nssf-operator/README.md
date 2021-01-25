@@ -50,7 +50,7 @@ To deploy NSSF from local repository, use the following commands
 
 ```bash
 charmcraft build
-juju deploy ./nssf.charm
+juju deploy ./nssf.charm --resource image=tataelxsi5g/nssf:3.0
 ```
 
 NOTE: NSSF can be deployed only after NRF is up because of

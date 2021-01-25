@@ -50,7 +50,7 @@ To deploy NRF from local repository, use the following commands
 
 ```bash
 charmcraft build
-juju deploy ./nrf.charm
+juju deploy ./nrf.charm --resource image=tataelxsi5g/nrf:2.0
 ```
 
 NOTE: NRF can be deployed only after MongoDB is up because of
