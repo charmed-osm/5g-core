@@ -118,11 +118,14 @@ microk8s kubectl get all –n core-kdu-<ns-id>
 
 ```bash
 osm ns-action core --vnf_name 1 --kdu_name core-kdu --action_name
-add-user --params '{application-name: mongodb,ue-id: imsi-2089300007487 }'
+add-user --params '{application-name: mongodb,ue-id: <IMSI_Number> }'
 ```
 
 * where "core" is the network service name, "1" points to vnf member index
   and "core-kdu" is the kdu name used in package.
+
+* IMSI_Number is the IMSI number of the subscriber to be added in 5G-Core.
+  imsi-2089300007487 is an example of IMSI number format.
 
 * "ueid" parameter should hold the desired imsi number.
 
