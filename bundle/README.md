@@ -122,7 +122,11 @@ b. Enable the following required addons for Microk8s to deploy 5G Core
 microk8s.enable storage dns
 microk8s.enable multus
 microk8s.enable rbac
+microk8s.enable metallb
 ```
+
+NOTE: 5G Core requires 3 loadbalancer IP addresses mandatorily. So allocate 3
+IP addresses while enabling metallb.
 
 c. A configuration change is needed in the cluster for enabling SCTP traffic.
 
@@ -156,8 +160,8 @@ juju deploy cs:~tataelxsi-charmers/core-5g
 
 b. Configuring interface
 
-Update master_interface field to your server's main interface name with the
-following command:
+For the deployment to get completed successfully, update master_interface field
+to your server's main interface name with the following command,
 
 ```bash
 juju config natapp master_interface="<interface_name>"
@@ -221,8 +225,8 @@ juju deploy ./bundle_local.yaml
 
 g. Configuring interface
 
-Update master_interface field to your server's main interface name with the
-following command:
+For the deployment to get completed successfully, update master_interface field
+to your server's main interface name with the following command,
 
 ```bash
 juju config natapp master_interface="<interface_name>"
@@ -241,21 +245,74 @@ facilitate control plane and data plane interactions with RAN,
 * UPF GTP Service - To enable data plane and data network accessbility to UE
 
 In order to achieve this, 5G Core needs 3 Loadbalancer services to be exposed
-and published. This is done using,
+and published. This is done using the below command,
 
 ```bash
 microk8s.enable metallb
 ```
 
-NOTE: 5G Core requires 3 loadbalancer IP addresses mandatorily.
+NOTE: 5G Core requires 3 loadbalancer IP addresses mandatorily. Ignore this
+step if already done in pre-requisites.
+
+#### Juju Actions
+
+a. Action "config-interface" in UPF1 to configure the MTU size of the
+upfgtp0 interface of UPF application,
+
+```bash
+juju run-action upf1/<unit_id> config-interface
+```
+
+where unit_id is the Unit number of the deployed application.
+
+b. Action "add-user" in mongodb to add subscriber information to core,
+
+```bash
+juju run-action mongodb/<unit_id> add-user ue-id=<IMSI_Number>
+```
+
+where unit_id is the Unit number of the deployed application,
+IMSI_Number is the IMSI number of the subscriber to be added in 5G-Core.
+imsi-2089300007487 is an example of IMSI number format.
+
+After executing each action, an ID will be generated like below,
+Action queued with id: "ID"
+This ID can be used to check the action status using the following command,
+
+```bash
+juju show-action-output <ID>
+```
+
+Check for the status of the action in the output which should be "completed".
+
+#### Actions Verification
+
+a. "config-interface" in upf1 has to be verified with the following command,
+
+```bash
+ifconfig
+```
+
+Check for the MTU size of upfgtp0 interface which would have been set to 1440.
+
+b. To verify “add-user”, login to mongodb application pod and verify the
+successful addition of imsi number,
+
+```bash
+mongo mongodb://db/free5G use free5gc
+show collections
+db.policyData.ues.amData.find()
+```
+
+where the imsi number added can be found under under key ueid.
 
 ### 5G Scenarios
 
 #### 5G User Registration
 
 After 5G-Core and 5G-RAN(https://github.com/charmed-osm/5g-ran) are deployed and
-configured, the user registration can be triggered through the following rest
-API call with POST method,
+actions are completed, the user registration can be triggered through the
+following rest API call with POST method,
 
 ```bash
 http://ran-loadbalancerip:8081/attachtrigger/1
@@ -302,9 +359,9 @@ nc -u -l -p <any unused port>
 
 Voice traffic flow can be tested once 5G-Core,
 5G-RAN(https://github.com/charmed-osm/5g-ran) and
-5G-IMS(https://github.com/charmed-osm/5g-ims) are deployed and configured. To
-test voice traffic flows, a SIP client called PJSIP is already installed in the
-UE application. Follow the below steps,
+5G-IMS(https://github.com/charmed-osm/5g-ims) are deployed and actions are
+completed. To test voice traffic flows, a SIP client called PJSIP is already
+installed in the UE application. Follow the below steps in UE application,
 
 a. Traverse to /pjproject directory in the UE pod.
 
@@ -328,8 +385,8 @@ d. Execute the following command to register the user alice with IMS,
 pjsua --config-file alice.cfg --log-level=3
 ```
 
-Note: Peform the above steps to register another user say bob with IMS so that SIP calls
-can be tested between the two users.
+Note: Peform the above steps in another server to register another user say bob
+with IMS so that SIP calls can be tested between the two users.
 
 e. After registration of both users, press ‘m’ from UE application's alice
 and then press enter to initiate a SIP call.

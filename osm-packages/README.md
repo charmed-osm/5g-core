@@ -125,3 +125,5 @@ add-user --params '{application-name: mongodb,ue-id: imsi-2089300007487 }'
   and "core-kdu" is the kdu name used in package.
 
 * "ueid" parameter should hold the desired imsi number.
+
+Note: [Test 5G-Scenarios](../README.md)
