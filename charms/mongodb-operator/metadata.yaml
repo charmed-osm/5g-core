@@ -36,7 +36,7 @@ series:
 min-juju-version: 2.8.2
 deployment:
   type: stateful
-  service: loadbalancer
+  service: cluster
 resources:
   image:
     type: oci-image
